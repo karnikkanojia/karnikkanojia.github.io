@@ -1,11 +1,47 @@
 import type { Metadata } from "next";
-import { Inter } from "next/font/google";
+import localFont from "next/font/local";
 import { ReactLenis } from "lenis/react";
 import "./globals.css";
 
-const inter = Inter({
-  subsets: ["latin"],
-  variable: "--font-inter",
+const khTeka = localFont({
+  variable: "--font-kh-teka",
+  display: "swap",
+  src: [
+    {
+      path: "../fonts/khkeka/KHTeka-Regular.woff2",
+      weight: "400",
+      style: "normal",
+    },
+    {
+      path: "../fonts/khkeka/KHTeka-Medium.woff2",
+      weight: "500",
+      style: "normal",
+    },
+  ],
+});
+
+const animo = localFont({
+  variable: "--font-animo",
+  display: "swap",
+  src: [
+    {
+      path: "../fonts/khkeka/Animo-Normal_Regular.woff2",
+      weight: "400",
+      style: "normal",
+    },
+  ],
+});
+
+const suisseIntlMono = localFont({
+  variable: "--font-suisse-intl-mono",
+  display: "swap",
+  src: [
+    {
+      path: "../fonts/khkeka/SuisseIntlMono-Regular-WebXL.woff2",
+      weight: "400",
+      style: "normal",
+    },
+  ],
 });
 
 export const metadata: Metadata = {
@@ -15,7 +51,10 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" className={inter.variable}>
+    <html
+      lang="en"
+      className={`${khTeka.variable} ${animo.variable} ${suisseIntlMono.variable}`}
+    >
       <body className="antialiased selection:bg-accent-dim selection:text-foreground">
         <div className="grain-overlay" />
         <ReactLenis root options={{ lerp: 0.1, duration: 1.5 }}>

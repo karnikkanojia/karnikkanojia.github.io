@@ -1,6 +1,13 @@
 "use client";
 
-import { Volume2, ArrowUpRight } from "lucide-react";
+import { scrollToSection } from "@/lib/scroll-to-section";
+
+const NAV_LINKS = [
+  { label: "About Me", href: "#about" },
+  { label: "Work", href: "#work" },
+  { label: "Projects", href: "#projects" },
+  { label: "Contact", href: "#contact" },
+];
 
 export function Navbar() {
   return (
@@ -10,34 +17,21 @@ export function Navbar() {
       </div>
 
       <div className="hidden md:flex items-center gap-10 text-[11px] font-bold uppercase tracking-[0.2em]">
-        {["About", "Work", "Services", "Process"].map((item) => (
+        {NAV_LINKS.map((item) => (
           <a
-            key={item}
-            href={`#${item.toLowerCase()}`}
+            key={item.label}
+            href={item.href}
+            onClick={(event) => scrollToSection(event, item.href)}
             className="group relative overflow-hidden"
           >
             <span className="inline-block transition-transform duration-300 group-hover:-translate-y-full">
-              {item}
+              {item.label}
             </span>
             <span className="absolute top-full left-0 inline-block transition-transform duration-300 group-hover:-translate-y-full">
-              {item}
+              {item.label}
             </span>
           </a>
         ))}
-      </div>
-
-      <div className="flex items-center gap-4">
-        <button className="p-2.5 rounded-full bg-white/10 backdrop-blur-md border border-white/20 hover:bg-white/20 transition-colors">
-          <Volume2 className="w-4 h-4" />
-        </button>
-        <a
-          href="https://cal.com/byhuy/project-intro-call"
-          target="_blank"
-          className="bg-white text-black px-6 py-3 rounded-full text-[11px] font-bold uppercase tracking-widest flex items-center gap-2 hover:scale-105 transition-transform"
-        >
-          Start a project
-          <ArrowUpRight className="w-4 h-4" />
-        </a>
       </div>
     </nav>
   );

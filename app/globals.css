@@ -9,8 +9,8 @@
   --color-muted: hsl(40 8% 25%);
   --color-border-light: hsl(40 8% 15%);
 
-  --font-sans: var(--font-inter), "Inter", sans-serif;
-  --font-mono: "JetBrains Mono", "Fira Code", monospace;
+  --font-sans: var(--font-kh-teka), sans-serif;
+  --font-mono: var(--font-suisse-intl-mono), monospace;
 
   --animate-grain: grain 0.5s steps(6) infinite;
 }

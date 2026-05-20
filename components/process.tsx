@@ -2,6 +2,8 @@
 
 import { motion } from "motion/react";
 
+import { scrollToSection } from "@/lib/scroll-to-section";
+
 const STEPS = [
   {
     num: "01",
@@ -53,6 +55,7 @@ export function Process() {
                 <div className="pt-6">
                   <a
                     href="#"
+                    onClick={(event) => scrollToSection(event, "#")}
                     className="group inline-flex items-center gap-4 text-[11px] font-bold uppercase tracking-[0.2em] border-b border-background/20 pb-2 hover:border-background transition-colors"
                   >
                     Explore this phase

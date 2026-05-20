@@ -7,7 +7,7 @@ const text =
 
 export function Problem() {
   return (
-    <section className="py-32 md:py-48 px-6 bg-foreground text-background">
+    <section id="about" className="py-32 md:py-48 px-6 bg-foreground text-background">
       <div className="max-w-7xl mx-auto grid lg:grid-cols-[1fr_2fr] gap-20 md:gap-32">
         <div className="space-y-16">
           <div className="flex flex-col gap-6 border-t border-background/20 pt-10">

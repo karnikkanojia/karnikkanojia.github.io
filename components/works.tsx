@@ -44,6 +44,7 @@ export function Works() {
       className="bg-background py-32 px-6 relative"
       onMouseMove={handleMouseMove}
     >
+      <span id="projects" className="absolute -top-24" aria-hidden="true" />
       <div className="max-w-7xl mx-auto">
         <div className="flex flex-col md:flex-row justify-between items-start md:items-end mb-24 gap-8">
           <h2 className="text-6xl md:text-9xl font-bold tracking-tighter uppercase leading-[0.8]">
