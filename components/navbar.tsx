@@ -1,12 +1,12 @@
 "use client";
 
-import { ArrowUpRight, Menu, Volume2, VolumeX } from "lucide-react";
+import { ArrowUpRight, Volume2, VolumeX } from "lucide-react";
 import { motion } from "motion/react";
-import type { MouseEvent } from "react";
+import type { MouseEvent, ReactNode } from "react";
 import { useState } from "react";
 
-import { scrollToSection } from "@/lib/scroll-to-section";
 import { useSoundEffects } from "@/components/sound-effects-provider";
+import { scrollToSection } from "@/lib/scroll-to-section";
 
 const DESKTOP_LINKS = [
   { label: "About", href: "#about" },
@@ -23,6 +23,31 @@ const MOBILE_LINKS = [
   { label: "Contact", href: "#contact" },
 ];
 
+const CONTACT_LABEL = "Contact Me";
+
+const MOTION_TRANSITION = {
+  duration: 0.22,
+  ease: [0.23, 1, 0.32, 1],
+} as const;
+
+const ICON_TRANSITION = {
+  duration: 0.16,
+  ease: [0.23, 1, 0.32, 1],
+} as const;
+
+type SlidePhase = "idle" | "active" | "exiting";
+
+type AnchorClickEvent = MouseEvent<HTMLAnchorElement>;
+
+function navigateToSection(
+  event: AnchorClickEvent,
+  href: string,
+  onNavigate?: () => void
+) {
+  scrollToSection(event, href);
+  onNavigate?.();
+}
+
 type NavLinkProps = {
   href: string;
   label: string;
@@ -30,55 +55,171 @@ type NavLinkProps = {
   onNavigate?: () => void;
 };
 
+type UnderlineButtonProps = {
+  children: ReactNode;
+  onClick: () => void;
+  ariaExpanded?: boolean;
+  ariaLabel?: string;
+};
+
+function UnderlineButton({
+  children,
+  onClick,
+  ariaExpanded,
+  ariaLabel,
+}: UnderlineButtonProps) {
+  const [isActive, setIsActive] = useState(false);
+
+  return (
+    <motion.button
+      type="button"
+      aria-label={ariaLabel}
+      aria-expanded={ariaExpanded}
+      onClick={onClick}
+      onHoverStart={() => setIsActive(true)}
+      onHoverEnd={() => setIsActive(false)}
+      onFocus={() => setIsActive(true)}
+      onBlur={() => setIsActive(false)}
+      className="relative inline-flex items-center py-1 text-sm font-medium leading-none tracking-tight text-white outline-none transition-transform duration-150 ease-out active:scale-95"
+    >
+      <span className="relative block overflow-hidden pb-0.5">
+        <span>{children}</span>
+        <motion.span
+          aria-hidden="true"
+          className="absolute bottom-0 left-0 h-px w-full origin-left bg-current"
+          initial={false}
+          animate={{ transform: isActive ? "scaleX(1)" : "scaleX(0)" }}
+          transition={MOTION_TRANSITION}
+        />
+      </span>
+    </motion.button>
+  );
+}
+
 function NavLink({
   href,
   label,
   variant = "desktop",
   onNavigate,
 }: NavLinkProps) {
-  const handleClick = (event: MouseEvent<HTMLAnchorElement>) => {
-    scrollToSection(event, href);
-    onNavigate?.();
+  const [isActive, setIsActive] = useState(false);
+  const [slidePhase, setSlidePhase] = useState<SlidePhase>("idle");
+
+  const activate = () => {
+    setIsActive(true);
+    setSlidePhase("active");
   };
 
-  const isMobile = variant === "mobile";
+  const deactivate = () => {
+    setIsActive(false);
+    setSlidePhase("exiting");
+  };
+
+  const handleAnimationComplete = () => {
+    if (slidePhase === "exiting") {
+      setSlidePhase("idle");
+    }
+  };
+
+  if (variant === "mobile") {
+    return (
+      <motion.a
+        href={href}
+        onClick={(event) => navigateToSection(event, href, onNavigate)}
+        onHoverStart={activate}
+        onHoverEnd={deactivate}
+        onFocus={activate}
+        onBlur={deactivate}
+        className="group relative flex w-full items-center overflow-hidden border-t border-white/10 py-3 pr-14 text-left text-5xl font-medium leading-none tracking-tighter text-white outline-none last:border-b focus-visible:ring-2 focus-visible:ring-white/60 focus-visible:ring-offset-2 focus-visible:ring-offset-black sm:text-6xl"
+      >
+        <motion.span
+          aria-hidden="true"
+          className="absolute inset-0 bg-white"
+          initial={false}
+          animate={{ opacity: isActive ? 1 : 0 }}
+          transition={MOTION_TRANSITION}
+        />
+        <motion.span
+          className="relative z-10 block"
+          initial={false}
+          animate={{
+            transform: isActive
+              ? "translate3d(6px, 0.04em, 0)"
+              : "translate3d(0px, 0.04em, 0)",
+            color: isActive ? "#000000" : "rgba(255,255,255,1)",
+          }}
+          transition={MOTION_TRANSITION}
+        >
+          {label}
+        </motion.span>
+        <motion.span
+          aria-hidden="true"
+          className="absolute right-1 z-10 flex translate-y-[0.04em] items-center justify-center text-5xl sm:right-2 sm:text-6xl"
+          initial={false}
+          animate={{
+            transform: isActive
+              ? "translate3d(0px, 0.04em, 0)"
+              : "translate3d(-18px, 0.04em, 0)",
+            opacity: isActive ? 1 : 0,
+            color: isActive ? "#000000" : "rgba(255,255,255,0)",
+          }}
+          transition={MOTION_TRANSITION}
+        >
+          {"\u2192"}
+        </motion.span>
+      </motion.a>
+    );
+  }
+
+  const backgroundTransform =
+    slidePhase === "active"
+      ? "translate3d(0%, 0%, 0)"
+      : slidePhase === "exiting"
+        ? "translate3d(101%, 0%, 0)"
+        : "translate3d(-101%, 0%, 0)";
 
   return (
-    <a
+    <motion.a
       href={href}
-      onClick={handleClick}
-      className={
-        isMobile
-          ? "group relative block overflow-hidden border-b border-white/10 py-3 text-5xl font-medium leading-none tracking-tighter text-white sm:text-6xl"
-          : "group relative overflow-hidden px-3 py-2 text-sm font-light leading-none text-white"
-      }
+      onClick={(event) => navigateToSection(event, href, onNavigate)}
+      onHoverStart={activate}
+      onHoverEnd={deactivate}
+      onFocus={activate}
+      onBlur={deactivate}
+      className="group relative overflow-hidden px-3 py-2 text-sm font-light leading-none text-white"
     >
-      <span
+      <motion.span
         aria-hidden="true"
-        className="absolute inset-0 z-0 origin-left scale-x-0 bg-black/65 transition-transform duration-200 ease-out group-hover:scale-x-100"
+        className="absolute inset-0 z-0 bg-black/70"
+        initial={false}
+        animate={{ transform: backgroundTransform }}
+        transition={
+          slidePhase === "idle" ? { duration: 0 } : MOTION_TRANSITION
+        }
+        onAnimationComplete={handleAnimationComplete}
       />
       <span className="relative z-10">{label}</span>
-    </a>
+    </motion.a>
   );
 }
 
-function IconButton({ label }: { label: string }) {
+function SoundToggle() {
   const { isMuted, toggleMuted } = useSoundEffects();
   const Icon = isMuted ? VolumeX : Volume2;
 
   return (
     <button
       type="button"
-      aria-label={isMuted ? "Unmute sound" : label}
+      aria-label={isMuted ? "Unmute sound" : "Mute sound"}
       aria-pressed={isMuted}
       onClick={toggleMuted}
       className="inline-flex size-8 items-center justify-center bg-black/85 text-white transition duration-200 ease-out hover:bg-white/90 hover:text-black active:scale-95"
     >
       <motion.span
         key={isMuted ? "muted" : "sound"}
-        initial={{ opacity: 0, transform: "scale(0.85)" }}
+        initial={{ opacity: 0, transform: "scale(0.9)" }}
         animate={{ opacity: 1, transform: "scale(1)" }}
-        transition={{ duration: 0.16, ease: [0.23, 1, 0.32, 1] }}
+        transition={ICON_TRANSITION}
       >
         <Icon aria-hidden="true" className="size-3" strokeWidth={2.2} />
       </motion.span>
@@ -86,114 +227,121 @@ function IconButton({ label }: { label: string }) {
   );
 }
 
+function AnimatedTextSwap({
+  label,
+  isActive,
+}: {
+  label: string;
+  isActive: boolean;
+}) {
+  return (
+    <span className="relative z-10 inline-grid h-4 place-items-center overflow-hidden text-black">
+      <span className="invisible row-start-1 col-start-1 whitespace-nowrap">
+        {label}
+      </span>
+      <motion.span
+        className="absolute inset-0 flex items-center justify-center whitespace-nowrap"
+        initial={false}
+        animate={{
+          transform: isActive
+            ? "translate3d(0%, -100%, 0)"
+            : "translate3d(0%, 0%, 0)",
+        }}
+        transition={MOTION_TRANSITION}
+      >
+        {label}
+      </motion.span>
+      <motion.span
+        className="absolute inset-0 flex items-center justify-center whitespace-nowrap"
+        initial={false}
+        animate={{
+          transform: isActive
+            ? "translate3d(0%, 0%, 0)"
+            : "translate3d(0%, 100%, 0)",
+        }}
+        transition={MOTION_TRANSITION}
+      >
+        {label}
+      </motion.span>
+    </span>
+  );
+}
+
+function AnimatedArrowSwap({ isActive }: { isActive: boolean }) {
+  return (
+    <span className="relative z-10 inline-flex size-5 items-center justify-center overflow-hidden bg-black text-white">
+      <motion.span
+        className="absolute inset-0 flex items-center justify-center"
+        initial={false}
+        animate={{
+          transform: isActive
+            ? "translate3d(100%, -100%, 0)"
+            : "translate3d(0%, 0%, 0)",
+        }}
+        transition={MOTION_TRANSITION}
+      >
+        <ArrowUpRight aria-hidden="true" className="size-3" strokeWidth={2.5} />
+      </motion.span>
+      <motion.span
+        className="absolute inset-0 flex items-center justify-center"
+        initial={false}
+        animate={{
+          transform: isActive
+            ? "translate3d(0%, 0%, 0)"
+            : "translate3d(-100%, 100%, 0)",
+        }}
+        transition={MOTION_TRANSITION}
+      >
+        <ArrowUpRight aria-hidden="true" className="size-3" strokeWidth={2.5} />
+      </motion.span>
+    </span>
+  );
+}
+
 function ContactButton({ onNavigate }: { onNavigate?: () => void }) {
   const [isHovered, setIsHovered] = useState(false);
 
-  const handlePointerEnter = () => {
-    setIsHovered(true);
-  };
-
-  const handlePointerLeave = () => {
-    setIsHovered(false);
-  };
-
-  const transition = {
-    duration: 0.22,
-    ease: [0.23, 1, 0.32, 1],
-  } as const;
-
   return (
-    <a
+    <motion.a
       href="#contact"
-      onPointerEnter={handlePointerEnter}
-      onPointerLeave={handlePointerLeave}
-      onClick={(event) => {
-        scrollToSection(event, "#contact");
-        onNavigate?.();
-      }}
+      onHoverStart={() => setIsHovered(true)}
+      onHoverEnd={() => setIsHovered(false)}
+      onClick={(event) => navigateToSection(event, "#contact", onNavigate)}
       className="relative inline-flex h-8 items-center gap-1.5 overflow-hidden bg-white px-2 pl-2.5 text-xs font-medium leading-none tracking-tight text-black transition-transform duration-150 ease-out active:scale-95"
     >
-      <span className="relative z-10 inline-grid h-4 place-items-center overflow-hidden text-black">
-        <span className="invisible row-start-1 col-start-1 whitespace-nowrap">
-          Contact Me
-        </span>
-        <motion.span
-          className="absolute inset-0 flex items-center justify-center whitespace-nowrap"
-          initial={false}
-          animate={{
-            transform: isHovered
-              ? "translate3d(0%, -100%, 0)"
-              : "translate3d(0%, 0%, 0)",
-          }}
-          transition={transition}
-        >
-          Contact Me
-        </motion.span>
-        <motion.span
-          className="absolute inset-0 flex items-center justify-center whitespace-nowrap"
-          initial={false}
-          animate={{
-            transform: isHovered
-              ? "translate3d(0%, 0%, 0)"
-              : "translate3d(0%, 100%, 0)",
-          }}
-          transition={transition}
-        >
-          Contact Me
-        </motion.span>
-      </span>
-      <span className="relative z-10 inline-flex size-5 items-center justify-center overflow-hidden bg-black text-white">
-        <motion.span
-          className="absolute inset-0 flex items-center justify-center"
-          initial={false}
-          animate={{
-            transform: isHovered
-              ? "translate3d(100%, -100%, 0)"
-              : "translate3d(0%, 0%, 0)",
-          }}
-          transition={transition}
-        >
-          <ArrowUpRight
-            aria-hidden="true"
-            className="size-3"
-            strokeWidth={2.5}
-          />
-        </motion.span>
-        <motion.span
-          className="absolute inset-0 flex items-center justify-center"
-          initial={false}
-          animate={{
-            transform: isHovered
-              ? "translate3d(0%, 0%, 0)"
-              : "translate3d(-100%, 100%, 0)",
-          }}
-          transition={transition}
-        >
-          <ArrowUpRight
-            aria-hidden="true"
-            className="size-3"
-            strokeWidth={2.5}
-          />
-        </motion.span>
-      </span>
+      <AnimatedTextSwap label={CONTACT_LABEL} isActive={isHovered} />
+      <AnimatedArrowSwap isActive={isHovered} />
+    </motion.a>
+  );
+}
+
+function BrandLink({
+  className = "",
+  onNavigate,
+}: {
+  className?: string;
+  onNavigate?: () => void;
+}) {
+  return (
+    <a
+      href="#"
+      onClick={(event) => navigateToSection(event, "#", onNavigate)}
+      className={`text-xl font-bold uppercase leading-none tracking-tighter ${className}`}
+      aria-label="Monolog home"
+    >
+      Monolog
     </a>
   );
 }
 
 export function Navbar() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const closeMenu = () => setIsMenuOpen(false);
 
   return (
     <>
       <nav className="fixed left-0 right-0 top-0 z-40 flex items-center justify-between px-5 py-5 text-white md:px-6 md:py-6">
-        <a
-          href="#"
-          onClick={(event) => scrollToSection(event, "#")}
-          className="text-xl font-bold uppercase leading-none tracking-tighter"
-          aria-label="Monolog home"
-        >
-          Monolog
-        </a>
+        <BrandLink />
 
         <div className="hidden items-center gap-1 md:flex">
           {DESKTOP_LINKS.map((item) => (
@@ -202,17 +350,17 @@ export function Navbar() {
         </div>
 
         <div className="flex items-center gap-4">
-          <IconButton label="Toggle sound" />
+          <SoundToggle />
           <ContactButton />
-          <button
-            type="button"
-            aria-label="Open navigation menu"
-            aria-expanded={isMenuOpen}
-            onClick={() => setIsMenuOpen(true)}
-            className="inline-flex h-10 items-center justify-center text-sm font-medium leading-none tracking-tight text-white transition-transform duration-150 ease-out active:scale-95 md:hidden"
-          >
-            <Menu aria-hidden="true" className="size-7" strokeWidth={2.2} />
-          </button>
+          <div className="md:hidden">
+            <UnderlineButton
+              ariaLabel="Open navigation menu"
+              ariaExpanded={isMenuOpen}
+              onClick={() => setIsMenuOpen(true)}
+            >
+              Menu
+            </UnderlineButton>
+          </div>
         </div>
       </nav>
 
@@ -224,28 +372,14 @@ export function Navbar() {
         }`}
         aria-hidden={!isMenuOpen}
       >
-        <a
-          href="#"
-          onClick={(event) => {
-            scrollToSection(event, "#");
-            setIsMenuOpen(false);
-          }}
-          className="absolute left-5 top-7 text-xl font-bold uppercase leading-none tracking-tighter"
-          aria-label="Monolog home"
-        >
-          Monolog
-        </a>
+        <BrandLink className="absolute left-5 top-7" onNavigate={closeMenu} />
 
         <div className="absolute right-5 top-6 flex items-center gap-4">
-          <IconButton label="Toggle sound" />
-          <ContactButton onNavigate={() => setIsMenuOpen(false)} />
-          <button
-            type="button"
-            onClick={() => setIsMenuOpen(false)}
-            className="h-10 text-sm font-medium leading-none tracking-tight text-white transition-transform duration-150 ease-out active:scale-95"
-          >
+          <SoundToggle />
+          <ContactButton onNavigate={closeMenu} />
+          <UnderlineButton onClick={closeMenu}>
             Close
-          </button>
+          </UnderlineButton>
         </div>
 
         <div className="flex flex-col">
@@ -254,7 +388,7 @@ export function Navbar() {
               key={item.label}
               {...item}
               variant="mobile"
-              onNavigate={() => setIsMenuOpen(false)}
+              onNavigate={closeMenu}
             />
           ))}
         </div>
