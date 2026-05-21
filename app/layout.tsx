@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import localFont from "next/font/local";
 import { ReactLenis } from "lenis/react";
+import { SoundEffectsProvider } from "@/components/sound-effects-provider";
 import "./globals.css";
 
 const khTeka = localFont({
@@ -56,10 +57,12 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       className={`${khTeka.variable} ${animo.variable} ${suisseIntlMono.variable}`}
     >
       <body className="antialiased selection:bg-accent-dim selection:text-foreground">
-        <div className="grain-overlay" />
-        <ReactLenis root options={{ lerp: 0.1, duration: 1.5 }}>
-          {children}
-        </ReactLenis>
+        <SoundEffectsProvider>
+          <div className="grain-overlay" />
+          <ReactLenis root options={{ lerp: 0.1, duration: 1.5 }}>
+            {children}
+          </ReactLenis>
+        </SoundEffectsProvider>
       </body>
     </html>
   );
