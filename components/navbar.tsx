@@ -1,7 +1,7 @@
 "use client";
 
 import { ArrowUpRight, Volume2, VolumeX } from "lucide-react";
-import { motion } from "motion/react";
+import { motion, useMotionValueEvent, useScroll } from "motion/react";
 import type { MouseEvent, ReactNode } from "react";
 import { useState } from "react";
 
@@ -9,18 +9,15 @@ import { useSoundEffects } from "@/components/sound-effects-provider";
 import { scrollToSection } from "@/lib/scroll-to-section";
 
 const DESKTOP_LINKS = [
-  { label: "About", href: "#about" },
+  { label: "About Me", href: "#about" },
   { label: "Work", href: "#work" },
-  { label: "Services", href: "#services" },
-  { label: "Process", href: "#process" },
+  { label: "Projects", href: "#projects" },
 ];
 
 const MOBILE_LINKS = [
-  { label: "About", href: "#about" },
+  { label: "About Me", href: "#about" },
   { label: "Work", href: "#work" },
-  { label: "Process", href: "#process" },
-  { label: "Services", href: "#services" },
-  { label: "Contact", href: "#contact" },
+  { label: "Projects", href: "#projects" },
 ];
 
 const CONTACT_LABEL = "Contact Me";
@@ -336,11 +333,41 @@ function BrandLink({
 
 export function Navbar() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [isNavbarVisible, setIsNavbarVisible] = useState(true);
+  const { scrollY } = useScroll();
   const closeMenu = () => setIsMenuOpen(false);
+
+  useMotionValueEvent(scrollY, "change", (current) => {
+    const previous = scrollY.getPrevious() ?? current;
+    const delta = current - previous;
+
+    if (isMenuOpen || current < 80) {
+      setIsNavbarVisible(true);
+      return;
+    }
+
+    if (delta > 8) {
+      setIsNavbarVisible(false);
+      return;
+    }
+
+    if (delta < -8) {
+      setIsNavbarVisible(true);
+    }
+  });
 
   return (
     <>
-      <nav className="fixed left-0 right-0 top-0 z-40 flex items-center justify-between px-5 py-5 text-white md:px-6 md:py-6">
+      <motion.nav
+        className="fixed left-0 right-0 top-0 z-40 flex items-center justify-between px-5 py-5 text-white md:px-6 md:py-6"
+        initial={false}
+        animate={{
+          transform: isNavbarVisible
+            ? "translate3d(0, 0%, 0)"
+            : "translate3d(0, -110%, 0)",
+        }}
+        transition={MOTION_TRANSITION}
+      >
         <BrandLink />
 
         <div className="hidden items-center gap-1 md:flex">
@@ -362,7 +389,7 @@ export function Navbar() {
             </UnderlineButton>
           </div>
         </div>
-      </nav>
+      </motion.nav>
 
       <div
         className={`fixed inset-0 z-50 bg-black/95 px-5 pb-10 pt-24 text-white transition duration-200 ease-out md:hidden ${

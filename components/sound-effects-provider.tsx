@@ -59,14 +59,31 @@ export function SoundEffectsProvider({
     };
   }, []);
 
-  const play = useCallback((audio: HTMLAudioElement | null) => {
-    if (!audio || isMutedRef.current) return;
+  const play = useCallback(
+    (audio: HTMLAudioElement | null, options?: { ignoreMuted?: boolean }) => {
+      if (!audio || (!options?.ignoreMuted && isMutedRef.current)) return;
 
-    audio.currentTime = 0;
-    void audio.play().catch(() => {
-      // Browsers can block audio before the first user gesture.
+      audio.currentTime = 0;
+      void audio.play().catch(() => {
+        // Browsers can block audio before the first user gesture.
+      });
+    },
+    []
+  );
+
+  const toggleMuted = useCallback(() => {
+    setIsMuted((current) => {
+      const next = !current;
+
+      isMutedRef.current = next;
+
+      if (!next) {
+        play(selectAudioRef.current, { ignoreMuted: true });
+      }
+
+      return next;
     });
-  }, []);
+  }, [play]);
 
   useEffect(() => {
     const handlePointerOver = (event: PointerEvent) => {
@@ -109,9 +126,9 @@ export function SoundEffectsProvider({
   const value = useMemo(
     () => ({
       isMuted,
-      toggleMuted: () => setIsMuted((current) => !current),
+      toggleMuted,
     }),
-    [isMuted]
+    [isMuted, toggleMuted]
   );
 
   return (
