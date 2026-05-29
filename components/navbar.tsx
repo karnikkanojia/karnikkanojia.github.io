@@ -322,11 +322,16 @@ function BrandLink({
   return (
     <a
       href="#"
+      data-no-sound
       onClick={(event) => navigateToSection(event, "#", onNavigate)}
-      className={`text-xl font-bold uppercase leading-none tracking-tighter ${className}`}
+      className={`flex items-center ${className}`}
       aria-label="Monolog home"
     >
-      Monolog
+      <img
+        src="/monogram.svg"
+        alt="Monolog"
+        className="h-6 w-auto"
+      />
     </a>
   );
 }

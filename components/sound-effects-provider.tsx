@@ -24,9 +24,13 @@ const SoundEffectsContext =
 function getInteractiveTarget(target: EventTarget | null) {
   if (!(target instanceof Element)) return null;
 
-  return target.closest(
+  const el = target.closest(
     'a, button, [role="button"], [role="link"], input, select, textarea'
   );
+
+  if (el instanceof Element && el.hasAttribute("data-no-sound")) return null;
+
+  return el;
 }
 
 export function SoundEffectsProvider({
