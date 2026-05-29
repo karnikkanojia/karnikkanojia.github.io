@@ -1,6 +1,6 @@
 import { Navbar } from "@/components/navbar";
 import { Hero } from "@/components/hero";
-import { Problem } from "@/components/problem";
+import { Introduction } from "@/components/Introduction";
 import { Clients } from "@/components/clients";
 import { Gap } from "@/components/gap";
 import { Works } from "@/components/works";
@@ -15,7 +15,7 @@ export default function Home() {
     <main className="relative">
       <Navbar />
       <Hero />
-      <Problem />
+      <Introduction />
       <Clients />
       <Gap />
       <Works />
