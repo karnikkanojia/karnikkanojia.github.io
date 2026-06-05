@@ -1,44 +1,54 @@
 "use client";
 
+import Image from "next/image";
 import { motion } from "motion/react";
 import { useEffect, useState } from "react";
 
-const portraits = [
+import bengaluruImage from "@/assets/site-loader/bengaluru.jpg";
+import everestImage from "@/assets/site-loader/everest.jpg";
+import flamingoImage from "@/assets/site-loader/flamingo.jpg";
+import kashmirImage from "@/assets/site-loader/kashmir.jpg";
+import pondicherryImage from "@/assets/site-loader/pondicherry.jpg";
+
+const portraits: { src: string; alt: string }[] = [
   {
-    src: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=720&q=85",
-    alt: "Portrait in warm studio light",
+    src: kashmirImage.src,
+    alt: "Snowy Kashmir mountain valley",
   },
   {
-    src: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=720&q=85",
-    alt: "Portrait against a neutral backdrop",
+    src: everestImage.src,
+    alt: "Mount Everest above the clouds",
   },
   {
-    src: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=720&q=85",
-    alt: "Close portrait with soft contrast",
+    src: flamingoImage.src,
+    alt: "Pink flamingo standing in shallow water",
   },
   {
-    src: "https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=crop&w=720&q=85",
-    alt: "Portrait with direct eye contact",
+    src: bengaluruImage.src,
+    alt: "Bengaluru city street at night",
+  },
+  {
+    src: pondicherryImage.src,
+    alt: "Pondicherry coastal street scene",
   },
 ];
 
 const introDelay = 850;
 const countDuration = 3300;
 const exitDelay = 850;
-const keepLoaderVisible = true;
+const imageRevealDuration = 0.62;
+const imageSequenceDuration = 2000;
+const imageExitDelay = 0.18;
+const imageRevealStagger = Math.max(
+  (imageSequenceDuration / 1000 - imageRevealDuration) / Math.max(portraits.length - 1, 1),
+  0,
+);
 
-const spinnerDots = [
-  { position: "rotate-0", opacity: "opacity-[0.22]" },
-  { position: "rotate-[36deg]", opacity: "opacity-[0.30]" },
-  { position: "rotate-[72deg]", opacity: "opacity-[0.37]" },
-  { position: "rotate-[108deg]", opacity: "opacity-[0.45]" },
-  { position: "rotate-[144deg]", opacity: "opacity-[0.52]" },
-  { position: "rotate-180", opacity: "opacity-[0.60]" },
-  { position: "rotate-[216deg]", opacity: "opacity-[0.67]" },
-  { position: "rotate-[252deg]", opacity: "opacity-[0.75]" },
-  { position: "rotate-[288deg]", opacity: "opacity-[0.82]" },
-  { position: "rotate-[324deg]", opacity: "opacity-[0.90]" },
-];
+const loaderCells = Array.from({ length: 9 }, (_, index) => ({
+  id: index,
+  isOuter: index !== 4,
+}));
+const loaderDotColors = ["#08080a", "#2a2a2d", "#5a5a60", "#8b8b91", "#c7c7cc"];
 
 export function SiteLoader() {
   const [count, setCount] = useState(0);
@@ -48,7 +58,7 @@ export function SiteLoader() {
 
   useEffect(() => {
     portraits.forEach((portrait) => {
-      const image = new Image();
+      const image = new window.Image();
       image.src = portrait.src;
     });
 
@@ -70,11 +80,7 @@ export function SiteLoader() {
         if (progress < 1) {
           frame = requestAnimationFrame(updateCounter);
         } else {
-          if (keepLoaderVisible) {
-            setCount(100);
-            return;
-          }
-
+          setCount(100);
           setIsExiting(true);
           exitTimer = window.setTimeout(() => setIsVisible(false), exitDelay);
         }
@@ -103,8 +109,8 @@ export function SiteLoader() {
         className="absolute inset-0 bg-[hsl(0_0%_98%)]"
         animate={{ opacity: isExiting ? 0 : 1 }}
         transition={{
-          duration: 0.36,
-          delay: isExiting ? 0.44 : 0,
+          duration: 0.38,
+          delay: isExiting ? 0.18 : 0,
           ease: [0.23, 1, 0.32, 1],
         }}
       />
@@ -113,79 +119,128 @@ export function SiteLoader() {
         className="absolute top-[clamp(1rem,2.3vw,1.8rem)] left-[clamp(1.1rem,2.3vw,1.8rem)] z-10 font-sans text-[clamp(4rem,5vw,6.8rem)] leading-[0.78] font-normal tracking-normal tabular-nums max-[720px]:text-[clamp(3rem,17vw,4.4rem)]"
         animate={
           isExiting
-            ? { x: "-34%", y: "-42%", opacity: 0 }
+            ? { x: [0, "5%", "-34%"], y: [0, "6%", "-42%"], opacity: [1, 1, 0] }
             : { x: 0, y: 0, opacity: 1 }
         }
-        transition={{ duration: 0.62, ease: [0.77, 0, 0.175, 1] }}
+        transition={
+          isExiting
+            ? { duration: 0.5, ease: [0.77, 0, 0.175, 1], times: [0, 0.2, 1] }
+            : { duration: 0.62, ease: [0.77, 0, 0.175, 1] }
+        }
       >
         {count}
       </motion.div>
 
       <motion.div
         className="absolute top-1/2 left-1/2 z-10 aspect-3/4 w-[clamp(14rem,18.5vw,21rem)] -translate-x-1/2 translate-y-[-44%] overflow-hidden max-[720px]:w-[clamp(10.5rem,50vw,15.5rem)] max-[720px]:translate-y-[-42%]"
-        animate={{
-          filter: isExiting ? "blur(18px)" : "blur(0px)",
-          opacity: isExiting ? 0 : 1,
-        }}
-        transition={{ duration: 0.58, ease: [0.23, 1, 0.32, 1] }}
       >
-        {portraits.map((portrait, index) => (
-          <motion.figure
-            key={portrait.src}
-            className="absolute inset-0 h-full w-full overflow-hidden will-change-[clip-path,opacity]"
-            style={{ zIndex: index + 1 }}
-            initial={{ opacity: 0, clipPath: "inset(100% 0 0 0)" }}
-            animate={
-              hasStarted
-                ? { opacity: 1, clipPath: "inset(0% 0 0 0)" }
-                : { opacity: 0, clipPath: "inset(100% 0 0 0)" }
-            }
-            transition={{
-              duration: 0.85,
-              delay: index * 0.24,
-              ease: [0.77, 0, 0.175, 1],
-            }}
-          >
-            <img className="h-full w-full object-cover" src={portrait.src} alt={portrait.alt} />
-          </motion.figure>
-        ))}
+        <motion.div
+          className="relative h-full w-full origin-center overflow-hidden"
+          animate={
+            isExiting
+              ? {
+                  filter: ["blur(0px)", "blur(0px)", "blur(14px)"],
+                  opacity: [1, 1, 0],
+                  scale: [1, 1.025, 0.94],
+                }
+              : { filter: "blur(0px)", opacity: 1, scale: 1 }
+          }
+          transition={
+            isExiting
+              ? {
+                  duration: 0.82,
+                  delay: imageExitDelay,
+                  ease: [0.23, 1, 0.32, 1],
+                  times: [0, 0.34, 1],
+                }
+              : { duration: 0.58, ease: [0.23, 1, 0.32, 1] }
+          }
+        >
+          {portraits.map((portrait, index) => (
+            <motion.figure
+              key={portrait.src}
+              className="absolute inset-0 h-full w-full overflow-hidden will-change-[clip-path,opacity]"
+              style={{ zIndex: index + 1 }}
+              initial={{ opacity: 0, clipPath: "inset(100% 0 0 0)" }}
+              animate={
+                hasStarted
+                  ? { opacity: 1, clipPath: "inset(0% 0 0 0)" }
+                  : { opacity: 0, clipPath: "inset(100% 0 0 0)" }
+              }
+              transition={{
+                duration: imageRevealDuration,
+                delay: index * imageRevealStagger,
+                ease: [0.77, 0, 0.175, 1],
+              }}
+            >
+              <Image
+                className="object-cover"
+                src={portrait.src}
+                alt={portrait.alt}
+                fill
+                priority
+                sizes="(max-width: 720px) 50vw, 21rem"
+              />
+            </motion.figure>
+          ))}
+        </motion.div>
       </motion.div>
 
       <motion.div
         className="absolute top-[clamp(1rem,2.3vw,2rem)] right-[clamp(1.1rem,2.3vw,2rem)] z-10 grid w-[clamp(2.45rem,3.1vw,3.1rem)] place-items-center max-[720px]:top-[1.05rem] max-[720px]:right-[1.05rem] max-[720px]:w-[2.45rem]"
         animate={
           isExiting
-            ? { x: "38%", y: "-44%", opacity: 0 }
+            ? { x: [0, "-5%", "38%"], y: [0, "6%", "-44%"], opacity: [1, 1, 0] }
             : { x: 0, y: 0, opacity: 1 }
         }
-        transition={{ duration: 0.62, ease: [0.77, 0, 0.175, 1] }}
+        transition={
+          isExiting
+            ? { duration: 0.5, ease: [0.77, 0, 0.175, 1], times: [0, 0.2, 1] }
+            : { duration: 0.62, ease: [0.77, 0, 0.175, 1] }
+        }
       >
-        <img className="block h-auto w-full" src="/monogram-dark.svg" alt="" />
+        <Image
+          className="block h-auto w-full"
+          src="/monogram-dark.svg"
+          alt=""
+          width={64}
+          height={64}
+          priority
+        />
       </motion.div>
 
       <motion.div
-        className="absolute right-[clamp(1rem,1.8vw,1.6rem)] bottom-[clamp(1rem,1.8vw,1.6rem)] z-10 size-9"
+        className="absolute right-[clamp(1rem,1.8vw,1.6rem)] bottom-[clamp(1rem,1.8vw,1.6rem)] z-10 grid size-12 grid-cols-3 grid-rows-3 gap-0.5"
         aria-hidden="true"
         animate={
           isExiting
-            ? { x: "40%", y: "42%", opacity: 0 }
+            ? { x: [0, "-6%", "40%"], y: [0, "-6%", "42%"], opacity: [1, 1, 0] }
             : { x: 0, y: 0, opacity: 1 }
         }
-        transition={{ duration: 0.62, ease: [0.77, 0, 0.175, 1] }}
+        transition={
+          isExiting
+            ? { duration: 0.5, ease: [0.77, 0, 0.175, 1], times: [0, 0.2, 1] }
+            : { duration: 0.62, ease: [0.77, 0, 0.175, 1] }
+        }
       >
-        <motion.div
-          className="absolute inset-0"
-          animate={{ rotate: 360 }}
-          transition={{ duration: 1, ease: "linear", repeat: Infinity }}
-        >
-          {spinnerDots.map((dot) => (
-            <span key={dot.position} className={`absolute inset-0 ${dot.position}`}>
-              <span
-                className={`absolute top-0 left-1/2 size-1.5 -translate-x-1/2 bg-[#08080a] ${dot.opacity}`}
+        {loaderCells.map((cell) => (
+          <span key={cell.id} className="grid place-items-center">
+            {cell.isOuter ? (
+              <motion.span
+                className="size-2.5"
+                animate={{
+                  backgroundColor: loaderDotColors,
+                }}
+                transition={{
+                  duration: 1,
+                  delay: cell.id * 0.08,
+                  ease: [0.77, 0, 0.175, 1],
+                  repeat: Infinity,
+                }}
               />
-            </span>
-          ))}
-        </motion.div>
+            ) : null}
+          </span>
+        ))}
       </motion.div>
     </motion.div>
   );
