@@ -3,7 +3,7 @@
 import * as React from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import type { LucideIcon } from "lucide-react";
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
 
 type AnimatedTextCycleWord = string | { label: string; icon?: LucideIcon };
 
@@ -12,6 +12,7 @@ interface AnimatedTextCycleProps {
   interval?: number;
   className?: string;
   repeat?: boolean;
+  restartKey?: number;
   startWhen?: boolean;
 }
 
@@ -20,26 +21,58 @@ export default function AnimatedTextCycle({
   interval = 5000,
   className = "",
   repeat = true,
+  restartKey = 0,
   startWhen = true,
 }: AnimatedTextCycleProps) {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [width, setWidth] = useState("auto");
-  const measureRef = useRef<HTMLDivElement>(null);
+  const measureRef = useRef<HTMLSpanElement>(null);
   const currentWord = words[currentIndex];
   const currentLabel = typeof currentWord === "string" ? currentWord : currentWord.label;
   const CurrentIcon = typeof currentWord === "string" ? undefined : currentWord.icon;
+  const measureCurrentWord = useCallback(() => {
+    const measureElement = measureRef.current;
 
-  useEffect(() => {
-    if (!measureRef.current) {
+    if (!measureElement) {
       return;
     }
 
-    const elements = measureRef.current.children;
-    if (elements.length > currentIndex) {
-      const newWidth = elements[currentIndex].getBoundingClientRect().width;
-      setWidth(`${newWidth}px`);
+    const wordElement = measureElement.children[currentIndex];
+
+    if (wordElement) {
+      setWidth(`${wordElement.getBoundingClientRect().width}px`);
     }
   }, [currentIndex]);
+
+  useEffect(() => {
+    setCurrentIndex(0);
+  }, [restartKey]);
+
+  useLayoutEffect(() => {
+    measureCurrentWord();
+  }, [className, measureCurrentWord, words]);
+
+  useEffect(() => {
+    const measureOnNextFrame = () => {
+      window.requestAnimationFrame(measureCurrentWord);
+    };
+    const observer = measureRef.current ? new ResizeObserver(measureOnNextFrame) : null;
+
+    if (measureRef.current) {
+      observer?.observe(measureRef.current);
+    }
+
+    window.addEventListener("resize", measureOnNextFrame);
+
+    if ("fonts" in document) {
+      void document.fonts.ready.then(measureCurrentWord);
+    }
+
+    return () => {
+      observer?.disconnect();
+      window.removeEventListener("resize", measureOnNextFrame);
+    };
+  }, [measureCurrentWord]);
 
   useEffect(() => {
     if (!startWhen || words.length < 2) {
@@ -93,10 +126,10 @@ export default function AnimatedTextCycle({
 
   return (
     <>
-      <div
+      <span
         ref={measureRef}
         aria-hidden="true"
-        className="pointer-events-none absolute opacity-0"
+        className="pointer-events-none absolute left-0 top-0 whitespace-nowrap opacity-0"
         style={{ visibility: "hidden" }}
       >
         {words.map((word) => {
@@ -104,16 +137,18 @@ export default function AnimatedTextCycle({
           const Icon = typeof word === "string" ? undefined : word.icon;
 
           return (
-          <span key={label} className={`inline-flex items-baseline gap-[0.16em] ${className}`}>
-            {Icon ? <Icon aria-hidden="true" className="mb-[0.06em] size-[0.58em] stroke-[1.8]" /> : null}
-            {label}
-          </span>
+            <span key={label} className={`inline-flex items-baseline gap-[0.16em] ${className}`}>
+              {Icon ? (
+                <Icon aria-hidden="true" className="mb-[0.06em] size-[0.58em] stroke-[1.8]" />
+              ) : null}
+              {label}
+            </span>
           );
         })}
-      </div>
+      </span>
 
       <motion.span
-        className="relative inline-block"
+        className="relative inline-block whitespace-nowrap align-baseline"
         animate={{
           width,
           transition: {
