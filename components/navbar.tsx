@@ -131,7 +131,7 @@ function NavLink({
       >
         <motion.span
           aria-hidden="true"
-          className="absolute inset-0 bg-white"
+          className="absolute inset-0 bg-[#f5f5f5]"
           initial={false}
           animate={{ opacity: isActive ? 1 : 0 }}
           transition={MOTION_TRANSITION}
@@ -187,7 +187,7 @@ function NavLink({
     >
       <motion.span
         aria-hidden="true"
-        className="absolute inset-0 z-0 bg-black/70"
+        className="absolute inset-0 z-0 bg-white"
         initial={false}
         animate={{ transform: backgroundTransform }}
         transition={
@@ -195,7 +195,9 @@ function NavLink({
         }
         onAnimationComplete={handleAnimationComplete}
       />
-      <span className="relative z-10">{label}</span>
+      <span className="relative z-10 transition-colors duration-200 group-hover:text-black group-focus-visible:text-black">
+        {label}
+      </span>
     </motion.a>
   );
 }
@@ -210,7 +212,7 @@ function SoundToggle() {
       aria-label={isMuted ? "Unmute sound" : "Mute sound"}
       aria-pressed={isMuted}
       onClick={toggleMuted}
-      className="inline-flex size-8 items-center justify-center bg-black/85 text-white transition duration-200 ease-out hover:bg-white/90 hover:text-black active:scale-95"
+      className="inline-flex size-7 items-center justify-center bg-black/85 text-white transition duration-200 ease-out hover:bg-[#f5f5f5]/90 hover:text-black active:scale-95"
     >
       <motion.span
         key={isMuted ? "muted" : "sound"}
@@ -304,7 +306,7 @@ function ContactButton({ onNavigate }: { onNavigate?: () => void }) {
       onHoverStart={() => setIsHovered(true)}
       onHoverEnd={() => setIsHovered(false)}
       onClick={(event) => navigateToSection(event, "#contact", onNavigate)}
-      className="relative inline-flex h-8 items-center gap-1.5 overflow-hidden bg-white px-2 pl-2.5 text-xs font-medium leading-none tracking-tight text-black transition-transform duration-150 ease-out active:scale-95"
+      className="relative inline-flex h-7 items-center gap-1.5 overflow-hidden bg-[#f5f5f5] px-2 pl-2.5 text-xs font-medium leading-none tracking-tight text-black transition-transform duration-150 ease-out active:scale-95"
     >
       <AnimatedTextSwap label={CONTACT_LABEL} isActive={isHovered} />
       <AnimatedArrowSwap isActive={isHovered} />
@@ -330,7 +332,7 @@ function BrandLink({
       <img
         src="/monogram.svg"
         alt="Monolog"
-        className="h-6 w-auto"
+        className="h-5 w-auto"
       />
     </a>
   );
@@ -364,7 +366,7 @@ export function Navbar() {
   return (
     <>
       <motion.nav
-        className="fixed left-0 right-0 top-0 z-40 flex items-center justify-between px-5 py-5 text-white md:px-6 md:py-6"
+        className="fixed left-0 right-0 top-0 z-40 flex items-center justify-between bg-black px-5 py-2 text-white md:px-6 md:py-2.5"
         initial={false}
         animate={{
           transform: isNavbarVisible

@@ -36,7 +36,7 @@ export function Process() {
         </div>
 
         <div className="space-y-48">
-          {STEPS.map((step, i) => (
+          {STEPS.map((step) => (
             <div key={step.num} className="grid lg:grid-cols-2 gap-24 items-center">
               <motion.div
                 initial={{ x: -40, opacity: 0 }}
@@ -71,7 +71,7 @@ export function Process() {
                 whileInView={{ scale: 1, opacity: 1 }}
                 viewport={{ once: true }}
                 transition={{ duration: 1.2, ease: [0.22, 1, 0.36, 1] }}
-                className="relative aspect-[4/3] rounded-[2rem] overflow-hidden bg-white/5 shadow-2xl"
+                className="relative aspect-[4/3] rounded-[2rem] overflow-hidden bg-[#f5f5f5]/5 shadow-2xl"
               >
                 <video
                   src={step.video}

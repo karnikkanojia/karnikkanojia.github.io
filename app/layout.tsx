@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { Playfair_Display } from "next/font/google";
 import localFont from "next/font/local";
 import { ReactLenis } from "lenis/react";
 import { SoundEffectsProvider } from "@/components/sound-effects-provider";
@@ -45,6 +46,13 @@ const suisseIntlMono = localFont({
   ],
 });
 
+const playfairDisplay = Playfair_Display({
+  variable: "--font-playfair-display",
+  display: "swap",
+  subsets: ["latin"],
+  style: ["italic"],
+});
+
 export const metadata: Metadata = {
   title: "Karnik Kanojia | Site Reliability Engineer",
   description: "SRE @ Oracle. Building reliable systems and impactful products.",
@@ -54,7 +62,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html
       lang="en"
-      className={`${khTeka.variable} ${animo.variable} ${suisseIntlMono.variable}`}
+      className={`${khTeka.variable} ${animo.variable} ${suisseIntlMono.variable} ${playfairDisplay.variable}`}
     >
       <body className="antialiased selection:bg-accent-dim selection:text-foreground">
         <SoundEffectsProvider>

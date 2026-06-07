@@ -5,11 +5,11 @@ import { motion } from "motion/react";
 const introLines = [
   "Hi, my name is",
   "Karnik Kanojia.",
-  "I build things with ML.",
+  "I build for scale and resilience.",
 ];
 
 const introBody =
-  "As a software engineer with expertise in crafting outstanding digital experiences, I am currently dedicated to building automation and tools to ensure large-scale systems are highly available, scalable, and resilient against failures at Oracle.";
+  "I'm a Site Reliability Engineer at Oracle, working on automation, observability, and resilient systems at scale. I also enjoy building thoughtful digital products across ML, tooling, and human-centered software.";
 
 export function Introduction() {
   return (
@@ -20,8 +20,8 @@ export function Introduction() {
             Introduction
           </p>
           <p className="max-w-70 text-sm leading-6 text-background/55">
-            Software engineer working across ML, automation, digital products, and
-            reliability-focused systems.
+            Software engineer working across reliability, automation, ML, and
+            human-centered digital products.
           </p>
         </div>
 

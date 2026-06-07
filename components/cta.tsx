@@ -29,7 +29,7 @@ export function CTA() {
 
           <button className="group relative px-16 py-8 bg-background text-foreground rounded-full text-2xl font-bold overflow-hidden hover:scale-110 transition-transform duration-500">
             <span className="relative z-10">Tell us your story</span>
-            <div className="absolute inset-0 bg-white translate-y-full group-hover:translate-y-0 transition-transform duration-500" />
+            <div className="absolute inset-0 bg-[#f5f5f5] translate-y-full group-hover:translate-y-0 transition-transform duration-500" />
           </button>
         </motion.div>
       </div>

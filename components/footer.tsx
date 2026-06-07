@@ -54,7 +54,7 @@ function FooterNavLink({ label, href }: FooterNavLinkProps) {
     >
       <motion.span
         aria-hidden="true"
-        className="absolute inset-0 bg-white"
+        className="absolute inset-0 bg-[#f5f5f5]"
         initial={false}
         animate={{ opacity: isActive ? 1 : 0 }}
         transition={TRANSITION}
@@ -166,7 +166,7 @@ function BackToTopButton() {
     >
       <motion.span
         aria-hidden="true"
-        className="absolute inset-0 bg-white"
+        className="absolute inset-0 bg-[#f5f5f5]"
         initial={false}
         animate={{ opacity: isActive ? 1 : 0 }}
         transition={TRANSITION}

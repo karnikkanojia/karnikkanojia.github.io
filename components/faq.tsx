@@ -44,11 +44,11 @@ export function FAQ() {
               <p className="text-xl font-medium mb-8 leading-relaxed">
                 Got more specific questions? Let&apos;s chat directly.
               </p>
-              <button className="w-full py-5 bg-white text-black rounded-full font-bold text-[11px] uppercase tracking-[0.2em] hover:scale-[1.02] active:scale-95 transition-all">
+              <button className="w-full py-5 bg-[#f5f5f5] text-black rounded-full font-bold text-[11px] uppercase tracking-[0.2em] hover:scale-[1.02] active:scale-95 transition-all">
                 Book a call with Huy
               </button>
             </div>
-            <div className="absolute top-0 right-0 w-32 h-32 bg-white/5 rounded-full -translate-y-1/2 translate-x-1/2 blur-3xl" />
+            <div className="absolute top-0 right-0 w-32 h-32 bg-[#f5f5f5]/5 rounded-full -translate-y-1/2 translate-x-1/2 blur-3xl" />
           </div>
         </div>
 

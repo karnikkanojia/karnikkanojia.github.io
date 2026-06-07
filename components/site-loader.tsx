@@ -82,7 +82,10 @@ export function SiteLoader() {
         } else {
           setCount(100);
           setIsExiting(true);
-          exitTimer = window.setTimeout(() => setIsVisible(false), exitDelay);
+          exitTimer = window.setTimeout(() => {
+            setIsVisible(false);
+            window.dispatchEvent(new Event("site-loader:complete"));
+          }, exitDelay);
         }
       };
 

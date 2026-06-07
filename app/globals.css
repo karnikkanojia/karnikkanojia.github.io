@@ -2,7 +2,7 @@
 
 @theme {
   --color-background: hsl(30 8% 5%);
-  --color-foreground: hsl(40 12% 92%);
+  --color-foreground: #f5f5f5;
   --color-card: hsl(30 10% 8%);
   --color-accent: #e78745;
   --color-accent-dim: hsl(25 75% 50% / 0.15);
@@ -26,18 +26,6 @@
 
 .mx-auto { margin-inline: auto !important; }
 
-.grain-overlay {
-  position: fixed;
-  inset: -50%;
-  width: 200%;
-  height: 200%;
-  background-image: url("https://cdn.prod.website-files.com/68b652bbd6c64a44c8fe3e5e/68b652bbd6c64a44c8fe3e6a_grain.png");
-  opacity: 0.04;
-  pointer-events: none;
-  z-index: 9999;
-  animation: grain 0.5s steps(6) infinite;
-}
-
 html {
   scroll-behavior: initial;
 }
@@ -49,6 +37,10 @@ body {
 
 .mix-blend-difference {
   mix-blend-mode: difference;
+}
+
+.variable-animation {
+  font-family: var(--font-mov), sans-serif;
 }
 
 ::selection {
