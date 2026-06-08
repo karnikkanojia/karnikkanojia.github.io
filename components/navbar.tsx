@@ -131,7 +131,7 @@ function NavLink({
       >
         <motion.span
           aria-hidden="true"
-          className="absolute inset-0 bg-[#f5f5f5]"
+          className="absolute inset-0 bg-foreground"
           initial={false}
           animate={{ opacity: isActive ? 1 : 0 }}
           transition={MOTION_TRANSITION}
@@ -212,7 +212,7 @@ function SoundToggle() {
       aria-label={isMuted ? "Unmute sound" : "Mute sound"}
       aria-pressed={isMuted}
       onClick={toggleMuted}
-      className="inline-flex size-7 items-center justify-center bg-black/85 text-white transition duration-200 ease-out hover:bg-[#f5f5f5]/90 hover:text-black active:scale-95"
+      className="inline-flex size-7 items-center justify-center bg-black/85 text-white transition duration-200 ease-out hover:bg-foreground/90 hover:text-black active:scale-95"
     >
       <motion.span
         key={isMuted ? "muted" : "sound"}

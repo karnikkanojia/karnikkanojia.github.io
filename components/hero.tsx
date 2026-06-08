@@ -58,7 +58,7 @@ export function Hero() {
   return (
     <section
       style={HERO_STYLE}
-      className="relative mt-[var(--hero-nav-offset)] h-[calc(100vh-var(--hero-nav-offset))] w-full bg-black p-3 md:[--hero-nav-offset:3rem] md:p-4"
+      className="relative mt-(--hero-nav-offset) h-[calc(100vh-var(--hero-nav-offset))] w-full bg-black p-3 md:[--hero-nav-offset:3rem] md:p-4"
     >
       <div className="relative h-full w-full overflow-hidden bg-black rounded-2xl">
         <AnimatedGradient
