@@ -306,7 +306,7 @@ function ContactButton({ onNavigate }: { onNavigate?: () => void }) {
       onHoverStart={() => setIsHovered(true)}
       onHoverEnd={() => setIsHovered(false)}
       onClick={(event) => navigateToSection(event, "#contact", onNavigate)}
-      className="relative inline-flex h-7 items-center gap-1.5 overflow-hidden bg-[#f5f5f5] px-2 pl-2.5 text-xs font-medium leading-none tracking-tight text-black transition-transform duration-150 ease-out active:scale-95"
+      className="relative inline-flex h-7 items-center gap-1.5 overflow-hidden bg-foreground px-2 pl-2.5 text-xs font-medium leading-none tracking-tight text-black transition-transform duration-150 ease-out active:scale-95"
     >
       <AnimatedTextSwap label={CONTACT_LABEL} isActive={isHovered} />
       <AnimatedArrowSwap isActive={isHovered} />

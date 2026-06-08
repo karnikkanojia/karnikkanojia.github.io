@@ -2,11 +2,11 @@
 
 import oracleLogo from "@/assets/hero/oracle-icon-logo.svg";
 import { AnimatedGradient } from "@/components/ui/animated-gradient";
-import AnimatedTextCycle from "@/components/ui/animated-text-cycle";
+import { TextFlip } from "@/components/text-flip";
 import { ShieldCheck, Sparkles, Workflow } from "lucide-react";
 import Image from "next/image";
-import { motion } from "motion/react";
-import { useCallback, useEffect, useState, type CSSProperties } from "react";
+import { motion, useReducedMotion } from "motion/react";
+import { useEffect, useState, type CSSProperties } from "react";
 
 const HERO_STYLE = { "--hero-nav-offset": "2.75rem" } as CSSProperties;
 const GRADIENT_CONFIG = { preset: "Ghost" } as const;
@@ -22,7 +22,16 @@ const focusWords = [
   { label: "intelligent", icon: Sparkles },
 ];
 const animatedWordClassName =
-  "font-normal italic text-white [font-family:var(--font-playfair-display),Georgia,serif]";
+  "inline-flex items-baseline gap-[0.16em] font-normal italic text-white [font-family:var(--font-playfair-display),Georgia,serif]";
+const TEXT_FLIP_VARIANTS = {
+  initial: { y: -8, opacity: 0, filter: "blur(4px)" },
+  animate: { y: 0, opacity: 1, filter: "blur(0px)" },
+  exit: { y: 8, opacity: 0, filter: "blur(4px)" },
+} as const;
+const TEXT_FLIP_TRANSITION = {
+  duration: 0.28,
+  ease: [0.22, 1, 0.36, 1],
+} as const;
 
 function useSiteLoaderComplete() {
   const [isComplete, setIsComplete] = useState(false);
@@ -44,10 +53,7 @@ function useSiteLoaderComplete() {
 
 export function Hero() {
   const isLoaderComplete = useSiteLoaderComplete();
-  const [animationRestartKey, setAnimationRestartKey] = useState(0);
-  const restartWordAnimation = useCallback(() => {
-    setAnimationRestartKey((key) => key + 1);
-  }, []);
+  const shouldReduceMotion = useReducedMotion();
 
   return (
     <section
@@ -71,15 +77,38 @@ export function Hero() {
             <h1 className="flex max-w-3xl flex-col items-start text-xl font-medium leading-[1.02] tracking-normal text-white md:text-2xl lg:text-4xl">
               <span>exploring &amp; building</span>
               <span>
-                <motion.span className="inline-block" onHoverStart={restartWordAnimation}>
-                  <AnimatedTextCycle
-                    words={focusWords}
-                    interval={1100}
-                    repeat={false}
-                    restartKey={animationRestartKey}
-                    startWhen={isLoaderComplete}
-                    className={animatedWordClassName}
-                  />
+                <motion.span
+                  className="inline-block whitespace-nowrap align-baseline"
+                >
+                  {shouldReduceMotion ? (
+                    <span className={animatedWordClassName}>
+                      <Sparkles
+                        aria-hidden="true"
+                        className="mb-[0.06em] size-[0.58em] stroke-[1.8]"
+                      />
+                      intelligent
+                    </span>
+                  ) : (
+                    <TextFlip
+                      as={motion.span}
+                      play={isLoaderComplete}
+                      loop={false}
+                      interval={1.8}
+                      className={animatedWordClassName}
+                      variants={TEXT_FLIP_VARIANTS}
+                      transition={TEXT_FLIP_TRANSITION}
+                    >
+                      {focusWords.map(({ label, icon: Icon }) => (
+                        <span key={label} className="inline-flex items-baseline gap-[0.16em]">
+                          <Icon
+                            aria-hidden="true"
+                            className="mb-[0.06em] size-[0.58em] stroke-[1.8]"
+                          />
+                          {label}
+                        </span>
+                      ))}
+                    </TextFlip>
+                  )}
                 </motion.span>{" "}
                 systems.
               </span>
