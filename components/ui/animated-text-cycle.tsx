@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { AnimatePresence, motion } from "framer-motion";
+import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import type { LucideIcon } from "lucide-react";
 import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
 
@@ -24,10 +24,12 @@ export default function AnimatedTextCycle({
   restartKey = 0,
   startWhen = true,
 }: AnimatedTextCycleProps) {
+  const shouldReduceMotion = useReducedMotion();
   const [currentIndex, setCurrentIndex] = useState(0);
   const [width, setWidth] = useState("auto");
   const measureRef = useRef<HTMLSpanElement>(null);
-  const currentWord = words[currentIndex];
+  const visibleIndex = shouldReduceMotion ? words.length - 1 : currentIndex;
+  const currentWord = words[visibleIndex];
   const currentLabel = typeof currentWord === "string" ? currentWord : currentWord.label;
   const CurrentIcon = typeof currentWord === "string" ? undefined : currentWord.icon;
   const measureCurrentWord = useCallback(() => {
@@ -37,16 +39,20 @@ export default function AnimatedTextCycle({
       return;
     }
 
-    const wordElement = measureElement.children[currentIndex];
+    const wordElement = measureElement.children[visibleIndex];
 
     if (wordElement) {
       setWidth(`${wordElement.getBoundingClientRect().width}px`);
     }
-  }, [currentIndex]);
+  }, [visibleIndex]);
 
   useEffect(() => {
+    if (shouldReduceMotion) {
+      return;
+    }
+
     setCurrentIndex(0);
-  }, [restartKey]);
+  }, [restartKey, shouldReduceMotion]);
 
   useLayoutEffect(() => {
     measureCurrentWord();
@@ -75,7 +81,7 @@ export default function AnimatedTextCycle({
   }, [measureCurrentWord]);
 
   useEffect(() => {
-    if (!startWhen || words.length < 2) {
+    if (shouldReduceMotion || !startWhen || words.length < 2) {
       return;
     }
 
@@ -96,13 +102,13 @@ export default function AnimatedTextCycle({
     }, interval);
 
     return () => window.clearTimeout(timer);
-  }, [currentIndex, interval, repeat, startWhen, words.length]);
+  }, [currentIndex, interval, repeat, shouldReduceMotion, startWhen, words.length]);
 
   const containerVariants = {
     hidden: {
       y: -20,
       opacity: 0,
-      filter: "blur(8px)",
+      filter: "blur(4px)",
     },
     visible: {
       y: 0,
@@ -116,7 +122,7 @@ export default function AnimatedTextCycle({
     exit: {
       y: 20,
       opacity: 0,
-      filter: "blur(8px)",
+      filter: "blur(4px)",
       transition: {
         duration: 0.3,
         ease: [0.64, 0, 0.78, 0] as const,
@@ -153,15 +159,14 @@ export default function AnimatedTextCycle({
           width,
           transition: {
             type: "spring",
-            stiffness: 150,
-            damping: 15,
-            mass: 1.2,
+            duration: 0.35,
+            bounce: 0,
           },
         }}
       >
         <AnimatePresence mode="wait" initial={false}>
           <motion.span
-            key={currentIndex}
+            key={visibleIndex}
             className={`inline-flex items-baseline gap-[0.16em] ${className}`}
             variants={containerVariants}
             initial="hidden"

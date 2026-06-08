@@ -12,8 +12,8 @@ const HERO_STYLE = { "--hero-nav-offset": "2.75rem" } as CSSProperties;
 const GRADIENT_CONFIG = { preset: "Ghost" } as const;
 const GRADIENT_NOISE = { opacity: 0.14, scale: 0.8 } as const;
 const COPY_REVEAL_TRANSITION = {
-  duration: 0.8,
-  delay: 0.2,
+  duration: 0.45,
+  delay: 0.08,
   ease: [0.22, 1, 0.36, 1],
 } as const;
 const focusWords = [
@@ -52,7 +52,7 @@ export function Hero() {
   return (
     <section
       style={HERO_STYLE}
-      className="relative mt-(--hero-nav-offset) h-[calc(100vh-var(--hero-nav-offset))] w-full bg-black p-3 md:[--hero-nav-offset:3rem] md:p-4"
+      className="relative mt-[var(--hero-nav-offset)] h-[calc(100vh-var(--hero-nav-offset))] w-full bg-black p-3 md:[--hero-nav-offset:3rem] md:p-4"
     >
       <div className="relative h-full w-full overflow-hidden bg-black rounded-2xl">
         <AnimatedGradient
@@ -66,20 +66,21 @@ export function Hero() {
             initial={{ opacity: 0, y: 16 }}
             animate={{ opacity: 1, y: 0 }}
             transition={COPY_REVEAL_TRANSITION}
-            onHoverStart={restartWordAnimation}
             className="flex max-w-[min(48rem,calc(100vw-2.5rem))] flex-col items-start text-left text-white drop-shadow-[0_18px_48px_rgb(0_0_0/0.45)]"
           >
             <h1 className="flex max-w-3xl flex-col items-start text-xl font-medium leading-[1.02] tracking-normal text-white md:text-2xl lg:text-4xl">
               <span>exploring &amp; building</span>
               <span>
-                <AnimatedTextCycle
-                  words={focusWords}
-                  interval={2600}
-                  repeat={false}
-                  restartKey={animationRestartKey}
-                  startWhen={isLoaderComplete}
-                  className={animatedWordClassName}
-                />{" "}
+                <motion.span className="inline-block" onHoverStart={restartWordAnimation}>
+                  <AnimatedTextCycle
+                    words={focusWords}
+                    interval={1100}
+                    repeat={false}
+                    restartKey={animationRestartKey}
+                    startWhen={isLoaderComplete}
+                    className={animatedWordClassName}
+                  />
+                </motion.span>{" "}
                 systems.
               </span>
             </h1>

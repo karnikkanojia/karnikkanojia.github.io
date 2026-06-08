@@ -366,7 +366,7 @@ export function Navbar() {
   return (
     <>
       <motion.nav
-        className="fixed left-0 right-0 top-0 z-40 flex items-center justify-between bg-black px-5 py-2 text-white md:px-6 md:py-2.5"
+        className="fixed left-0 right-0 top-0 z-40 grid h-11 grid-cols-[auto_1fr] items-center bg-black px-5 text-white md:h-12 md:grid-cols-[1fr_auto_1fr] md:px-6"
         initial={false}
         animate={{
           transform: isNavbarVisible
@@ -377,13 +377,13 @@ export function Navbar() {
       >
         <BrandLink />
 
-        <div className="hidden items-center gap-1 md:flex">
+        <div className="hidden items-center gap-1 md:flex md:justify-self-center">
           {DESKTOP_LINKS.map((item) => (
             <NavLink key={item.label} {...item} />
           ))}
         </div>
 
-        <div className="flex items-center gap-4">
+        <div className="col-start-2 flex items-center gap-4 justify-self-end md:col-start-auto">
           <SoundToggle />
           <ContactButton />
           <div className="md:hidden">
