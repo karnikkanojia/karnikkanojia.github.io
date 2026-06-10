@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Playfair_Display } from "next/font/google";
 import localFont from "next/font/local";
 import { ReactLenis } from "lenis/react";
+import { Agentation } from "agentation";
 import { SoundEffectsProvider } from "@/components/sound-effects-provider";
 import "./globals.css";
 
@@ -70,6 +71,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           <ReactLenis root options={{ lerp: 0.1, duration: 1.5 }}>
             {children}
           </ReactLenis>
+          {process.env.NODE_ENV === "development" && <Agentation />}
         </SoundEffectsProvider>
       </body>
     </html>

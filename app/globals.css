@@ -28,6 +28,7 @@
 
 html {
   scroll-behavior: initial;
+  scrollbar-gutter: stable;
 }
 
 body {

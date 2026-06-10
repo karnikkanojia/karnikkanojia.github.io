@@ -1,63 +1,110 @@
-"use client";
+"use client"
 
-import { ArrowUpRight, Volume2, VolumeX } from "lucide-react";
-import { motion, useMotionValueEvent, useScroll } from "motion/react";
-import type { MouseEvent, ReactNode } from "react";
-import { useState } from "react";
+import { ArrowUpRight, Volume2, VolumeX } from "lucide-react"
+import { motion, useMotionValueEvent, useScroll } from "motion/react"
+import Image from "next/image"
+import type { CSSProperties, MouseEvent, ReactNode } from "react"
+import { useEffect, useState } from "react"
 
-import { useSoundEffects } from "@/components/sound-effects-provider";
-import { scrollToSection } from "@/lib/scroll-to-section";
+import { useSoundEffects } from "@/components/sound-effects-provider"
+import { scrollToSection } from "@/lib/scroll-to-section"
 
 const DESKTOP_LINKS = [
   { label: "About Me", href: "#about" },
   { label: "Work", href: "#work" },
   { label: "Projects", href: "#projects" },
-];
+]
 
 const MOBILE_LINKS = [
   { label: "About Me", href: "#about" },
   { label: "Work", href: "#work" },
   { label: "Projects", href: "#projects" },
-];
+]
 
-const CONTACT_LABEL = "Contact Me";
+const CONTACT_LABEL = "Contact Me"
 
 const MOTION_TRANSITION = {
   duration: 0.22,
   ease: [0.23, 1, 0.32, 1],
-} as const;
+} as const
 
 const ICON_TRANSITION = {
   duration: 0.16,
   ease: [0.23, 1, 0.32, 1],
-} as const;
+} as const
 
-type SlidePhase = "idle" | "active" | "exiting";
+const navbarEnterTransition =
+  "transform 700ms cubic-bezier(0.22, 0.61, 0.36, 1), opacity 700ms cubic-bezier(0.22, 0.61, 0.36, 1), filter 700ms cubic-bezier(0.22, 0.61, 0.36, 1)"
 
-type AnchorClickEvent = MouseEvent<HTMLAnchorElement>;
+type SlidePhase = "idle" | "active" | "exiting"
+
+type AnchorClickEvent = MouseEvent<HTMLAnchorElement>
+
+function getNavbarEnterStyle(
+  hasEntered: boolean,
+  hiddenTransform: string
+): CSSProperties {
+  return {
+    opacity: hasEntered ? 1 : 0,
+    filter: hasEntered ? "blur(0px)" : "blur(4px)",
+    transform: hasEntered ? "translate3d(0, 0, 0)" : hiddenTransform,
+    transition: navbarEnterTransition,
+  }
+}
+
+function useSiteLoaderHeroEnter() {
+  const [isAboveLoader, setIsAboveLoader] = useState(false)
+  const [hasEntered, setHasEntered] = useState(false)
+
+  useEffect(() => {
+    let firstFrame = 0
+    let secondFrame = 0
+
+    const handleHeroEnter = () => {
+      setIsAboveLoader(true)
+      firstFrame = requestAnimationFrame(() => {
+        secondFrame = requestAnimationFrame(() => {
+          setHasEntered(true)
+        })
+      })
+    }
+
+    window.addEventListener("site-loader:hero-enter", handleHeroEnter, {
+      once: true,
+    })
+
+    return () => {
+      cancelAnimationFrame(firstFrame)
+      cancelAnimationFrame(secondFrame)
+      window.removeEventListener("site-loader:hero-enter", handleHeroEnter)
+    }
+  }, [])
+
+  return { hasEntered, isAboveLoader }
+}
 
 function navigateToSection(
   event: AnchorClickEvent,
   href: string,
   onNavigate?: () => void
 ) {
-  scrollToSection(event, href);
-  onNavigate?.();
+  scrollToSection(event, href)
+  onNavigate?.()
 }
 
 type NavLinkProps = {
-  href: string;
-  label: string;
-  variant?: "desktop" | "mobile";
-  onNavigate?: () => void;
-};
+  href: string
+  label: string
+  variant?: "desktop" | "mobile"
+  onNavigate?: () => void
+}
 
 type UnderlineButtonProps = {
-  children: ReactNode;
-  onClick: () => void;
-  ariaExpanded?: boolean;
-  ariaLabel?: string;
-};
+  children: ReactNode
+  onClick: () => void
+  ariaExpanded?: boolean
+  ariaLabel?: string
+}
 
 function UnderlineButton({
   children,
@@ -65,7 +112,7 @@ function UnderlineButton({
   ariaExpanded,
   ariaLabel,
 }: UnderlineButtonProps) {
-  const [isActive, setIsActive] = useState(false);
+  const [isActive, setIsActive] = useState(false)
 
   return (
     <motion.button
@@ -77,7 +124,7 @@ function UnderlineButton({
       onHoverEnd={() => setIsActive(false)}
       onFocus={() => setIsActive(true)}
       onBlur={() => setIsActive(false)}
-      className="relative inline-flex items-center py-1 text-sm font-medium leading-none tracking-tight text-white outline-none transition-transform duration-150 ease-out active:scale-95"
+      className="relative inline-flex items-center py-1 text-sm leading-none font-medium tracking-tight text-white transition-transform duration-150 ease-out outline-none active:scale-95"
     >
       <span className="relative block overflow-hidden pb-0.5">
         <span>{children}</span>
@@ -90,7 +137,7 @@ function UnderlineButton({
         />
       </span>
     </motion.button>
-  );
+  )
 }
 
 function NavLink({
@@ -99,24 +146,24 @@ function NavLink({
   variant = "desktop",
   onNavigate,
 }: NavLinkProps) {
-  const [isActive, setIsActive] = useState(false);
-  const [slidePhase, setSlidePhase] = useState<SlidePhase>("idle");
+  const [isActive, setIsActive] = useState(false)
+  const [slidePhase, setSlidePhase] = useState<SlidePhase>("idle")
 
   const activate = () => {
-    setIsActive(true);
-    setSlidePhase("active");
-  };
+    setIsActive(true)
+    setSlidePhase("active")
+  }
 
   const deactivate = () => {
-    setIsActive(false);
-    setSlidePhase("exiting");
-  };
+    setIsActive(false)
+    setSlidePhase("exiting")
+  }
 
   const handleAnimationComplete = () => {
     if (slidePhase === "exiting") {
-      setSlidePhase("idle");
+      setSlidePhase("idle")
     }
-  };
+  }
 
   if (variant === "mobile") {
     return (
@@ -127,7 +174,7 @@ function NavLink({
         onHoverEnd={deactivate}
         onFocus={activate}
         onBlur={deactivate}
-        className="group relative flex w-full items-center overflow-hidden border-t border-white/10 py-3 pr-14 text-left text-5xl font-medium leading-none tracking-tighter text-white outline-none last:border-b focus-visible:ring-2 focus-visible:ring-white/60 focus-visible:ring-offset-2 focus-visible:ring-offset-black sm:text-6xl"
+        className="group relative flex w-full items-center overflow-hidden border-t border-white/10 py-3 pr-14 text-left text-5xl leading-none font-medium tracking-tighter text-white outline-none last:border-b focus-visible:ring-2 focus-visible:ring-white/60 focus-visible:ring-offset-2 focus-visible:ring-offset-black sm:text-6xl"
       >
         <motion.span
           aria-hidden="true"
@@ -165,7 +212,7 @@ function NavLink({
           {"\u2192"}
         </motion.span>
       </motion.a>
-    );
+    )
   }
 
   const backgroundTransform =
@@ -173,7 +220,7 @@ function NavLink({
       ? "translate3d(0%, 0%, 0)"
       : slidePhase === "exiting"
         ? "translate3d(101%, 0%, 0)"
-        : "translate3d(-101%, 0%, 0)";
+        : "translate3d(-101%, 0%, 0)"
 
   return (
     <motion.a
@@ -183,28 +230,26 @@ function NavLink({
       onHoverEnd={deactivate}
       onFocus={activate}
       onBlur={deactivate}
-      className="group relative overflow-hidden px-3 py-2 text-sm font-light leading-none text-white"
+      className="group relative overflow-hidden px-3 py-2 text-sm leading-none font-light text-white"
     >
       <motion.span
         aria-hidden="true"
         className="absolute inset-0 z-0 bg-white"
         initial={false}
         animate={{ transform: backgroundTransform }}
-        transition={
-          slidePhase === "idle" ? { duration: 0 } : MOTION_TRANSITION
-        }
+        transition={slidePhase === "idle" ? { duration: 0 } : MOTION_TRANSITION}
         onAnimationComplete={handleAnimationComplete}
       />
       <span className="relative z-10 transition-colors duration-200 group-hover:text-black group-focus-visible:text-black">
         {label}
       </span>
     </motion.a>
-  );
+  )
 }
 
 function SoundToggle() {
-  const { isMuted, toggleMuted } = useSoundEffects();
-  const Icon = isMuted ? VolumeX : Volume2;
+  const { isMuted, toggleMuted } = useSoundEffects()
+  const Icon = isMuted ? VolumeX : Volume2
 
   return (
     <button
@@ -223,19 +268,19 @@ function SoundToggle() {
         <Icon aria-hidden="true" className="size-3" strokeWidth={2.2} />
       </motion.span>
     </button>
-  );
+  )
 }
 
 function AnimatedTextSwap({
   label,
   isActive,
 }: {
-  label: string;
-  isActive: boolean;
+  label: string
+  isActive: boolean
 }) {
   return (
     <span className="relative z-10 inline-grid h-4 place-items-center overflow-hidden text-black">
-      <span className="invisible row-start-1 col-start-1 whitespace-nowrap">
+      <span className="invisible col-start-1 row-start-1 whitespace-nowrap">
         {label}
       </span>
       <motion.span
@@ -263,7 +308,7 @@ function AnimatedTextSwap({
         {label}
       </motion.span>
     </span>
-  );
+  )
 }
 
 function AnimatedArrowSwap({ isActive }: { isActive: boolean }) {
@@ -294,11 +339,11 @@ function AnimatedArrowSwap({ isActive }: { isActive: boolean }) {
         <ArrowUpRight aria-hidden="true" className="size-3" strokeWidth={2.5} />
       </motion.span>
     </span>
-  );
+  )
 }
 
 function ContactButton({ onNavigate }: { onNavigate?: () => void }) {
-  const [isHovered, setIsHovered] = useState(false);
+  const [isHovered, setIsHovered] = useState(false)
 
   return (
     <motion.a
@@ -306,20 +351,20 @@ function ContactButton({ onNavigate }: { onNavigate?: () => void }) {
       onHoverStart={() => setIsHovered(true)}
       onHoverEnd={() => setIsHovered(false)}
       onClick={(event) => navigateToSection(event, "#contact", onNavigate)}
-      className="relative inline-flex h-7 items-center gap-1.5 overflow-hidden bg-foreground px-2 pl-2.5 text-xs font-medium leading-none tracking-tight text-black transition-transform duration-150 ease-out active:scale-95"
+      className="relative inline-flex h-7 items-center gap-1.5 overflow-hidden bg-foreground px-2 pl-2.5 text-xs leading-none font-medium tracking-tight text-black transition-transform duration-150 ease-out active:scale-95"
     >
       <AnimatedTextSwap label={CONTACT_LABEL} isActive={isHovered} />
       <AnimatedArrowSwap isActive={isHovered} />
     </motion.a>
-  );
+  )
 }
 
 function BrandLink({
   className = "",
   onNavigate,
 }: {
-  className?: string;
-  onNavigate?: () => void;
+  className?: string
+  onNavigate?: () => void
 }) {
   return (
     <a
@@ -329,44 +374,48 @@ function BrandLink({
       className={`flex items-center ${className}`}
       aria-label="Monolog home"
     >
-      <img
+      <Image
         src="/monogram.svg"
         alt="Monolog"
+        width={72}
+        height={20}
         className="h-5 w-auto"
+        priority
       />
     </a>
-  );
+  )
 }
 
 export function Navbar() {
-  const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const [isNavbarVisible, setIsNavbarVisible] = useState(true);
-  const { scrollY } = useScroll();
-  const closeMenu = () => setIsMenuOpen(false);
+  const [isMenuOpen, setIsMenuOpen] = useState(false)
+  const [isNavbarVisible, setIsNavbarVisible] = useState(true)
+  const { hasEntered: hasHeroEntered, isAboveLoader } = useSiteLoaderHeroEnter()
+  const { scrollY } = useScroll()
+  const closeMenu = () => setIsMenuOpen(false)
 
   useMotionValueEvent(scrollY, "change", (current) => {
-    const previous = scrollY.getPrevious() ?? current;
-    const delta = current - previous;
+    const previous = scrollY.getPrevious() ?? current
+    const delta = current - previous
 
     if (isMenuOpen || current < 80) {
-      setIsNavbarVisible(true);
-      return;
+      setIsNavbarVisible(true)
+      return
     }
 
     if (delta > 8) {
-      setIsNavbarVisible(false);
-      return;
+      setIsNavbarVisible(false)
+      return
     }
 
     if (delta < -8) {
-      setIsNavbarVisible(true);
+      setIsNavbarVisible(true)
     }
-  });
+  })
 
   return (
     <>
       <motion.nav
-        className="fixed left-0 right-0 top-0 z-40 grid h-11 grid-cols-[auto_1fr] items-center bg-black px-5 text-white md:h-12 md:grid-cols-[1fr_auto_1fr] md:px-6"
+        className="fixed top-0 right-0 left-0 grid h-11 grid-cols-[auto_1fr] items-center bg-black px-5 text-white md:h-12 md:grid-cols-[1fr_auto_1fr] md:px-6"
         initial={false}
         animate={{
           transform: isNavbarVisible
@@ -374,16 +423,36 @@ export function Navbar() {
             : "translate3d(0, -110%, 0)",
         }}
         transition={MOTION_TRANSITION}
+        style={{ zIndex: isAboveLoader ? 10001 : 40 }}
       >
-        <BrandLink />
+        <div
+          style={getNavbarEnterStyle(
+            hasHeroEntered,
+            "translate3d(-4.5rem, 0, 0)"
+          )}
+        >
+          <BrandLink />
+        </div>
 
-        <div className="hidden items-center gap-1 md:flex md:justify-self-center">
+        <div
+          className="hidden items-center gap-1 md:flex md:justify-self-center"
+          style={getNavbarEnterStyle(
+            hasHeroEntered,
+            "translate3d(0, -2.75rem, 0)"
+          )}
+        >
           {DESKTOP_LINKS.map((item) => (
             <NavLink key={item.label} {...item} />
           ))}
         </div>
 
-        <div className="col-start-2 flex items-center gap-4 justify-self-end md:col-start-auto">
+        <div
+          className="col-start-2 flex items-center gap-4 justify-self-end md:col-start-auto"
+          style={getNavbarEnterStyle(
+            hasHeroEntered,
+            "translate3d(5.5rem, 0, 0)"
+          )}
+        >
           <SoundToggle />
           <ContactButton />
           <div className="md:hidden">
@@ -399,21 +468,19 @@ export function Navbar() {
       </motion.nav>
 
       <div
-        className={`fixed inset-0 z-50 bg-black/95 px-5 pb-10 pt-24 text-white transition duration-200 ease-out md:hidden ${
+        className={`fixed inset-0 z-50 bg-black/95 px-5 pt-24 pb-10 text-white transition duration-200 ease-out md:hidden ${
           isMenuOpen
             ? "pointer-events-auto translate-y-0 opacity-100"
             : "pointer-events-none -translate-y-3 opacity-0"
         }`}
         aria-hidden={!isMenuOpen}
       >
-        <BrandLink className="absolute left-5 top-7" onNavigate={closeMenu} />
+        <BrandLink className="absolute top-7 left-5" onNavigate={closeMenu} />
 
-        <div className="absolute right-5 top-6 flex items-center gap-4">
+        <div className="absolute top-6 right-5 flex items-center gap-4">
           <SoundToggle />
           <ContactButton onNavigate={closeMenu} />
-          <UnderlineButton onClick={closeMenu}>
-            Close
-          </UnderlineButton>
+          <UnderlineButton onClick={closeMenu}>Close</UnderlineButton>
         </div>
 
         <div className="flex flex-col">
@@ -428,5 +495,5 @@ export function Navbar() {
         </div>
       </div>
     </>
-  );
+  )
 }

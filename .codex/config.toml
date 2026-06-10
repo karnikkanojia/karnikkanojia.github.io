@@ -1,0 +1,3 @@
+[mcp_servers.agentation]
+command = "bunx"
+args = [ "-y", "agentation-mcp", "server" ]
