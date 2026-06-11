@@ -1,10 +1,15 @@
 "use client"
 
 import { ArrowUpRight, Volume2, VolumeX } from "lucide-react"
-import { motion, useMotionValueEvent, useScroll } from "motion/react"
+import {
+  AnimatePresence,
+  motion,
+  useMotionValueEvent,
+  useScroll,
+} from "motion/react"
 import Image from "next/image"
 import type { CSSProperties, MouseEvent, ReactNode } from "react"
-import { useEffect, useState } from "react"
+import { useEffect, useState, useSyncExternalStore } from "react"
 
 import { useSoundEffects } from "@/components/sound-effects-provider"
 import { scrollToSection } from "@/lib/scroll-to-section"
@@ -33,8 +38,20 @@ const ICON_TRANSITION = {
   ease: [0.23, 1, 0.32, 1],
 } as const
 
+const MOBILE_MENU_TRANSITION = {
+  duration: 0.32,
+  ease: [0.32, 0.72, 0, 1],
+} as const
+
+const MOBILE_NAVBAR_ENTER_TRANSITION = {
+  duration: 0.5,
+  ease: [0.22, 0.61, 0.36, 1],
+} as const
+
 const navbarEnterTransition =
   "transform 700ms cubic-bezier(0.22, 0.61, 0.36, 1), opacity 700ms cubic-bezier(0.22, 0.61, 0.36, 1), filter 700ms cubic-bezier(0.22, 0.61, 0.36, 1)"
+
+const DESKTOP_NAV_QUERY = "(min-width: 768px)"
 
 type SlidePhase = "idle" | "active" | "exiting"
 
@@ -42,14 +59,51 @@ type AnchorClickEvent = MouseEvent<HTMLAnchorElement>
 
 function getNavbarEnterStyle(
   hasEntered: boolean,
-  hiddenTransform: string
+  hiddenTransform: string,
+  shouldAnimateChildren = true
 ): CSSProperties {
+  if (!shouldAnimateChildren) {
+    return {
+      opacity: 1,
+      filter: "blur(0px)",
+      transform: "translate3d(0, 0, 0)",
+      transition: "none",
+    }
+  }
+
   return {
     opacity: hasEntered ? 1 : 0,
     filter: hasEntered ? "blur(0px)" : "blur(4px)",
     transform: hasEntered ? "translate3d(0, 0, 0)" : hiddenTransform,
     transition: navbarEnterTransition,
   }
+}
+
+function subscribeToDesktopNav(callback: () => void) {
+  if (typeof window === "undefined") {
+    return () => {}
+  }
+
+  const mediaQuery = window.matchMedia(DESKTOP_NAV_QUERY)
+  mediaQuery.addEventListener("change", callback)
+
+  return () => mediaQuery.removeEventListener("change", callback)
+}
+
+function getDesktopNavSnapshot() {
+  if (typeof window === "undefined") {
+    return true
+  }
+
+  return window.matchMedia(DESKTOP_NAV_QUERY).matches
+}
+
+function useIsDesktopNav() {
+  return useSyncExternalStore(
+    subscribeToDesktopNav,
+    getDesktopNavSnapshot,
+    () => true
+  )
 }
 
 function useSiteLoaderHeroEnter() {
@@ -388,10 +442,42 @@ function BrandLink({
 
 export function Navbar() {
   const [isMenuOpen, setIsMenuOpen] = useState(false)
+  const [isMenuLayerActive, setIsMenuLayerActive] = useState(false)
   const [isNavbarVisible, setIsNavbarVisible] = useState(true)
   const { hasEntered: hasHeroEntered, isAboveLoader } = useSiteLoaderHeroEnter()
   const { scrollY } = useScroll()
+  const isDesktopNav = useIsDesktopNav()
   const closeMenu = () => setIsMenuOpen(false)
+  const navbarTransform =
+    !isDesktopNav && !hasHeroEntered
+      ? "translate3d(0, -110%, 0)"
+      : isNavbarVisible
+        ? "translate3d(0, 0%, 0)"
+        : "translate3d(0, -110%, 0)"
+
+  const toggleMenu = () => {
+    setIsMenuOpen((open) => {
+      if (open) {
+        return false
+      }
+
+      setIsMenuLayerActive(true)
+      return true
+    })
+  }
+
+  useEffect(() => {
+    if (!isMenuOpen) {
+      return
+    }
+
+    const originalOverflow = document.body.style.overflow
+    document.body.style.overflow = "hidden"
+
+    return () => {
+      document.body.style.overflow = originalOverflow
+    }
+  }, [isMenuOpen])
 
   useMotionValueEvent(scrollY, "change", (current) => {
     const previous = scrollY.getPrevious() ?? current
@@ -417,18 +503,19 @@ export function Navbar() {
       <motion.nav
         className="fixed top-0 right-0 left-0 grid h-11 grid-cols-[auto_1fr] items-center bg-black px-5 text-white md:h-12 md:grid-cols-[1fr_auto_1fr] md:px-6"
         initial={false}
-        animate={{
-          transform: isNavbarVisible
-            ? "translate3d(0, 0%, 0)"
-            : "translate3d(0, -110%, 0)",
+        animate={{ transform: navbarTransform }}
+        transition={
+          isDesktopNav ? MOTION_TRANSITION : MOBILE_NAVBAR_ENTER_TRANSITION
+        }
+        style={{
+          zIndex: isMenuLayerActive ? 10003 : isAboveLoader ? 10001 : 40,
         }}
-        transition={MOTION_TRANSITION}
-        style={{ zIndex: isAboveLoader ? 10001 : 40 }}
       >
         <div
           style={getNavbarEnterStyle(
             hasHeroEntered,
-            "translate3d(-4.5rem, 0, 0)"
+            "translate3d(-4.5rem, 0, 0)",
+            isDesktopNav
           )}
         >
           <BrandLink />
@@ -438,7 +525,8 @@ export function Navbar() {
           className="hidden items-center gap-1 md:flex md:justify-self-center"
           style={getNavbarEnterStyle(
             hasHeroEntered,
-            "translate3d(0, -2.75rem, 0)"
+            "translate3d(0, -2.75rem, 0)",
+            isDesktopNav
           )}
         >
           {DESKTOP_LINKS.map((item) => (
@@ -450,50 +538,49 @@ export function Navbar() {
           className="col-start-2 flex items-center gap-4 justify-self-end md:col-start-auto"
           style={getNavbarEnterStyle(
             hasHeroEntered,
-            "translate3d(5.5rem, 0, 0)"
+            "translate3d(5.5rem, 0, 0)",
+            isDesktopNav
           )}
         >
           <SoundToggle />
           <ContactButton />
           <div className="md:hidden">
             <UnderlineButton
-              ariaLabel="Open navigation menu"
+              ariaLabel={
+                isMenuOpen ? "Close navigation menu" : "Open navigation menu"
+              }
               ariaExpanded={isMenuOpen}
-              onClick={() => setIsMenuOpen(true)}
+              onClick={toggleMenu}
             >
-              Menu
+              {isMenuOpen ? "Close" : "Menu"}
             </UnderlineButton>
           </div>
         </div>
       </motion.nav>
 
-      <div
-        className={`fixed inset-0 z-50 bg-black/95 px-5 pt-24 pb-10 text-white transition duration-200 ease-out md:hidden ${
-          isMenuOpen
-            ? "pointer-events-auto translate-y-0 opacity-100"
-            : "pointer-events-none -translate-y-3 opacity-0"
-        }`}
-        aria-hidden={!isMenuOpen}
-      >
-        <BrandLink className="absolute top-7 left-5" onNavigate={closeMenu} />
-
-        <div className="absolute top-6 right-5 flex items-center gap-4">
-          <SoundToggle />
-          <ContactButton onNavigate={closeMenu} />
-          <UnderlineButton onClick={closeMenu}>Close</UnderlineButton>
-        </div>
-
-        <div className="flex flex-col">
-          {MOBILE_LINKS.map((item) => (
-            <NavLink
-              key={item.label}
-              {...item}
-              variant="mobile"
-              onNavigate={closeMenu}
-            />
-          ))}
-        </div>
-      </div>
+      <AnimatePresence onExitComplete={() => setIsMenuLayerActive(false)}>
+        {isMenuOpen ? (
+          <motion.div
+            key="mobile-menu"
+            className="fixed top-11 right-0 bottom-0 left-0 z-[10002] border-t border-white/10 bg-black/95 px-5 pt-20 pb-10 text-white md:hidden"
+            initial={{ y: "-100%" }}
+            animate={{ y: "0%" }}
+            exit={{ y: "-100%" }}
+            transition={MOBILE_MENU_TRANSITION}
+          >
+            <div className="flex flex-col">
+              {MOBILE_LINKS.map((item) => (
+                <NavLink
+                  key={item.label}
+                  {...item}
+                  variant="mobile"
+                  onNavigate={closeMenu}
+                />
+              ))}
+            </div>
+          </motion.div>
+        ) : null}
+      </AnimatePresence>
     </>
   )
 }

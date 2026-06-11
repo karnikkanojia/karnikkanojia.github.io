@@ -39,49 +39,29 @@ const TEXT_FLIP_TRANSITION = {
   ease: [0.22, 1, 0.36, 1],
 } as const
 
-function useSiteLoaderComplete() {
-  const [isComplete, setIsComplete] = useState(false)
+function useSiteLoaderEvent(eventName: string) {
+  const [hasFired, setHasFired] = useState(false)
 
   useEffect(() => {
-    const handleLoaderComplete = () => {
-      setIsComplete(true)
+    const handleEvent = () => {
+      setHasFired(true)
     }
 
-    window.addEventListener("site-loader:complete", handleLoaderComplete, {
+    window.addEventListener(eventName, handleEvent, {
       once: true,
     })
 
     return () => {
-      window.removeEventListener("site-loader:complete", handleLoaderComplete)
+      window.removeEventListener(eventName, handleEvent)
     }
-  }, [])
+  }, [eventName])
 
-  return isComplete
-}
-
-function useSiteLoaderHeroEnter() {
-  const [hasEntered, setHasEntered] = useState(false)
-
-  useEffect(() => {
-    const handleHeroEnter = () => {
-      setHasEntered(true)
-    }
-
-    window.addEventListener("site-loader:hero-enter", handleHeroEnter, {
-      once: true,
-    })
-
-    return () => {
-      window.removeEventListener("site-loader:hero-enter", handleHeroEnter)
-    }
-  }, [])
-
-  return hasEntered
+  return hasFired
 }
 
 export function Hero() {
-  const isLoaderComplete = useSiteLoaderComplete()
-  const hasHeroEntered = useSiteLoaderHeroEnter()
+  const isLoaderComplete = useSiteLoaderEvent("site-loader:complete")
+  const hasHeroEntered = useSiteLoaderEvent("site-loader:hero-enter")
   const shouldReduceMotion = useReducedMotion()
 
   return (

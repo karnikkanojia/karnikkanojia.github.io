@@ -70,9 +70,31 @@ const windowExpandTransition: Transition = {
   ease: [0.22, 0.61, 0.36, 1],
 }
 
+type MeasuredRect = {
+  top: number
+  left: number
+  width: number
+  height: number
+}
+
 type MorphRect = {
-  from: DOMRect
-  to: DOMRect
+  from: MeasuredRect
+  to: MeasuredRect
+}
+
+function measureElement(element: Element | null | undefined): MeasuredRect | null {
+  const rect = element?.getBoundingClientRect()
+
+  if (!rect) {
+    return null
+  }
+
+  return {
+    top: rect.top,
+    left: rect.left,
+    width: rect.width,
+    height: rect.height,
+  }
 }
 
 export function SiteLoader() {
@@ -138,10 +160,10 @@ export function SiteLoader() {
           frame = requestAnimationFrame(updateCounter)
         } else {
           setCount(100)
-          const from = loaderWindowRef.current?.getBoundingClientRect()
-          const to = document
-            .querySelector("[data-hero-surface='true']")
-            ?.getBoundingClientRect()
+          const from = measureElement(loaderWindowRef.current)
+          const to = measureElement(
+            document.querySelector("[data-hero-surface='true']")
+          )
 
           if (from && to) {
             setMorphRect({ from, to })
@@ -202,7 +224,15 @@ export function SiteLoader() {
           aria-hidden="true"
         >
           <defs>
-            <mask id={maskId}>
+            <mask
+              id={maskId}
+              maskUnits="userSpaceOnUse"
+              maskContentUnits="userSpaceOnUse"
+              x="0"
+              y="0"
+              width="100%"
+              height="100%"
+            >
               <rect width="100%" height="100%" fill="white" />
               <motion.rect
                 fill="black"
@@ -242,7 +272,7 @@ export function SiteLoader() {
         key={morphRect ? "morphing-window" : "stack-window"}
         ref={loaderWindowRef}
         id="site-loader-window"
-        className={`${loaderWindowClassName} z-10 will-change-[height,left,top,width]`}
+        className={`${loaderWindowClassName} z-10 will-change-[opacity]`}
         initial={
           morphRect
             ? {
@@ -260,15 +290,17 @@ export function SiteLoader() {
           isExiting
             ? morphRect
               ? {
-                  top: [morphRect.from.top, morphRect.to.top],
-                  left: [morphRect.from.left, morphRect.to.left],
-                  width: [morphRect.from.width, morphRect.to.width],
-                  height: [morphRect.from.height, morphRect.to.height],
+                  opacity: 0,
+                  top: morphRect.from.top,
+                  left: morphRect.from.left,
+                  width: morphRect.from.width,
+                  height: morphRect.from.height,
                   x: 0,
                   y: 0,
-                  borderRadius: [windowRadius, heroRadius],
+                  borderRadius: windowRadius,
                 }
               : {
+                  opacity: 0,
                   top: "50%",
                   left: "50%",
                   width: "var(--loader-window-width)",
@@ -278,6 +310,7 @@ export function SiteLoader() {
                   borderRadius: windowRadius,
                 }
             : {
+                opacity: 1,
                 ...(morphRect
                   ? {
                       top: morphRect.from.top,
@@ -298,7 +331,7 @@ export function SiteLoader() {
                 borderRadius: windowRadius,
               }
         }
-        transition={isExiting ? windowExpandTransition : { duration: 0 }}
+        transition={isExiting ? { duration: 0 } : { duration: 0 }}
         style={{ boxShadow: isExiting ? "none" : "0 0 0 100vmax #000000" }}
       >
         <motion.div
