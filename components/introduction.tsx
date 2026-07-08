@@ -1,137 +1,238 @@
 "use client";
 
-import airIndiaLogo from "@/assets/introduction/airindia.png";
-import { Briefcase } from "lucide-react";
-import Image from "next/image";
-import { motion, useInView } from "motion/react";
-import { useRef } from "react";
+import { AppleHelloEffectHindi } from "@/components/apple-hello-effect-hindi";
+import {
+  motion,
+  useInView,
+  useMotionValue,
+  useReducedMotion,
+  useTransform,
+} from "motion/react";
+import { useEffect, useRef, useState } from "react";
 
-const introLines = ["Hi, I'm Karnik Kanojia"];
+const tagline = "Technology matters most when it has intent.";
 
 const introBody =
-  "I'm passionate about using data science 🧠 to solve societal challenges and build real-time products 🚀 that make a positive impact. From predicting diseases ⚕️ to empowering underprivileged communities 🫶, I'm especially focused on specialized ML systems for medical images, including photos, X-rays, CT scans, and MRI scans.";
+  "I'm Karnik Kanojia, a site reliability engineer and builder drawn to systems that are reliable, intelligent, and useful in the real world. My work sits at the intersection of data science, real-time products, and social impact, with a special focus on machine learning for medical images like photos, X-rays, CT scans, and MRI scans.";
 
-function BoardingPass() {
-  const cardRef = useRef<HTMLElement>(null);
-  const isInView = useInView(cardRef, { once: true, amount: 0.45 });
+const helloClassName =
+  "mx-auto h-auto w-full max-w-[min(58vw,31rem)] text-foreground";
+const taglineClassName =
+  "max-w-[12ch] text-center text-[clamp(3rem,8.5vw,8rem)] leading-[0.9] font-medium tracking-normal text-balance";
+const bioClassName =
+  "max-w-4xl text-[clamp(1.45rem,2.55vw,2.9rem)] leading-[1.08] font-light tracking-normal text-foreground/78 text-balance";
+const reducedMotionHelloClassName =
+  "h-auto w-full max-w-[26rem] text-foreground";
+const reducedMotionTaglineClassName =
+  "max-w-4xl text-4xl leading-[0.95] font-medium tracking-normal text-balance md:text-5xl lg:text-6xl";
+const reducedMotionBioClassName =
+  "max-w-3xl text-xl leading-[1.16] font-light tracking-normal text-foreground/72 md:text-2xl lg:text-3xl";
 
+type StageMode = "before" | "fixed" | "after";
+
+function PanelFrame({
+  children,
+  className = "",
+}: {
+  children: React.ReactNode;
+  className?: string;
+}) {
   return (
-    <motion.aside
-      ref={cardRef}
-      initial={{ opacity: 0, y: 20 }}
-      whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true, amount: 0.45 }}
-      transition={{ duration: 0.8, delay: 0.15, ease: [0.22, 1, 0.36, 1] }}
-      className="relative mx-auto w-full max-w-xs overflow-hidden rounded-3xl bg-black px-4 py-4 text-white shadow-[0_20px_56px_rgb(0_0_0/0.28)] ring-1 ring-white/10"
-      aria-label="Air India flight AI101 from Delhi to New York"
+    <section
+      className={`flex h-screen w-screen shrink-0 items-center justify-center px-5 pt-16 pb-10 text-foreground md:px-8 md:pt-20 md:pb-14 ${className}`}
     >
-      <div className="flex items-center justify-between gap-4 text-xs text-white/78">
-        <div className="flex items-center gap-2">
-          <p className="font-mono">AI101</p>
-          <div className="flex items-center gap-1.5 rounded-[10px] bg-[#ffb300] px-2.5 py-1.5 text-black">
-            <Briefcase aria-hidden="true" className="size-4 stroke-[2.2]" />
-            <span className="text-base font-medium leading-none">2</span>
-          </div>
-        </div>
-        <Image
-          src={airIndiaLogo}
-          alt="Air India"
-          width={76}
-          height={20}
-          className="h-5 w-auto object-contain"
-        />
-      </div>
-
-      <div className="relative mt-7 grid grid-cols-[auto_1fr_auto] items-start gap-2">
-        <div>
-          <p className="text-3xl font-medium leading-none tracking-normal">LKO</p>
-          <p className="mt-1 font-mono text-[10px] leading-none text-white/55">
-            02:20
-          </p>
-        </div>
-
-        <div className="relative h-9">
-          <svg
-            aria-hidden="true"
-            viewBox="0 0 210 58"
-            className="absolute inset-0 h-full w-full overflow-visible"
-            fill="none"
-          >
-            <motion.path
-              d="M18 41C61 8 139 8 192 41"
-              stroke="#00f5a0"
-              strokeWidth="3"
-              strokeLinecap="round"
-              initial={{ pathLength: 0, opacity: 1 }}
-              animate={{ pathLength: isInView ? 1 : 0, opacity: 1 }}
-              transition={{ duration: 1.2, delay: 0.35, ease: [0.22, 1, 0.36, 1] }}
-            />
-            <motion.path
-              d="M151 23C166 27 180 33 192 41"
-              stroke="#00f5a0"
-              strokeWidth="3"
-              strokeDasharray="5 6"
-              strokeLinecap="round"
-              initial={{ pathLength: 0, opacity: 1 }}
-              animate={{ pathLength: isInView ? 1 : 0, opacity: 1 }}
-              transition={{ duration: 0.45, delay: 1.15, ease: [0.22, 1, 0.36, 1] }}
-            />
-            <circle cx="18" cy="41" r="10" fill="#00f5a0" />
-            <circle cx="192" cy="41" r="10" fill="#00f5a0" />
-            <path d="M14 45L22 37M22 37H15M22 37V44" stroke="#02130d" strokeWidth="2.4" />
-            <path d="M188 37L196 45M196 45H189M196 45V38" stroke="#02130d" strokeWidth="2.4" />
-          </svg>
-        </div>
-
-        <div className="text-right">
-          <p className="text-3xl font-medium leading-none tracking-normal">JFK</p>
-          <p className="mt-1 font-mono text-[10px] leading-none text-white/55">
-            07:35<sup className="ml-0.5 text-[7px] leading-none text-white/42">+1</sup>
-          </p>
-        </div>
-      </div>
-    </motion.aside>
+      {children}
+    </section>
   );
 }
 
 export function Introduction() {
-  return (
-    <section
-      id="about"
-      className="flex min-h-screen items-center bg-foreground px-5 py-10 text-background md:py-12"
-    >
-      <div className="mx-auto grid w-full max-w-7xl grid-cols-1 gap-6 lg:grid-cols-[0.62fr_1.38fr] lg:items-center lg:gap-10">
-        <BoardingPass />
-        <div className="relative space-y-5">
-          <div className="space-y-2">
-            {introLines.map((line, index) => (
-              <motion.h2
-                key={line}
-                initial={{ opacity: 0, y: 24 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true, amount: 0.7 }}
-                transition={{
-                  duration: 0.7,
-                  delay: index * 0.12,
-                  ease: [0.22, 1, 0.36, 1],
-                }}
-                className="text-2xl font-medium leading-[1.05] tracking-normal md:text-3xl lg:text-4xl"
-              >
-                {line}
-              </motion.h2>
-            ))}
+  const sectionRef = useRef<HTMLElement>(null);
+  const stageRef = useRef<HTMLDivElement>(null);
+  const [stageMode, setStageMode] = useState<StageMode>("before");
+  const shouldReduceMotion = useReducedMotion();
+  const isIntroInView = useInView(stageRef, { once: true, amount: 0.45 });
+  const introProgress = useMotionValue(0);
+  const helloDrawProgress = useTransform(introProgress, [0.03, 0.28], [0, 1]);
+  const helloMetaOpacity = useTransform(introProgress, [0, 0.08, 0.24], [1, 1, 0]);
+  const helloScale = useTransform(introProgress, [0, 0.28], [0.94, 1]);
+  const trackTransform = useTransform(
+    introProgress,
+    [0, 0.26, 0.52, 0.82, 1],
+    [
+      "translate3d(0%, 0, 0)",
+      "translate3d(0%, 0, 0)",
+      "translate3d(-33.333333%, 0, 0)",
+      "translate3d(-66.666667%, 0, 0)",
+      "translate3d(-66.666667%, 0, 0)",
+    ]
+  );
+  const taglineTransform = useTransform(
+    introProgress,
+    [0.34, 0.46, 0.58, 0.7],
+    [
+      "translate3d(0, 64vh, 0)",
+      "translate3d(0, 0vh, 0)",
+      "translate3d(0, 0vh, 0)",
+      "translate3d(0, -64vh, 0)",
+    ]
+  );
+  const taglineOpacity = useTransform(
+    introProgress,
+    [0.32, 0.44, 0.6, 0.72],
+    [0, 1, 1, 0]
+  );
+  const bioTransform = useTransform(
+    introProgress,
+    [0.72, 0.88],
+    ["translate3d(0, 32px, 0)", "translate3d(0, 0px, 0)"]
+  );
+  const bioOpacity = useTransform(introProgress, [0.72, 0.88], [0, 1]);
+
+  useEffect(() => {
+    let frame = 0;
+
+    const updateProgress = () => {
+      const section = sectionRef.current;
+
+      if (!section) {
+        return;
+      }
+
+      const rect = section.getBoundingClientRect();
+      const scrollableDistance = Math.max(rect.height - window.innerHeight, 1);
+      const nextProgress = Math.min(
+        Math.max(-rect.top / scrollableDistance, 0),
+        1
+      );
+      const nextStageMode =
+        rect.top > 0
+          ? "before"
+          : rect.bottom <= window.innerHeight
+            ? "after"
+            : "fixed";
+
+      introProgress.set(nextProgress);
+      setStageMode((currentMode) =>
+        currentMode === nextStageMode ? currentMode : nextStageMode
+      );
+    };
+
+    const requestUpdate = () => {
+      cancelAnimationFrame(frame);
+      frame = requestAnimationFrame(updateProgress);
+    };
+
+    updateProgress();
+    window.addEventListener("scroll", requestUpdate, { passive: true });
+    window.addEventListener("resize", requestUpdate);
+
+    return () => {
+      cancelAnimationFrame(frame);
+      window.removeEventListener("scroll", requestUpdate);
+      window.removeEventListener("resize", requestUpdate);
+    };
+  }, [introProgress]);
+
+  if (shouldReduceMotion) {
+    return (
+      <section
+        id="about"
+        className="bg-black px-5 py-24 text-foreground md:px-8 md:py-32"
+      >
+        <div className="mx-auto flex w-full max-w-6xl flex-col gap-24">
+          <div className="flex min-h-[48vh] items-center justify-center">
+            <AppleHelloEffectHindi
+              className={reducedMotionHelloClassName}
+              durationScale={0.7}
+            />
           </div>
 
-          <motion.p
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.8, delay: 0.3, ease: [0.22, 1, 0.36, 1] }}
-            className="max-w-4xl text-base font-light leading-[1.48] text-background/65 md:text-lg md:leading-[1.35]"
-          >
+          <h2 className={reducedMotionTaglineClassName}>
+            {tagline}
+          </h2>
+
+          <p className={reducedMotionBioClassName}>
             {introBody}
-          </motion.p>
+          </p>
         </div>
+      </section>
+    );
+  }
+
+  const stageClassName =
+    stageMode === "fixed"
+      ? "fixed inset-x-0 top-0 z-20 h-screen overflow-hidden bg-black"
+      : stageMode === "after"
+        ? "absolute inset-x-0 bottom-0 h-screen overflow-hidden bg-black"
+        : "absolute inset-x-0 top-0 h-screen overflow-hidden bg-black";
+
+  return (
+    <section
+      ref={sectionRef}
+      id="about"
+      className="relative h-[480vh] bg-black text-foreground"
+      aria-label="Introduction"
+    >
+      <div ref={stageRef} data-intro-stage className={stageClassName}>
+        <motion.div
+          data-intro-track
+          className="flex h-screen w-[300vw]"
+          style={{ transform: trackTransform }}
+        >
+          <PanelFrame>
+            <div className="flex w-full max-w-6xl flex-col items-center gap-8 text-center">
+              <motion.p
+                style={{ opacity: helloMetaOpacity }}
+                className="font-mono text-xs tracking-[0.32em] text-foreground/42 uppercase"
+              >
+                Karnik Kanojia
+              </motion.p>
+              <motion.div
+                data-intro-hello
+                style={{ scale: helloScale }}
+                className="w-full"
+              >
+                <AppleHelloEffectHindi
+                  play={isIntroInView}
+                  drawProgress={helloDrawProgress}
+                  durationScale={0.72}
+                  className={helloClassName}
+                />
+              </motion.div>
+            </div>
+          </PanelFrame>
+
+          <PanelFrame>
+            <div className="flex h-full w-full items-center justify-center overflow-hidden">
+              <motion.h2
+                data-intro-tagline
+                style={{
+                  opacity: taglineOpacity,
+                  transform: taglineTransform,
+                }}
+                className={taglineClassName}
+              >
+                {tagline}
+              </motion.h2>
+            </div>
+          </PanelFrame>
+
+          <PanelFrame className="justify-start md:justify-center">
+            <motion.div
+              data-intro-bio
+              style={{ opacity: bioOpacity, transform: bioTransform }}
+              className="mx-auto grid w-full max-w-7xl grid-cols-1 gap-8 md:grid-cols-[0.28fr_0.72fr] md:items-start md:gap-14"
+            >
+              <div className="font-mono text-xs tracking-[0.32em] text-foreground/40 uppercase">
+                About
+              </div>
+              <p className={bioClassName}>
+                {introBody}
+              </p>
+            </motion.div>
+          </PanelFrame>
+        </motion.div>
       </div>
     </section>
   );
