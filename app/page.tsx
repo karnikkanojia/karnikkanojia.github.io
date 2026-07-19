@@ -3,6 +3,7 @@ import { IntroTransition } from "@/components/intro-transition"
 import { Navbar } from "@/components/navbar"
 import { GithubCalendar } from "@/components/ui/github-calendar"
 import { ContactFooter } from "@/components/contact-footer"
+import { BlogsBento, ProjectsBento } from "@/components/bento-sections"
 import { BrainIcon, DatabaseIcon, HospitalIcon } from "lucide-react"
 import {
   WorkExperience,
@@ -136,6 +137,8 @@ export default function Home() {
                   ? "min-h-screen items-center py-12 md:py-16"
                   : section.id === "github"
                     ? "min-h-0 items-start py-0"
+                    : section.id === "projects" || section.id === "blogs"
+                      ? "min-h-0 items-start py-8 md:py-6"
                     : "min-h-[70vh] items-end py-12 md:py-16"
               } ${
                 section.id === "about" ? "md:-mt-[100vh]" : ""
@@ -145,17 +148,25 @@ export default function Home() {
                 className={
                   section.id === "work"
                     ? "mx-auto w-full max-w-3xl text-center"
-                    : section.id === "github"
+                    : section.id === "github" ||
+                        section.id === "projects" ||
+                        section.id === "blogs"
                       ? "mx-auto w-full max-w-6xl"
                       : "w-full max-w-3xl"
                 }
               >
-                {section.id !== "github" && section.id !== "work" && (
+                {section.id !== "github" &&
+                  section.id !== "work" &&
+                  section.id !== "projects" &&
+                  section.id !== "blogs" && (
                   <p className="mb-4 text-sm tracking-wide text-black/55">
                     {section.eyebrow}
                   </p>
                 )}
-                {section.id !== "github" && section.id !== "work" && (
+                {section.id !== "github" &&
+                  section.id !== "work" &&
+                  section.id !== "projects" &&
+                  section.id !== "blogs" && (
                   <h2 className="max-w-4xl text-3xl leading-[1.02] font-medium tracking-tight text-balance md:text-5xl">
                     {section.title}
                   </h2>
@@ -175,6 +186,8 @@ export default function Home() {
                     />
                   </div>
                 )}
+                {section.id === "projects" && <ProjectsBento />}
+                {section.id === "blogs" && <BlogsBento />}
               </div>
             </section>
           ))}

@@ -125,10 +125,10 @@ export function ContactFooter() {
               id="footer-navigation-title"
               className="mb-9 flex items-center gap-2.5 text-[0.78rem] leading-none font-normal md:mb-10 md:text-sm"
             >
-              <span
-                aria-hidden="true"
-                className="size-2 rounded-full bg-[#f1f1ed]"
-              />
+              <span aria-hidden="true" className="relative flex size-2">
+                <span className="absolute inset-0 animate-ping rounded-full bg-[#4a8dff] opacity-55" />
+                <span className="relative size-2 rounded-full bg-[#4a8dff] shadow-[0_0_0_3px_rgb(74_141_255/0.12)]" />
+              </span>
               Navigation
             </h2>
 
@@ -200,10 +200,10 @@ export function ContactFooter() {
 
             <div className="mt-20 md:mt-24">
               <div className="inline-flex items-center gap-2 bg-white/6 px-2.5 py-2 text-[0.75rem] leading-none md:text-xs">
-                <span
-                  aria-hidden="true"
-                  className="size-2 rounded-full bg-[#40d978] shadow-[0_0_0_3px_rgb(64_217_120/0.12)]"
-                />
+                <span aria-hidden="true" className="relative flex size-2">
+                  <span className="absolute inset-0 animate-ping rounded-full bg-[#40d978] opacity-55" />
+                  <span className="relative size-2 rounded-full bg-[#40d978] shadow-[0_0_0_3px_rgb(64_217_120/0.12)]" />
+                </span>
                 Open to meaningful work
               </div>
 
@@ -221,10 +221,10 @@ export function ContactFooter() {
                 labelClassName="[&_svg]:!size-3.5 [&_svg]:stroke-[1.75]"
               >
                 <a
-                  href="mailto:karnikk1406120@gmail.com"
+                  href="mailto:karnikkanojia8@gmail.com"
                   className="footer-email inline-block text-[0.82rem] leading-tight underline decoration-white/60 underline-offset-3 md:text-sm"
                 >
-                  ↳ karnikk1406120@gmail.com
+                  ↳ karnikkanojia8@gmail.com
                 </a>
               </CursorFollowLabel>
             </div>

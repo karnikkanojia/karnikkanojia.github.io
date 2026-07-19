@@ -4,11 +4,14 @@ import { cn } from "@/lib/utils"
 import {
   type PointerEvent as ReactPointerEvent,
   type ReactNode,
+  useCallback,
   useEffect,
   useRef,
   useState,
 } from "react"
 import { createPortal } from "react-dom"
+
+const VIEWPORT_PADDING = 12
 
 type CursorFollowLabelProps = {
   as?: "div" | "span"
@@ -36,8 +39,39 @@ export function CursorFollowLabel({
   const frameRef = useRef<number | undefined>(undefined)
   const currentRef = useRef({ x: 0, y: 0 })
   const targetRef = useRef({ x: 0, y: 0 })
+  const labelSizeRef = useRef({ width: 0, height: 0 })
+  const viewportSizeRef = useRef({ width: 0, height: 0 })
   const isHoveringRef = useRef(false)
   const [mounted, setMounted] = useState(false)
+
+  const positionLabel = useCallback(
+    (pointerX: number, pointerY: number) => {
+      const position = positionRef.current
+      const label = labelRef.current
+      if (!position || !label) return
+
+      const { width: labelWidth, height: labelHeight } = labelSizeRef.current
+      const { width: viewportWidth, height: viewportHeight } =
+        viewportSizeRef.current
+      const preferredX = pointerX + offset.x
+      const shouldFlipLeft =
+        preferredX + labelWidth > viewportWidth - VIEWPORT_PADDING
+      const nextX = shouldFlipLeft
+        ? Math.max(VIEWPORT_PADDING, pointerX - offset.x - labelWidth)
+        : Math.max(VIEWPORT_PADDING, preferredX)
+      const nextY = Math.max(
+        VIEWPORT_PADDING,
+        Math.min(
+          Math.max(VIEWPORT_PADDING, pointerY + offset.y),
+          viewportHeight - labelHeight - VIEWPORT_PADDING
+        )
+      )
+
+      position.style.transform = `translate3d(${nextX}px, ${nextY}px, 0)`
+      label.style.transformOrigin = shouldFlipLeft ? "top right" : "top left"
+    },
+    [offset.x, offset.y]
+  )
 
   useEffect(() => {
     const mountFrame = requestAnimationFrame(() => setMounted(true))
@@ -46,6 +80,42 @@ export function CursorFollowLabel({
       if (frameRef.current !== undefined) cancelAnimationFrame(frameRef.current)
     }
   }, [])
+
+  useEffect(() => {
+    const updateViewportSize = () => {
+      viewportSizeRef.current = {
+        width: window.innerWidth,
+        height: window.innerHeight,
+      }
+      if (isHoveringRef.current) {
+        positionLabel(currentRef.current.x, currentRef.current.y)
+      }
+    }
+
+    updateViewportSize()
+    window.addEventListener("resize", updateViewportSize)
+    return () => window.removeEventListener("resize", updateViewportSize)
+  }, [positionLabel])
+
+  useEffect(() => {
+    const labelElement = labelRef.current
+    if (!mounted || !labelElement) return
+
+    const updateLabelSize = () => {
+      labelSizeRef.current = {
+        width: labelElement.offsetWidth,
+        height: labelElement.offsetHeight,
+      }
+      if (isHoveringRef.current) {
+        positionLabel(currentRef.current.x, currentRef.current.y)
+      }
+    }
+
+    updateLabelSize()
+    const observer = new ResizeObserver(updateLabelSize)
+    observer.observe(labelElement)
+    return () => observer.disconnect()
+  }, [mounted, positionLabel])
 
   useEffect(() => {
     if (!labelRef.current || !isHoveringRef.current) return
@@ -59,9 +129,7 @@ export function CursorFollowLabel({
     current.x += (target.x - current.x) * 0.22
     current.y += (target.y - current.y) * 0.22
 
-    if (positionRef.current) {
-      positionRef.current.style.transform = `translate3d(${current.x + offset.x}px, ${current.y + offset.y}px, 0)`
-    }
+    positionLabel(current.x, current.y)
 
     if (
       Math.abs(target.x - current.x) > 0.1 ||
@@ -86,9 +154,7 @@ export function CursorFollowLabel({
     isHoveringRef.current = true
     currentRef.current = { x: event.clientX, y: event.clientY }
     targetRef.current = currentRef.current
-    if (positionRef.current) {
-      positionRef.current.style.transform = `translate3d(${event.clientX + offset.x}px, ${event.clientY + offset.y}px, 0)`
-    }
+    positionLabel(event.clientX, event.clientY)
     if (labelRef.current) {
       labelRef.current.style.opacity = showLabel ? "1" : "0"
       labelRef.current.style.transform = showLabel ? "scale(1)" : "scale(0.96)"
@@ -121,7 +187,7 @@ export function CursorFollowLabel({
             <div
               ref={labelRef}
               className={cn(
-                "inline-flex origin-top-left scale-[0.96] items-center gap-1.5 bg-[#dddddd] px-3 py-1.5 font-navbar text-[10px] leading-none font-light tracking-wide text-black uppercase opacity-0 shadow-[0_6px_20px_rgb(0_0_0/0.12)] transition-[opacity,transform] duration-150 ease-[cubic-bezier(0.23,1,0.32,1)] [&_svg]:size-2.5 [&_svg]:stroke-[1.5]",
+                "inline-flex max-w-[calc(100vw-24px)] origin-top-left scale-[0.96] items-center gap-1.5 bg-[#dddddd] px-3 py-1.5 font-navbar text-[10px] leading-none font-light tracking-wide text-black uppercase opacity-0 shadow-[0_6px_20px_rgb(0_0_0/0.12)] transition-[opacity,transform] duration-150 ease-[cubic-bezier(0.23,1,0.32,1)] [&_span]:min-w-0 [&_svg]:size-2.5 [&_svg]:shrink-0 [&_svg]:stroke-[1.5]",
                 labelClassName
               )}
             >
