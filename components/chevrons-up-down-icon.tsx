@@ -11,11 +11,13 @@ export type ChevronsUpDownIconHandle = {
 export type ChevronsUpDownIconProps = React.ComponentPropsWithoutRef<"svg"> & {
   ref?: React.Ref<ChevronsUpDownIconHandle>
   duration?: number
+  initialOpen?: boolean
 }
 
 export function ChevronsUpDownIcon({
   ref,
   duration = 0.3,
+  initialOpen = false,
   ...props
 }: ChevronsUpDownIconProps) {
   const lowerPathRef = useRef<SVGPathElement>(null)
@@ -32,6 +34,7 @@ export function ChevronsUpDownIcon({
         ease: cubicBezier(0.77, 0, 0.175, 1),
       })
     }
+
     if (upperPathRef.current) {
       animate(upperPathRef.current, {
         d: upper,
@@ -62,8 +65,14 @@ export function ChevronsUpDownIcon({
       aria-hidden
       {...props}
     >
-      <path ref={lowerPathRef} d="M7 15L12 20L17 15" />
-      <path ref={upperPathRef} d="M7 9L12 4L17 9" />
+      <path
+        ref={lowerPathRef}
+        d={initialOpen ? "M7 20L12 15L17 20" : "M7 15L12 20L17 15"}
+      />
+      <path
+        ref={upperPathRef}
+        d={initialOpen ? "M7 4L12 9L17 4" : "M7 9L12 4L17 9"}
+      />
     </svg>
   )
 }

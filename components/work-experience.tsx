@@ -1,6 +1,7 @@
 "use client"
 
 import { useCallback, useEffect, useRef, type ComponentProps } from "react"
+import { animate, createTimeline, cubicBezier, remove } from "animejs"
 import { differenceInMonths, parse } from "date-fns"
 import Image from "next/image"
 import ReactMarkdown from "react-markdown"
@@ -12,10 +13,9 @@ import {
   CollapsibleContent,
   CollapsibleTrigger,
 } from "@/components/ui/collapsible"
-import { Separator } from "@/components/ui/separator"
 import type { ChevronsUpDownIconHandle } from "@/components/chevrons-up-down-icon"
 import { ChevronsUpDownIcon } from "@/components/chevrons-up-down-icon"
-import { ArrowUpRightIcon, InfinityIcon } from "lucide-react"
+import { ArrowUpRightIcon, CodeXmlIcon } from "lucide-react"
 
 export type ExperiencePositionItemType = {
   /** Unique identifier for the position */
@@ -79,46 +79,131 @@ export function WorkExperience({
     if (!list) return
 
     const items = Array.from(
-      list.querySelectorAll<HTMLElement>("[data-work-item]")
+      list.querySelectorAll<HTMLElement>("[data-work-experience-company]")
     )
+    const positionItems = Array.from(
+      list.querySelectorAll<HTMLElement>("[data-work-experience-position]")
+    )
+    const revealAnimations: ReturnType<typeof animate>[] = []
+    const trailTimelines = new Map<
+      HTMLElement,
+      ReturnType<typeof createTimeline>
+    >()
+    let animationFrame: number | undefined
+
+    items.forEach((item) => {
+      item.style.opacity = "0"
+      item.style.transform = "translateY(24px)"
+    })
+
+    positionItems.forEach((item) => {
+      const verticalTrail = item.querySelector<HTMLElement>(
+        "[data-work-experience-trail-progress]"
+      )
+      const horizontalTrail = item.querySelector<HTMLElement>(
+        "[data-work-experience-skill-trail-progress]"
+      )
+      if (!verticalTrail) return
+
+      const verticalDuration = horizontalTrail ? 860 : 1_000
+      const timeline = createTimeline({ autoplay: false })
+      timeline.add(
+        verticalTrail,
+        {
+          scaleY: [0, 1],
+          duration: verticalDuration,
+          ease: "linear",
+        },
+        0
+      )
+
+      if (horizontalTrail) {
+        timeline.add(
+          horizontalTrail,
+          {
+            scaleX: [0, 1],
+            duration: 140,
+            ease: "linear",
+          },
+          verticalDuration
+        )
+      }
+
+      timeline.seek(0, true)
+      trailTimelines.set(item, timeline)
+    })
+
     const observer = new IntersectionObserver(
-      ([entry]) => {
-        if (!entry?.isIntersecting) return
+      (entries) => {
+        entries.forEach((entry) => {
+          if (!entry.isIntersecting) return
 
-        items.forEach((item, index) => {
-          item.animate(
-            [
-              { opacity: 0, transform: "translateY(12px)" },
-              { opacity: 1, transform: "translateY(0)" },
-            ],
-            {
-              delay: index * 55,
-              duration: 480,
-              easing: "cubic-bezier(0.23, 1, 0.32, 1)",
-              fill: "both",
-            }
-          )
+          const item = entry.target as HTMLElement
+          const animation = animate(item, {
+            opacity: [0, 1],
+            translateY: [24, 0],
+            duration: 560,
+            ease: cubicBezier(0.16, 1, 0.3, 1),
+          })
+          revealAnimations.push(animation)
+          observer.unobserve(item)
         })
-        observer.disconnect()
       },
-      { threshold: 0.16 }
+      { threshold: 0.08, rootMargin: "0px 0px -10% 0px" }
     )
 
-    observer.observe(list)
-    return () => observer.disconnect()
+    items.forEach((item) => observer.observe(item))
+
+    const updateTrailProgress = () => {
+      const viewportHeight = window.innerHeight
+      positionItems.forEach((item) => {
+        const { top, height } = item.getBoundingClientRect()
+        const startLine = viewportHeight * 0.82
+        const endLine = viewportHeight * 0.18
+        const travelDistance = Math.max(1, height + startLine - endLine)
+        const progress = Math.min(
+          1,
+          Math.max(0, (startLine - top) / travelDistance)
+        )
+        const timeline = trailTimelines.get(item)
+        if (timeline) timeline.seek(timeline.duration * progress, true)
+      })
+    }
+
+    const handleScroll = () => {
+      if (animationFrame !== undefined) return
+      animationFrame = window.requestAnimationFrame(() => {
+        animationFrame = undefined
+        updateTrailProgress()
+      })
+    }
+
+    updateTrailProgress()
+    window.addEventListener("scroll", handleScroll, { passive: true })
+    return () => {
+      observer.disconnect()
+      window.removeEventListener("scroll", handleScroll)
+      if (animationFrame !== undefined) window.cancelAnimationFrame(animationFrame)
+      revealAnimations.forEach((animation) => animation.cancel())
+      trailTimelines.forEach((timeline) => timeline.cancel())
+      remove(items)
+      items.forEach((item) => {
+        item.style.opacity = ""
+        item.style.transform = ""
+      })
+    }
   }, [experiences])
 
   return (
     <div
       ref={listRef}
-      className={cn("text-black", className)}
+      className={cn(
+        "mx-auto w-full max-w-3xl bg-background px-4 text-foreground font-sans",
+        className
+      )}
     >
-      {experiences.map((experience, index) => (
-        <ExperienceItem
-          key={experience.id}
-          experience={experience}
-          index={index}
-        />
+      {experiences.map((experience) => (
+        <ExperienceItem key={experience.id} experience={experience} />
       ))}
     </div>
   )
@@ -126,71 +211,75 @@ export function WorkExperience({
 
 export type ExperienceItemProps = {
   experience: ExperienceItemType
-  index: number
 }
 
-export function ExperienceItem({ experience, index }: ExperienceItemProps) {
+export function ExperienceItem({ experience }: ExperienceItemProps) {
   return (
-    <article
-      data-work-item
-      className="editorial-work-item grid py-5 transition-colors duration-200 ease-[cubic-bezier(0.23,1,0.32,1)] md:grid-cols-[3rem_minmax(12rem,0.75fr)_minmax(0,1.5fr)] md:gap-8 md:px-3 md:py-7"
-    >
-      <span className="mb-5 font-navbar text-[10px] leading-none font-light tracking-[0.16em] text-black/40 tabular-nums md:mb-0 md:pt-1.5">
-        {String(index + 1).padStart(2, "0")}
-      </span>
-
-      <div className="not-prose mb-5 flex items-start gap-3 md:mb-0">
-        <div className="flex size-7 shrink-0 items-center justify-center">
+    <div data-work-experience-company className="space-y-4 py-4">
+      <div className="not-prose flex items-center gap-3">
+        <div className="flex size-6 shrink-0 items-center justify-center">
           {experience.companyLogo ? (
             <Image
               src={experience.companyLogo}
-              alt={experience.companyName}
-              width={28}
-              height={28}
-              className="size-7 rounded-full border border-black/10 grayscale transition-[filter] duration-200"
+              alt=""
+              width={24}
+              height={24}
+              className="size-6 rounded-full"
+              aria-hidden
             />
           ) : (
             <span className="flex size-2 rounded-full bg-zinc-300 dark:bg-zinc-600" />
           )}
         </div>
 
-        <div className="min-w-0 pt-0.5">
+        <h3 className="text-lg leading-snug font-medium">
           {experience.companyWebsite ? (
             <CursorFollowLabel
+              as="span"
               className="inline-flex"
+              icon={<ArrowUpRightIcon />}
+              labelClassName="[&_svg]:!size-3.5 [&_svg]:stroke-[1.75]"
               label={`Visit ${experience.companyName}`}
             >
               <a
-                className="editorial-company-link group/company inline-flex items-center gap-1.5 text-base leading-tight font-medium tracking-tight"
+                className="link inline-flex items-center gap-1"
                 href={experience.companyWebsite}
                 target="_blank"
                 rel="noopener noreferrer"
               >
-                <span>{experience.companyName}</span>
-                <ArrowUpRightIcon className="size-3.5 stroke-[1.5] transition-transform duration-160 ease-[cubic-bezier(0.23,1,0.32,1)]" />
+                {experience.companyName}
+                <Image
+                  src="/noun-up-right-648092.svg"
+                  alt=""
+                  width={12}
+                  height={12}
+                  className="size-3 opacity-70"
+                  aria-hidden
+                />
               </a>
             </CursorFollowLabel>
           ) : (
-            <h3 className="text-base leading-tight font-medium tracking-tight">
-              {experience.companyName}
-            </h3>
+            experience.companyName
           )}
+        </h3>
 
-          {experience.isCurrentEmployer && (
-            <span className="mt-2 inline-flex items-center gap-1.5 font-navbar text-[9px] leading-none font-light tracking-[0.14em] text-black/45 uppercase">
-              <span className="size-1.5 rounded-full bg-blue-600" />
-              Current
-            </span>
-          )}
-        </div>
+        {experience.isCurrentEmployer && (
+          <span
+            className="relative flex items-center justify-center"
+            aria-label="Current Employer"
+          >
+            <span className="absolute inline-flex size-3 animate-ping rounded-full bg-sky-500 opacity-50" />
+            <span className="relative inline-flex size-2 rounded-full bg-sky-500" />
+          </span>
+        )}
       </div>
 
-      <div className="divide-y divide-black/10">
+      <div className="space-y-4 text-left">
         {experience.positions.map((position) => (
           <ExperiencePositionItem key={position.id} position={position} />
         ))}
       </div>
-    </article>
+    </div>
   )
 }
 
@@ -217,6 +306,8 @@ export function ExperiencePositionItem({
   const { start, end } = position.employmentPeriod
   const isOngoing = !end
   const duration = formatDuration(start, end)
+  const skills = position.skills ?? []
+  const hasSkills = skills.length > 0
 
   return (
     <Collapsible
@@ -225,25 +316,52 @@ export function ExperiencePositionItem({
       disabled={!position.description}
       asChild
     >
-      <div className="relative py-1 first:pt-0 last:pb-0">
+      <div data-work-experience-position className="relative">
+        <span
+          aria-hidden
+          className={cn(
+            "pointer-events-none absolute top-3 left-3 z-0 w-px overflow-hidden bg-black/15",
+            hasSkills ? "bottom-[10px]" : "bottom-0"
+          )}
+        >
+          <span
+            data-work-experience-trail-progress
+            className="absolute inset-0 origin-top bg-black"
+            style={{ transform: "scaleY(0)" }}
+          />
+        </span>
         <CollapsibleTrigger
           className={cn(
             "group/experience-position not-prose block w-full text-left select-none",
-            "transition-transform duration-160 ease-[cubic-bezier(0.23,1,0.32,1)] active:scale-[0.99]",
-            "data-disabled:cursor-default data-disabled:active:scale-100"
+            "relative before:absolute before:-top-1 before:-right-1 before:-bottom-1.5 before:left-7 before:rounded-lg hover:before:bg-muted/30",
+            "data-disabled:before:content-none"
           )}
         >
-          <div className="flex items-start gap-4">
-            <h4 className="flex-1 text-xl leading-[1.05] font-normal tracking-tight text-balance text-black md:text-2xl">
+          <div className="relative z-1 mb-1 flex items-start gap-3 text-base">
+            <div
+              className={cn(
+                "flex size-6 shrink-0 items-center justify-center rounded-lg",
+                "bg-muted text-muted-foreground",
+                "[&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4"
+              )}
+            >
+              {position.icon ?? <CodeXmlIcon />}
+            </div>
+
+            <h4 className="flex-1 font-medium text-balance text-foreground">
               {position.title}
             </h4>
 
-            <div className="shrink-0 text-black/45 group-disabled/experience-position:hidden [&_svg]:h-lh [&_svg]:w-4">
-              <ChevronsUpDownIcon ref={chevronsUpDownIconRef} duration={0.15} />
+            <div className="shrink-0 text-muted-foreground group-disabled/experience-position:hidden [&_svg]:h-lh [&_svg]:w-4">
+              <ChevronsUpDownIcon
+                ref={chevronsUpDownIconRef}
+                duration={0.15}
+                initialOpen={position.isExpanded}
+              />
             </div>
           </div>
 
-          <dl className="mt-3 flex flex-wrap items-center gap-x-2 gap-y-1 font-navbar text-[9px] leading-none font-light tracking-[0.12em] text-black/45 uppercase md:text-[10px]">
+          <dl className="relative z-1 flex items-center gap-2 pl-9 font-navbar text-xs tracking-wide text-muted-foreground uppercase">
             {position.employmentType && (
               <>
                 <div>
@@ -251,35 +369,22 @@ export function ExperiencePositionItem({
                   <dd>{position.employmentType}</dd>
                 </div>
 
-                <Separator
-                  className="data-vertical:h-3 data-vertical:self-center data-vertical:bg-black/15"
-                  orientation="vertical"
-                />
+                <span aria-hidden>-</span>
               </>
             )}
 
             <div>
               <dt className="sr-only">Employment Period</dt>
-              <dd className="flex items-center gap-1 tabular-nums">
+              <dd className="flex items-center gap-0.5 tabular-nums">
                 <span>{start}</span>
-                <span>-</span>
-                {isOngoing ? (
-                  <InfinityIcon
-                    className="size-3.5 translate-y-[0.5px] stroke-[1.5]"
-                    aria-label="Present"
-                  />
-                ) : (
-                  <span>{end}</span>
-                )}
+                <span>.</span>
+                <span>{isOngoing ? "Present" : end}</span>
               </dd>
             </div>
 
             {duration && (
               <>
-                <Separator
-                  className="data-vertical:h-3 data-vertical:self-center data-vertical:bg-black/15"
-                  orientation="vertical"
-                />
+                <span aria-hidden>-</span>
                 <div>
                   <dt className="sr-only">Duration</dt>
                   <dd className="tabular-nums">{duration}</dd>
@@ -289,17 +394,27 @@ export function ExperiencePositionItem({
           </dl>
         </CollapsibleTrigger>
 
-        <CollapsibleContent className="overflow-hidden">
+        <CollapsibleContent className="relative z-1 overflow-hidden">
           {position.description && (
-            <Prose className="pt-4 text-sm text-black/65">
+            <Prose className="prose-sm pt-2 pl-9 prose-p:my-1.5 prose-p:leading-[1.4] prose-ul:my-1.5 prose-li:my-1 prose-li:leading-[1.4]">
               <ReactMarkdown>{position.description}</ReactMarkdown>
             </Prose>
           )}
         </CollapsibleContent>
 
-        {Array.isArray(position.skills) && position.skills.length > 0 && (
-          <ul className="not-prose mt-4 flex flex-wrap gap-1.5">
-            {position.skills.map((skill, index) => (
+        {hasSkills && (
+          <ul className="not-prose relative z-1 flex flex-wrap gap-1.5 pt-3 pl-9">
+            <span
+              aria-hidden
+              className="pointer-events-none absolute bottom-[10px] left-3 h-px w-5 overflow-hidden bg-black/15"
+            >
+              <span
+                data-work-experience-skill-trail-progress
+                className="absolute inset-0 origin-left bg-black"
+                style={{ transform: "scaleX(0)" }}
+              />
+            </span>
+            {skills.map((skill, index) => (
               <li key={index} className="flex">
                 <Skill>{skill}</Skill>
               </li>
@@ -327,7 +442,7 @@ function Skill({ className, ...props }: ComponentProps<"span">) {
   return (
     <span
       className={cn(
-        "editorial-skill inline-flex items-center border border-black/15 px-2 py-1 font-navbar text-[9px] leading-none font-light tracking-[0.12em] text-black/55 uppercase transition-[color,border-color,transform] duration-160 ease-[cubic-bezier(0.23,1,0.32,1)]",
+        "inline-flex items-center rounded-md border bg-muted/50 px-1.5 py-0.5 font-navbar text-[10px] tracking-wide text-muted-foreground uppercase",
         className
       )}
       {...props}

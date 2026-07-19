@@ -11,6 +11,7 @@ import {
 import { createPortal } from "react-dom"
 
 type CursorFollowLabelProps = {
+  as?: "div" | "span"
   children: ReactNode
   className?: string
   icon?: ReactNode
@@ -21,6 +22,7 @@ type CursorFollowLabelProps = {
 }
 
 export function CursorFollowLabel({
+  as: Component = "div",
   children,
   className,
   icon,
@@ -102,7 +104,7 @@ export function CursorFollowLabel({
   }
 
   return (
-    <div
+    <Component
       className={cn("cursor-follow-target", className)}
       onPointerEnter={handlePointerEnter}
       onPointerLeave={hideLabel}
@@ -129,6 +131,6 @@ export function CursorFollowLabel({
           </div>,
           document.body
         )}
-    </div>
+    </Component>
   )
 }

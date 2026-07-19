@@ -2,6 +2,7 @@ import type { Metadata } from "next"
 import { Agentation } from "agentation"
 import "./globals.css"
 import localFont from "next/font/local"
+import Script from "next/script"
 import { ReactLenis } from "lenis/react"
 import { cn } from "@/lib/utils"
 
@@ -26,8 +27,8 @@ const messinaSansMono = localFont({
 })
 
 export const metadata: Metadata = {
-  title: "Portfolio",
-  description: "A new portfolio project.",
+  title: "Karnik Kanojia",
+  description: "Karnik Kanojia | SRE @ Oracle | Ex-Data Scientist @ MI4People",
 }
 
 export default function RootLayout({
@@ -38,13 +39,12 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={cn(
-        "font-sans",
-        khTeka.variable,
-        messinaSansMono.variable
-      )}
+      className={cn("font-sans", khTeka.variable, messinaSansMono.variable)}
     >
       <body>
+        <Script id="initial-scroll-position" strategy="beforeInteractive">
+          {`if (!window.location.hash) { window.history.scrollRestoration = "manual"; window.scrollTo(0, 0); }`}
+        </Script>
         <ReactLenis root options={{ anchors: true, autoRaf: true, lerp: 0.1 }}>
           {children}
           {process.env.NODE_ENV === "development" && <Agentation />}

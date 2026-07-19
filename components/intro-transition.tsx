@@ -146,7 +146,9 @@ export function IntroTransition({ children }: IntroTransitionProps) {
 
   return (
     <>
-      <div className="relative min-h-screen w-full bg-white">{children}</div>
+      <div className="relative z-10 flow-root min-h-screen w-full bg-white">
+        {children}
+      </div>
       {introVisible && (
         <div
           ref={loaderRef}

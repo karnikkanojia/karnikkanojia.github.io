@@ -1,14 +1,29 @@
 "use client"
 
 import { animate, createTimeline, cubicBezier, stagger } from "animejs"
+import { useLenis } from "lenis/react"
 import Image from "next/image"
 import { useEffect, useLayoutEffect, useRef, useState } from "react"
 
-const DESKTOP_LINKS = [
+const RESUME_URL =
+  "https://drive.google.com/file/d/1BZi0plL9zUQAPkJ0Qz4lJjMWQUvh4_v5/view?usp=sharing"
+
+type NavbarLinkItem = {
+  label: string
+  href: string
+  external?: boolean
+}
+
+const DESKTOP_LINKS: NavbarLinkItem[] = [
   { label: "ABOUT", href: "#about" },
   { label: "WORK", href: "#work" },
   { label: "PROJECTS", href: "#projects" },
   { label: "BLOGS", href: "#blogs" },
+  { label: "RESUME", href: RESUME_URL, external: true },
+]
+const MOBILE_LINKS: NavbarLinkItem[] = [
+  ...DESKTOP_LINKS,
+  { label: "CONTACT", href: "#contact" },
 ]
 const DOT_OFFSETS = [
   [-4.75, -4.75],
@@ -28,12 +43,14 @@ function getTranslation(element: HTMLElement) {
 }
 
 type NavbarScrollState = {
+  isFooterActive: boolean
   isVisible: boolean
   isScrolled: boolean
 }
 
 function useNavbarScrollState() {
   const [state, setState] = useState<NavbarScrollState>({
+    isFooterActive: false,
     isVisible: true,
     isScrolled: false,
   })
@@ -42,6 +59,7 @@ function useNavbarScrollState() {
     let previousScrollY = window.scrollY
     let directionStartY = previousScrollY
     let previousDirection = 0
+    let footerAnchor: HTMLElement | null = null
     let heroEndY = 0
     let frameId: number | undefined
 
@@ -52,6 +70,7 @@ function useNavbarScrollState() {
       heroEndY = hero
         ? hero.getBoundingClientRect().bottom + window.scrollY
         : window.innerHeight + 80
+      footerAnchor = document.querySelector<HTMLElement>("#contact")
     }
 
     const update = () => {
@@ -67,21 +86,27 @@ function useNavbarScrollState() {
       const directionalDistance = currentScrollY - directionStartY
       previousScrollY = currentScrollY
       const isHeroActive = currentScrollY + window.innerHeight <= heroEndY + 1
+      const isFooterActive = footerAnchor
+        ? footerAnchor.getBoundingClientRect().top <= window.innerHeight
+        : false
 
       setState((current) => {
-        const isVisible = isHeroActive
-          ? true
-          : directionalDistance < -8
+        const isVisible = isFooterActive
+          ? false
+          : isHeroActive
             ? true
-            : directionalDistance > 8
-              ? false
-              : current.isVisible
+            : directionalDistance < -8
+              ? true
+              : directionalDistance > 8
+                ? false
+                : current.isVisible
         const isScrolled = currentScrollY > 24
 
         return current.isVisible === isVisible &&
+          current.isFooterActive === isFooterActive &&
           current.isScrolled === isScrolled
           ? current
-          : { isVisible, isScrolled }
+          : { isFooterActive, isVisible, isScrolled }
       })
     }
 
@@ -108,10 +133,12 @@ function useNavbarScrollState() {
   return state
 }
 
-function NavLink({ href, label }: { href: string; label: string }) {
+function NavLink({ href, label, external }: NavbarLinkItem) {
   return (
     <a
       href={href}
+      target={external ? "_blank" : undefined}
+      rel={external ? "noopener noreferrer" : undefined}
       className="px-2 py-2 text-xs leading-none font-light text-black transition-opacity duration-150 ease-out group-hover/nav-links:opacity-35 hover:!opacity-100"
     >
       {label}
@@ -133,8 +160,19 @@ export function Navbar() {
     typeof animate
   > | null>(null)
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
-  const { isVisible: isNavbarVisible, isScrolled: isNavbarScrolled } =
-    useNavbarScrollState()
+  const lenis = useLenis()
+  const {
+    isFooterActive,
+    isVisible: isNavbarVisible,
+    isScrolled: isNavbarScrolled,
+  } = useNavbarScrollState()
+
+  useEffect(() => {
+    if (!isFooterActive) return
+
+    const frameId = requestAnimationFrame(() => setIsMobileMenuOpen(false))
+    return () => cancelAnimationFrame(frameId)
+  }, [isFooterActive])
 
   const animateContactRadius = (radius: number) => {
     const contactShape = contactShapeRef.current
@@ -374,146 +412,166 @@ export function Navbar() {
   useEffect(() => {
     if (!isMobileMenuOpen) return
 
+    const html = document.documentElement
+    const body = document.body
+    const previousHtmlOverflow = html.style.overflow
+    const previousHtmlOverscrollBehavior = html.style.overscrollBehavior
+    const previousBodyOverflow = body.style.overflow
+
+    lenis?.stop()
+    html.style.overflow = "hidden"
+    html.style.overscrollBehavior = "none"
+    body.style.overflow = "hidden"
+
     const closeOnEscape = (event: KeyboardEvent) => {
       if (event.key === "Escape") setIsMobileMenuOpen(false)
     }
 
     window.addEventListener("keydown", closeOnEscape)
-    return () => window.removeEventListener("keydown", closeOnEscape)
-  }, [isMobileMenuOpen])
+    return () => {
+      window.removeEventListener("keydown", closeOnEscape)
+      lenis?.start()
+      html.style.overflow = previousHtmlOverflow
+      html.style.overscrollBehavior = previousHtmlOverscrollBehavior
+      body.style.overflow = previousBodyOverflow
+    }
+  }, [isMobileMenuOpen, lenis])
 
   return (
     <>
-    <nav
-      data-site-navbar
-      className={`fixed top-0 right-0 left-0 z-[102] flex h-14 items-center justify-between px-5 font-navbar text-black transition-transform duration-220 ease-[cubic-bezier(0.23,1,0.32,1)] md:h-[4.125rem] md:px-6 ${
-        isNavbarVisible || isMobileMenuOpen
-          ? "translate-y-0"
-          : "-translate-y-[calc(100%+0.5rem)]"
-      }`}
-    >
-      <a href="#" aria-label="Home" className="flex items-center">
-        <span
-          ref={logoRef}
-          className="inline-flex w-fit items-center"
-          style={{
-            visibility: "hidden",
-            opacity: 0,
-            filter: "brightness(0)",
-          }}
-        >
-          <Image
-            src="/monogram.svg"
-            alt="Karnik Kanojia"
-            width={72}
-            height={20}
-            className="h-5 w-auto"
-            style={{ width: "auto" }}
-            priority
-          />
-        </span>
-      </a>
-      <div
-        className={`flex items-center gap-2 rounded-[5px] transition-[background-color,padding,transform] duration-200 ease-[cubic-bezier(0.23,1,0.32,1)] ${
-          isNavbarScrolled
-            ? "-translate-x-1 bg-[#f1f1f1] px-3 py-2"
-            : "translate-x-0 bg-transparent px-0 py-0"
+      <nav
+        data-site-navbar
+        className={`fixed top-0 right-0 left-0 z-[102] flex h-14 items-center justify-between px-5 font-navbar text-black transition-transform duration-220 ease-[cubic-bezier(0.23,1,0.32,1)] md:h-[4.125rem] md:px-6 ${
+          !isFooterActive && (isNavbarVisible || isMobileMenuOpen)
+            ? "translate-y-0"
+            : "-translate-y-[calc(100%+0.5rem)]"
         }`}
       >
-        <div
-          ref={linksRef}
-          className="group/nav-links hidden items-center gap-1 md:flex"
-        >
-          {DESKTOP_LINKS.map((link) => (
-            <NavLink key={link.label} {...link} />
-          ))}
-        </div>
-        <div
-          ref={contactRef}
-          className="inline-flex items-center gap-2.5"
-          style={{ visibility: "hidden", opacity: 0 }}
-        >
-          <a
-            ref={contactButtonRef}
-            href="#contact"
-            className="group hidden md:inline-flex"
-            onPointerEnter={() => animateContactRadius(0)}
-            onPointerLeave={() => animateContactRadius(14)}
-          >
-            <span
-              ref={contactShapeRef}
-              className="relative inline-flex h-7 w-[92px] items-center justify-start overflow-hidden rounded-[14px] transition-transform duration-150 ease-out will-change-transform group-active:scale-[0.97]"
-            >
-              <span className="absolute inset-0 bg-black" />
-              <span className="absolute inset-0 z-10 inline-flex items-center justify-center text-xs leading-none font-light whitespace-nowrap text-white">
-                CONTACT
-              </span>
-            </span>
-          </a>
-          <button
-            type="button"
-            aria-label={
-              isMobileMenuOpen ? "Close navigation menu" : "Open navigation menu"
-            }
-            aria-controls="mobile-navigation"
-            aria-expanded={isMobileMenuOpen}
-            className="relative isolate inline-flex size-[26px] shrink-0 border-0 bg-transparent p-0 transform-gpu"
-            onPointerEnter={() => animateContactDotsScale(1.25)}
-            onPointerLeave={() => animateContactDotsScale(1)}
-            onClick={() => {
-              if (window.matchMedia("(max-width: 767px)").matches) {
-                setIsMobileMenuOpen((isOpen) => !isOpen)
-              }
+        <a href="#" aria-label="Home" className="flex items-center">
+          <span
+            ref={logoRef}
+            className="inline-flex w-fit items-center"
+            style={{
+              visibility: "hidden",
+              opacity: 0,
+              filter: "brightness(0)",
             }}
           >
-            <span
-              ref={contactDotsRef}
-              aria-hidden="true"
-              className={`pointer-events-none absolute inset-0 overflow-hidden rounded-full transition-opacity duration-150 ease-out [contain:paint] ${
-                isMobileMenuOpen ? "opacity-0" : "opacity-100"
-              }`}
+            <Image
+              src="/monogram.svg"
+              alt="Karnik Kanojia"
+              width={72}
+              height={20}
+              className="h-5 w-auto"
+              style={{ width: "auto" }}
+              priority
+            />
+          </span>
+        </a>
+        <div
+          className={`flex items-center gap-2 rounded-[5px] transition-[background-color,padding,transform] duration-200 ease-[cubic-bezier(0.23,1,0.32,1)] ${
+            isNavbarScrolled
+              ? "-translate-x-1 bg-[#f1f1f1] px-3 py-2"
+              : "translate-x-0 bg-transparent px-0 py-0"
+          }`}
+        >
+          <div
+            ref={linksRef}
+            className="group/nav-links hidden items-center gap-1 md:flex"
+          >
+            {DESKTOP_LINKS.map((link) => (
+              <NavLink key={link.label} {...link} />
+            ))}
+          </div>
+          <div
+            ref={contactRef}
+            className="inline-flex items-center gap-2.5"
+            style={{ visibility: "hidden", opacity: 0 }}
+          >
+            <a
+              ref={contactButtonRef}
+              href="#contact"
+              className="group hidden md:inline-flex"
+              onPointerEnter={() => animateContactRadius(0)}
+              onPointerLeave={() => animateContactRadius(14)}
             >
-              {[0, 1, 2, 3].map((dot) => (
-                <span
-                  key={dot}
-                  className="absolute top-[10.5px] left-[10.5px] size-[5px]"
-                >
-                  <span className="block size-full rounded-full bg-black" />
+              <span
+                ref={contactShapeRef}
+                className="relative inline-flex h-7 w-[92px] items-center justify-start overflow-hidden rounded-[14px] transition-transform duration-150 ease-out will-change-transform group-active:scale-[0.97]"
+              >
+                <span className="absolute inset-0 bg-black" />
+                <span className="absolute inset-0 z-10 inline-flex items-center justify-center text-xs leading-none font-light whitespace-nowrap text-white">
+                  CONTACT
                 </span>
-              ))}
-            </span>
-            <svg
-              aria-hidden="true"
-              viewBox="0 0 24 24"
-              className={`pointer-events-none absolute inset-0 transition-[opacity,transform] duration-200 ease-[cubic-bezier(0.23,1,0.32,1)] md:hidden ${
+              </span>
+            </a>
+            <button
+              type="button"
+              aria-label={
                 isMobileMenuOpen
-                  ? "scale-100 opacity-100"
-                  : "scale-75 opacity-0"
-              }`}
+                  ? "Close navigation menu"
+                  : "Open navigation menu"
+              }
+              aria-controls="mobile-navigation"
+              aria-expanded={isMobileMenuOpen}
+              className="relative isolate inline-flex size-[26px] shrink-0 transform-gpu border-0 bg-transparent p-0"
+              onPointerEnter={() => animateContactDotsScale(1.25)}
+              onPointerLeave={() => animateContactDotsScale(1)}
+              onClick={() => {
+                if (window.matchMedia("(max-width: 767px)").matches) {
+                  setIsMobileMenuOpen((isOpen) => !isOpen)
+                }
+              }}
             >
-              <path
-                d="M7 7L17 17M17 7L7 17"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="1.5"
-                strokeLinecap="square"
-              />
-            </svg>
-          </button>
+              <span
+                ref={contactDotsRef}
+                aria-hidden="true"
+                className={`pointer-events-none absolute inset-0 overflow-hidden rounded-full transition-opacity duration-150 ease-out [contain:paint] ${
+                  isMobileMenuOpen ? "opacity-0" : "opacity-100"
+                }`}
+              >
+                {[0, 1, 2, 3].map((dot) => (
+                  <span
+                    key={dot}
+                    className="absolute top-[10.5px] left-[10.5px] size-[5px]"
+                  >
+                    <span className="block size-full rounded-full bg-black" />
+                  </span>
+                ))}
+              </span>
+              <svg
+                aria-hidden="true"
+                viewBox="0 0 24 24"
+                className={`pointer-events-none absolute inset-0 transition-[opacity,transform] duration-200 ease-[cubic-bezier(0.23,1,0.32,1)] md:hidden ${
+                  isMobileMenuOpen
+                    ? "scale-100 opacity-100"
+                    : "scale-75 opacity-0"
+                }`}
+              >
+                <path
+                  d="M7 7L17 17M17 7L7 17"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="1.5"
+                  strokeLinecap="square"
+                />
+              </svg>
+            </button>
+          </div>
         </div>
-      </div>
-    </nav>
+      </nav>
       <div
         id="mobile-navigation"
-        aria-hidden={!isMobileMenuOpen}
+        aria-hidden={!isMobileMenuOpen || isFooterActive}
         className={`fixed inset-0 z-[101] bg-[#f1f1f1] px-5 pt-24 pb-6 font-navbar md:hidden ${
-          isMobileMenuOpen ? "" : "pointer-events-none"
+          isMobileMenuOpen && !isFooterActive ? "" : "pointer-events-none"
         }`}
         style={{
-          opacity: isMobileMenuOpen ? 1 : 0,
-          transform: isMobileMenuOpen
-            ? "translate3d(0, 0, 0)"
-            : "translate3d(0, -100%, 0)",
+          opacity: isMobileMenuOpen && !isFooterActive ? 1 : 0,
+          transform:
+            isMobileMenuOpen && !isFooterActive
+              ? "translate3d(0, 0, 0)"
+              : "translate3d(0, -100%, 0)",
           transition:
             "transform 460ms cubic-bezier(0.32, 0.72, 0, 1), opacity 180ms ease-out",
           willChange: "transform",
@@ -521,37 +579,31 @@ export function Navbar() {
       >
         <div className="flex h-full flex-col">
           <div>
-          {DESKTOP_LINKS.map((link) => (
-            <a
-              key={link.label}
-              href={link.href}
-              className="mobile-menu-link group flex items-center justify-between border-b border-black/10 px-0 py-5 text-base leading-none font-light text-black transition-[background-color,color,padding] duration-200 ease-[cubic-bezier(0.23,1,0.32,1)] hover:border-[#1c1c1c] hover:bg-[#1c1c1c] hover:px-3 hover:text-white"
-              tabIndex={isMobileMenuOpen ? 0 : -1}
-              onPointerEnter={(event) =>
-                animateMobileMenuArrow(event.currentTarget)
-              }
-              onFocus={(event) => animateMobileMenuArrow(event.currentTarget)}
-              onClick={() => setIsMobileMenuOpen(false)}
-            >
-              <span>{link.label}</span>
-              <Image
-                src="/noun-up-right-648092.svg"
-                alt=""
-                width={16}
-                height={16}
-                className="mobile-menu-link-arrow size-4 transition-filter duration-200 ease-[cubic-bezier(0.23,1,0.32,1)] group-hover:invert"
-              />
-            </a>
-          ))}
+            {MOBILE_LINKS.map((link) => (
+              <a
+                key={link.label}
+                href={link.href}
+                target={link.external ? "_blank" : undefined}
+                rel={link.external ? "noopener noreferrer" : undefined}
+                className="mobile-menu-link group flex items-center justify-between border-b border-black/10 px-0 py-5 text-base leading-none font-light text-black transition-[background-color,color,padding] duration-200 ease-[cubic-bezier(0.23,1,0.32,1)] hover:border-[#1c1c1c] hover:bg-[#1c1c1c] hover:px-3 hover:text-white"
+                tabIndex={isMobileMenuOpen ? 0 : -1}
+                onPointerEnter={(event) =>
+                  animateMobileMenuArrow(event.currentTarget)
+                }
+                onFocus={(event) => animateMobileMenuArrow(event.currentTarget)}
+                onClick={() => setIsMobileMenuOpen(false)}
+              >
+                <span>{link.label}</span>
+                <Image
+                  src="/noun-up-right-648092.svg"
+                  alt=""
+                  width={16}
+                  height={16}
+                  className="mobile-menu-link-arrow transition-filter size-4 duration-200 ease-[cubic-bezier(0.23,1,0.32,1)] group-hover:invert"
+                />
+              </a>
+            ))}
           </div>
-          <a
-            href="#contact"
-            className="mt-auto inline-flex h-10 w-fit items-center rounded-[14px] bg-black px-5 text-xs leading-none font-light text-white transition-transform duration-150 ease-out active:scale-[0.97]"
-            tabIndex={isMobileMenuOpen ? 0 : -1}
-            onClick={() => setIsMobileMenuOpen(false)}
-          >
-            CONTACT
-          </a>
         </div>
       </div>
     </>
