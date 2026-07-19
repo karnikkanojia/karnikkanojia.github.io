@@ -1,6 +1,6 @@
 "use client"
 
-import oracleLogo from "@/assets/hero/oracle-icon-logo.svg"
+import oracleLogo from "@/public/logos/work/oracle.jpg"
 import { AnimatedGradient } from "@/components/ui/animated-gradient"
 import { CursorFollowLabel } from "@/components/ui/cursor-follow-label"
 import { Pause, Play, Sparkles } from "lucide-react"
