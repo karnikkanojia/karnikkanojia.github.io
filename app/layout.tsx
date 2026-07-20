@@ -1,5 +1,4 @@
 import type { Metadata } from "next"
-import { Agentation } from "agentation"
 import "./globals.css"
 import localFont from "next/font/local"
 import Script from "next/script"
@@ -47,7 +46,6 @@ export default function RootLayout({
         </Script>
         <ReactLenis root options={{ anchors: true, autoRaf: true, lerp: 0.1 }}>
           {children}
-          {process.env.NODE_ENV === "development" && <Agentation />}
         </ReactLenis>
       </body>
     </html>

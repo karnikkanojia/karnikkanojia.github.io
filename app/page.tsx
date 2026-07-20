@@ -4,6 +4,9 @@ import { Navbar } from "@/components/navbar"
 import { GithubCalendar } from "@/components/ui/github-calendar"
 import { ContactFooter } from "@/components/contact-footer"
 import { BlogsBento, ProjectsBento } from "@/components/bento-sections"
+import { getMediumPosts } from "@/lib/medium"
+
+export const dynamic = "force-dynamic"
 import { BrainIcon, DatabaseIcon, HospitalIcon } from "lucide-react"
 import {
   WorkExperience,
@@ -121,7 +124,9 @@ const sections = [
   },
 ]
 
-export default function Home() {
+export default async function Home() {
+  const mediumPosts = await getMediumPosts().catch(() => [])
+
   return (
     <>
       <Navbar />
@@ -147,7 +152,7 @@ export default function Home() {
               <div
                 className={
                   section.id === "work"
-                    ? "mx-auto w-full max-w-3xl text-center"
+                    ? "mx-auto w-full max-w-3xl text-left"
                     : section.id === "github" ||
                         section.id === "projects" ||
                         section.id === "blogs"
@@ -187,7 +192,7 @@ export default function Home() {
                   </div>
                 )}
                 {section.id === "projects" && <ProjectsBento />}
-                {section.id === "blogs" && <BlogsBento />}
+                {section.id === "blogs" && <BlogsBento posts={mediumPosts} />}
               </div>
             </section>
           ))}

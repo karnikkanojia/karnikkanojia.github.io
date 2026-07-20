@@ -10,6 +10,8 @@ const contributionLevels = [
 
 type ContributionLevel = (typeof contributionLevels)[number]
 
+const ONE_DAY = 60 * 60 * 24
+
 interface ContributionDay {
   color: string
   contributionCount: number
@@ -34,7 +36,7 @@ export async function GET(
         headers: {
           "User-Agent": "portfolio-github-calendar",
         },
-        next: { revalidate: 60 * 60 * 6 },
+        next: { revalidate: ONE_DAY },
       }
     )
 
@@ -86,7 +88,7 @@ export async function GET(
       },
       {
         headers: {
-          "Cache-Control": "public, s-maxage=21600, stale-while-revalidate=86400",
+          "Cache-Control": `public, s-maxage=${ONE_DAY}, stale-while-revalidate=${ONE_DAY}`,
         },
       }
     )

@@ -251,22 +251,21 @@ button *,
   }
 
   .bento-card:hover {
-    background-color: #0a0a0a;
-    box-shadow: 0 16px 44px rgb(0 0 0 / 0.07);
+    border-color: #0a0a0a;
   }
 
   .bento-card:hover .bento-card-title {
-    color: rgb(255 255 255 / 0.96);
+    color: rgb(0 0 0 / 0.96);
   }
 
   .bento-card:hover .bento-card-meta,
   .bento-card:hover .bento-card-description {
-    color: rgb(255 255 255 / 0.62);
+    color: rgb(0 0 0 / 0.62);
   }
 }
 
 .bento-card:focus-visible {
-  background-color: #0a0a0a;
+  border-color: #0a0a0a;
 }
 
 .bento-card:focus-visible .bento-card-arrow {
@@ -275,12 +274,12 @@ button *,
 }
 
 .bento-card:focus-visible .bento-card-title {
-  color: rgb(255 255 255 / 0.96);
+  color: rgb(0 0 0 / 0.96);
 }
 
 .bento-card:focus-visible .bento-card-meta,
 .bento-card:focus-visible .bento-card-description {
-  color: rgb(255 255 255 / 0.62);
+  color: rgb(0 0 0 / 0.62);
 }
 
 .contact-footer,

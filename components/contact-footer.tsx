@@ -2,7 +2,8 @@
 
 import { useEffect, useLayoutEffect, useRef, useState } from "react"
 import Image from "next/image"
-import { ArrowUpRight } from "lucide-react"
+import { ArrowUp, ArrowUpRight } from "lucide-react"
+import { SpotlightLogo } from "@/components/spotlight-logo"
 import { CursorFollowLabel } from "@/components/ui/cursor-follow-label"
 
 const navigation = [
@@ -113,13 +114,22 @@ export function ContactFooter() {
     <section
       ref={shellRef}
       id="contact"
-      className="pointer-events-none relative z-0 h-[46rem] bg-[#080808] md:h-svh"
+      className="pointer-events-none relative z-0 h-184 bg-[#080808] md:h-svh"
     >
       <footer
         ref={footerRef}
-        className="contact-footer pointer-events-auto fixed inset-x-0 top-0 z-0 min-h-[46rem] bg-[#080808] px-5 pt-8 pb-7 text-[#f1f1ed] will-change-transform md:min-h-svh md:px-8 md:pt-10 md:pb-8"
+        className="contact-footer pointer-events-auto fixed inset-x-0 top-0 z-0 min-h-184 bg-[#080808] px-5 pt-8 pb-7 text-[#f1f1ed] will-change-transform md:min-h-svh md:px-8 md:pt-10 md:pb-8"
       >
-        <div className="mx-auto grid min-h-[calc(46rem-3.75rem)] max-w-[120rem] grid-cols-1 md:min-h-[calc(100svh-4.5rem)] md:grid-cols-[minmax(0,2.35fr)_minmax(17rem,1fr)] md:gap-x-20">
+        <div
+          aria-hidden="true"
+          className="pointer-events-none absolute inset-0 overflow-hidden"
+        >
+          <div className="pointer-events-auto absolute top-1/2 right-[-18vw] w-[88vw] max-w-104 -translate-y-1/2 [--background:#080808] sm:top-auto sm:right-auto sm:-bottom-16 sm:left-1/2 sm:w-[clamp(30rem,50vw,40rem)] sm:max-w-none sm:-translate-x-1/2 sm:translate-y-0">
+            <SpotlightLogo />
+          </div>
+        </div>
+
+        <div className="pointer-events-none relative z-10 mx-auto grid min-h-169 max-w-480 grid-cols-1 md:min-h-[calc(100svh-4.5rem)] md:grid-cols-[minmax(0,2.35fr)_minmax(17rem,1fr)] md:gap-x-20 [&_.cursor-follow-target]:pointer-events-auto [&_a]:pointer-events-auto [&_button]:pointer-events-auto">
           <section aria-labelledby="footer-navigation-title">
             <h2
               id="footer-navigation-title"
@@ -135,15 +145,15 @@ export function ContactFooter() {
             <nav aria-label="Footer navigation">
               <ul>
                 {navigation.map((item) => (
-                  <li key={item.href} className="border-b border-white/12">
+                  <li key={item.href}>
                     <a
                       href={item.href}
-                      className="footer-nav-link group flex min-h-14 items-center text-[clamp(1.8rem,3.5vw,2.8rem)] leading-none font-normal tracking-[-0.04em] md:min-h-[4.35rem]"
+                      className="footer-nav-link group flex min-h-14 items-center text-[clamp(1.65rem,3.2vw,2.55rem)] leading-none font-normal tracking-[-0.04em] md:min-h-[4.35rem]"
                     >
                       <span>{item.label}</span>
                       <span
                         aria-hidden="true"
-                        className="ml-auto translate-x-[-0.35rem] opacity-0 transition-[transform,opacity] duration-200 ease-[cubic-bezier(0.23,1,0.32,1)] group-hover:translate-x-0 group-hover:opacity-100"
+                        className="ml-2 translate-x-[-0.35rem] opacity-0 transition-[transform,opacity] duration-200 ease-[cubic-bezier(0.23,1,0.32,1)] group-hover:translate-x-0 group-hover:opacity-100"
                       >
                         <Image
                           src="/noun-up-right-648092.svg"
@@ -230,10 +240,10 @@ export function ContactFooter() {
             </div>
           </section>
 
-          <div className="mt-20 grid grid-cols-1 gap-9 self-end md:col-span-2 md:mt-16 md:grid-cols-[2.35fr_1fr_1fr] md:gap-x-20 md:gap-y-0">
+          <div className="mt-20 grid grid-cols-[minmax(0,1fr)_auto] items-end gap-x-2 self-end md:col-span-2 md:mt-16 md:grid-cols-[2.35fr_1fr_1fr] md:gap-x-20 md:gap-y-0">
             <time
               dateTime={now?.toISOString()}
-              className="block text-[0.78rem] leading-[1.2] tabular-nums md:text-sm"
+              className="block text-[clamp(0.5rem,2.56vw,0.6rem)] leading-[1.2] whitespace-nowrap tabular-nums md:text-sm"
               aria-live="off"
             >
               Lucknow {now ? timeFormatter.format(now) : "--:--:-- --"}
@@ -242,22 +252,20 @@ export function ContactFooter() {
               +05:30)
             </time>
 
-            <div className="text-[0.78rem] leading-[1.2] md:text-sm">
+            <div className="flex flex-col items-end gap-5 text-right md:col-start-3 md:justify-self-end">
               <button
                 type="button"
                 onClick={scrollToTop}
-                className="footer-back-to-top inline-block transition-transform duration-150 ease-[cubic-bezier(0.23,1,0.32,1)] active:scale-[0.97]"
+                aria-label="Back to top"
+                className="footer-back-to-top inline-flex size-9 items-center justify-center rounded-[11px] bg-[#f1f1ed] text-[#080808] transition-[transform,background-color] duration-150 ease-[cubic-bezier(0.23,1,0.32,1)] hover:bg-white active:scale-[0.97]"
               >
-                Back to top ↑
+                <ArrowUp aria-hidden="true" className="size-4" />
               </button>
-              <p className="text-white/52">
-                Let&apos;s build reliable systems.
+
+              <p className="text-[clamp(0.5rem,2.56vw,0.6rem)] leading-none whitespace-nowrap md:text-sm">
+                ©{now?.getFullYear() ?? new Date().getFullYear()} Karnik Kanojia
               </p>
             </div>
-
-            <p className="self-end text-[0.78rem] leading-none md:justify-self-end md:text-right md:text-sm">
-              ©{now?.getFullYear() ?? new Date().getFullYear()} Karnik Kanojia
-            </p>
           </div>
         </div>
       </footer>
