@@ -1,28 +1,19 @@
 "use client"
 
-import { useEffect, useId, useRef } from "react"
+import { animate, createAnimatable, remove, spring } from "animejs"
+import {
+  useEffect,
+  useId,
+  useRef,
+  type PointerEvent as ReactPointerEvent,
+} from "react"
 import { useSound } from "@/hooks/use-sound"
 import { metalClickSound } from "@/lib/metal-click"
-import type { Transition } from "motion/react"
-import {
-  motion,
-  useInView,
-  useMotionValue,
-  useSpring,
-  useTransform,
-} from "motion/react"
 
 type Point = readonly [x: number, y: number]
 
 const EXTRUSION_DEPTH = 32
 const PRESSED_OFFSET = 16
-
-const pressTransition: Transition = {
-  type: "spring",
-  mass: 0.5,
-  damping: 18,
-  stiffness: 200,
-}
 
 // A forward-reading K drawn directly in upright SVG coordinates.
 const K_POINTS: readonly Point[] = [
@@ -78,46 +69,136 @@ export function SpotlightLogo() {
   }
 
   const ref = useRef<SVGSVGElement>(null)
+  const faceFillRef = useRef<SVGPathElement>(null)
+  const strokeRef = useRef<SVGPathElement>(null)
+  const radialGradientRef = useRef<SVGRadialGradientElement>(null)
+  const sidePathRefs = useRef<Array<SVGPathElement | null>>([])
   const [play] = useSound(metalClickSound, { interrupt: true })
-  const isInView = useInView(ref, { margin: "80px" })
-  const mouseX = useMotionValue(0.5)
-  const mouseY = useMotionValue(0.5)
-
-  const cx = useSpring(useTransform(mouseX, [0, 1], [0, 556]), {
-    stiffness: 300,
-    damping: 30,
-    mass: 0.1,
-  })
-
-  const cy = useSpring(useTransform(mouseY, [0, 1], [0, 354]), {
-    stiffness: 300,
-    damping: 30,
-    mass: 0.1,
-  })
 
   useEffect(() => {
-    if (!isInView || window.matchMedia("(hover: none)").matches) return
+    const svg = ref.current
+    const faceFill = faceFillRef.current
+    const stroke = strokeRef.current
+    const radialGradient = radialGradientRef.current
+    const sidePaths = [...sidePathRefs.current]
+    if (!svg || !radialGradient) return
+
+    const hoverQuery = window.matchMedia("(hover: hover)")
+    const gradientAnimator = createAnimatable(radialGradient, {
+      cx: {
+        duration: 600,
+        ease: spring({ stiffness: 300, damping: 30, mass: 0.1 }),
+      },
+      cy: {
+        duration: 600,
+        ease: spring({ stiffness: 300, damping: 30, mass: 0.1 }),
+      },
+    })
+    let isListening = false
+    let isIntersecting = false
 
     const handleMouseMove = (event: MouseEvent) => {
-      mouseX.set(event.clientX / window.innerWidth)
-      mouseY.set(event.clientY / window.innerHeight)
+      gradientAnimator.cx((event.clientX / window.innerWidth) * 556)
+      gradientAnimator.cy((event.clientY / window.innerHeight) * 354)
     }
 
-    window.addEventListener("mousemove", handleMouseMove)
-    return () => window.removeEventListener("mousemove", handleMouseMove)
-  }, [isInView, mouseX, mouseY])
+    const setMouseTracking = (enabled: boolean) => {
+      const shouldListen = enabled && hoverQuery.matches
+      if (shouldListen === isListening) return
+
+      isListening = shouldListen
+      if (shouldListen) {
+        window.addEventListener("mousemove", handleMouseMove)
+      } else {
+        window.removeEventListener("mousemove", handleMouseMove)
+      }
+    }
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        isIntersecting = entry.isIntersecting
+        setMouseTracking(isIntersecting)
+      },
+      { rootMargin: "80px" }
+    )
+
+    const handleHoverChange = () => setMouseTracking(isIntersecting)
+
+    observer.observe(svg)
+    hoverQuery.addEventListener("change", handleHoverChange)
+
+    return () => {
+      setMouseTracking(false)
+      observer.disconnect()
+      hoverQuery.removeEventListener("change", handleHoverChange)
+      gradientAnimator.revert()
+      remove(
+        [faceFill, stroke, ...sidePaths].filter(
+          (path): path is SVGPathElement => path !== null
+        )
+      )
+    }
+  }, [])
+
+  const animatePressedState = (pressed: boolean) => {
+    const topOffset = pressed ? PRESSED_OFFSET : 0
+    const pressEase = () => spring({ mass: 0.5, damping: 18, stiffness: 200 })
+    const faceFill = faceFillRef.current
+    const stroke = strokeRef.current
+
+    if (faceFill) {
+      remove(faceFill)
+      animate(faceFill, {
+        d: closedPath(K_POINTS, topOffset),
+        ease: pressEase(),
+      })
+    }
+
+    if (stroke) {
+      remove(stroke)
+      animate(stroke, {
+        d: outlinePath(topOffset),
+        ease: pressEase(),
+      })
+    }
+
+    sidePathRefs.current.forEach((path, index) => {
+      if (!path) return
+      const point = K_POINTS[index]
+      const nextPoint = K_POINTS[(index + 1) % K_POINTS.length]
+
+      remove(path)
+      animate(path, {
+        d: sidePath(point, nextPoint, topOffset),
+        ease: pressEase(),
+      })
+    })
+  }
+
+  const handlePointerDown = (event: ReactPointerEvent<SVGSVGElement>) => {
+    event.currentTarget.setPointerCapture(event.pointerId)
+    void play()
+    animatePressedState(true)
+  }
+
+  const handlePointerRelease = (event: ReactPointerEvent<SVGSVGElement>) => {
+    if (event.currentTarget.hasPointerCapture(event.pointerId)) {
+      event.currentTarget.releasePointerCapture(event.pointerId)
+    }
+    animatePressedState(false)
+  }
 
   return (
-    <motion.svg
+    <svg
       ref={ref}
       className="h-auto w-full touch-manipulation"
       viewBox="0 0 556 354"
       fill="none"
       xmlns="http://www.w3.org/2000/svg"
       aria-hidden="true"
-      initial="normal"
-      onPointerDown={() => void play()}
-      whileTap="pressed"
+      onPointerDown={handlePointerDown}
+      onPointerUp={handlePointerRelease}
+      onPointerCancel={handlePointerRelease}
     >
       <defs>
         <pattern
@@ -135,49 +216,32 @@ export function SpotlightLogo() {
           />
         </pattern>
 
-        <motion.path
-          id={ids.faceFill}
-          d={K_TOP_PATH}
-          variants={{
-            normal: { transform: "translateY(0px)" },
-            pressed: { transform: `translateY(${PRESSED_OFFSET}px)` },
-          }}
-          transition={pressTransition}
-        />
-        <motion.path
-          id={ids.stroke}
-          variants={{
-            normal: { d: outlinePath(0) },
-            pressed: { d: outlinePath(PRESSED_OFFSET) },
-          }}
-          transition={pressTransition}
-        />
+        <path ref={faceFillRef} id={ids.faceFill} d={K_TOP_PATH} />
+        <path ref={strokeRef} id={ids.stroke} d={outlinePath(0)} />
 
-        <motion.radialGradient
+        <radialGradient
+          ref={radialGradientRef}
           id={ids.radialGradient}
-          cx={cx}
-          cy={cy}
+          cx="278"
+          cy="177"
           r="200"
           gradientUnits="userSpaceOnUse"
         >
           <stop stopColor="#f1f1ed" />
           <stop offset="1" stopColor="#f1f1ed" stopOpacity="0" />
-        </motion.radialGradient>
+        </radialGradient>
       </defs>
 
       <g className="fill-background" fillRule="evenodd" clipRule="evenodd">
         {K_POINTS.map((point, index) => {
           const nextPoint = K_POINTS[(index + 1) % K_POINTS.length]
           return (
-            <motion.path
-              key={`${point[0]}-${point[1]}`}
-              variants={{
-                normal: { d: sidePath(point, nextPoint, 0) },
-                pressed: {
-                  d: sidePath(point, nextPoint, PRESSED_OFFSET),
-                },
+            <path
+              ref={(path) => {
+                sidePathRefs.current[index] = path
               }}
-              transition={pressTransition}
+              key={`${point[0]}-${point[1]}`}
+              d={sidePath(point, nextPoint, 0)}
             />
           )
         })}
@@ -187,6 +251,6 @@ export function SpotlightLogo() {
       <use href={`#${ids.faceFill}`} fill={`url(#${ids.facePattern})`} />
       <use href={`#${ids.stroke}`} stroke="rgb(241 241 237 / 0.24)" />
       <use href={`#${ids.stroke}`} stroke={`url(#${ids.radialGradient})`} />
-    </motion.svg>
+    </svg>
   )
 }
