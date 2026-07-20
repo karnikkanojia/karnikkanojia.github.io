@@ -175,7 +175,7 @@ export function IntroTransition({ children }: IntroTransitionProps) {
           >
             <video
               ref={videoRef}
-              className="block h-auto w-full"
+              className="block h-auto w-full translate-x-[2vw] md:translate-x-0"
               muted
               playsInline
               preload="auto"

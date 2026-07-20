@@ -246,7 +246,6 @@ export function Navbar() {
     logo.style.transformOrigin = "left center"
     logo.style.transform = `translate(${logoStartX - logo.getBoundingClientRect().left - 16}px, ${logoStartY - logo.getBoundingClientRect().top}px) scale(1.45)`
     logo.style.opacity = "0"
-    logo.style.filter = "brightness(0)"
     logo.style.visibility = "visible"
     links.style.visibility = "hidden"
     navLinks.forEach((link) => {
@@ -312,15 +311,6 @@ export function Navbar() {
             ease: "inOutQuart",
           },
           260
-        )
-        .add(
-          logo,
-          {
-            filter: "brightness(0)",
-            duration: 300,
-            ease: "inOutQuad",
-          },
-          520
         )
         .add(
           contact,
@@ -454,15 +444,14 @@ export function Navbar() {
             style={{
               visibility: "hidden",
               opacity: 0,
-              filter: "brightness(0)",
             }}
           >
             <Image
-              src="/monogram.svg"
+              src="/typography/karnik-wordmark.svg"
               alt="Karnik Kanojia"
-              width={72}
-              height={20}
-              className="h-5 w-auto"
+              width={73}
+              height={22}
+              className="h-5 w-auto md:h-7"
               style={{ width: "auto" }}
               priority
             />
@@ -599,7 +588,6 @@ export function Navbar() {
                   alt=""
                   width={16}
                   height={16}
-                  className="mobile-menu-link-arrow transition-filter size-4 duration-200 ease-[cubic-bezier(0.23,1,0.32,1)] group-hover:invert"
                 />
               </a>
             ))}

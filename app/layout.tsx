@@ -1,9 +1,10 @@
-import type { Metadata } from "next"
+import type { Metadata, Viewport } from "next"
 import "./globals.css"
 import localFont from "next/font/local"
 import Script from "next/script"
 import { ReactLenis } from "lenis/react"
 import { cn } from "@/lib/utils"
+import { SITE_DESCRIPTION, SITE_NAME, SITE_URL } from "@/lib/site"
 
 const khTeka = localFont({
   src: [
@@ -26,8 +27,96 @@ const messinaSansMono = localFont({
 })
 
 export const metadata: Metadata = {
-  title: "Karnik Kanojia",
-  description: "Karnik Kanojia | SRE @ Oracle | Ex-Data Scientist @ MI4People",
+  metadataBase: new URL(SITE_URL),
+  title: {
+    default: SITE_NAME,
+    template: `%s | ${SITE_NAME}`,
+  },
+  description: SITE_DESCRIPTION,
+  applicationName: SITE_NAME,
+  authors: [{ name: SITE_NAME, url: SITE_URL }],
+  creator: SITE_NAME,
+  publisher: SITE_NAME,
+  category: "technology",
+  keywords: [
+    "Karnik Kanojia",
+    "Site Reliability Engineer",
+    "SRE",
+    "DevOps",
+    "Cloud Infrastructure",
+    "Automation",
+    "Data Science",
+    "Oracle",
+  ],
+  alternates: {
+    canonical: "/",
+  },
+  icons: {
+    icon: "/typography/karnik-k.svg",
+    shortcut: "/typography/karnik-k.svg",
+  },
+  openGraph: {
+    type: "website",
+    locale: "en_US",
+    url: "/",
+    siteName: SITE_NAME,
+    title: SITE_NAME,
+    description: SITE_DESCRIPTION,
+    images: [
+      {
+        url: "/videos/intro-poster.webp",
+        width: 1440,
+        height: 810,
+        alt: `${SITE_NAME} portfolio`,
+      },
+    ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: SITE_NAME,
+    description: SITE_DESCRIPTION,
+    images: ["/videos/intro-poster.webp"],
+  },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      "max-image-preview": "large",
+      "max-snippet": -1,
+      "max-video-preview": -1,
+    },
+  },
+  referrer: "origin-when-cross-origin",
+  formatDetection: {
+    email: false,
+    address: false,
+    telephone: false,
+  },
+}
+
+export const viewport: Viewport = {
+  colorScheme: "light",
+  themeColor: "#ffffff",
+}
+
+const personJsonLd = {
+  "@context": "https://schema.org",
+  "@type": "Person",
+  name: SITE_NAME,
+  url: SITE_URL,
+  image: `${SITE_URL}/typography/karnik-k.svg`,
+  jobTitle: "Site Reliability Engineer",
+  worksFor: {
+    "@type": "Organization",
+    name: "Oracle",
+  },
+  sameAs: [
+    "https://github.com/karnikkanojia",
+    "https://www.linkedin.com/in/karnikkanojia",
+    "https://medium.com/@karnikk1406120",
+  ],
 }
 
 export default function RootLayout({
@@ -41,6 +130,10 @@ export default function RootLayout({
       className={cn("font-sans", khTeka.variable, messinaSansMono.variable)}
     >
       <body>
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(personJsonLd) }}
+        />
         <Script id="initial-scroll-position" strategy="beforeInteractive">
           {`if (!window.location.hash) { window.history.scrollRestoration = "manual"; window.scrollTo(0, 0); }`}
         </Script>
