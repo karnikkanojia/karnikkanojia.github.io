@@ -1,6 +1,13 @@
 "use client"
 
-import { useRef, useEffect, useMemo, useState, CSSProperties } from "react"
+import {
+  useRef,
+  useEffect,
+  useMemo,
+  useState,
+  useCallback,
+  CSSProperties,
+} from "react"
 import { cn } from "@/lib/utils"
 import { WebGLErrorBoundary, WebGLFallback } from "./webgl-error-boundary"
 
@@ -173,13 +180,20 @@ export function AnimatedGradient({
   const animationTimeRef = useRef(initialTimeSeconds)
   const lastFrameTimeRef = useRef<number | undefined>(undefined)
   const shouldAnimateRef = useRef(shouldAnimate)
+  const requestedAnimationRef = useRef(shouldAnimate)
+  const isNearViewportRef = useRef(true)
 
   const [hasWebGLError, setHasWebGLError] = useState(false)
 
-  useEffect(() => {
-    shouldAnimateRef.current = shouldAnimate
+  const syncAnimationLoop = useCallback(() => {
+    const canAnimate =
+      requestedAnimationRef.current &&
+      isNearViewportRef.current &&
+      !document.hidden
 
-    if (!shouldAnimate) {
+    shouldAnimateRef.current = canAnimate
+
+    if (!canAnimate) {
       if (frameIdRef.current !== undefined) {
         cancelAnimationFrame(frameIdRef.current)
         frameIdRef.current = undefined
@@ -191,7 +205,34 @@ export function AnimatedGradient({
     if (frameIdRef.current === undefined && renderFrameRef.current !== null) {
       frameIdRef.current = requestAnimationFrame(renderFrameRef.current)
     }
-  }, [shouldAnimate])
+  }, [])
+
+  useEffect(() => {
+    requestedAnimationRef.current = shouldAnimate
+    syncAnimationLoop()
+  }, [shouldAnimate, syncAnimationLoop])
+
+  useEffect(() => {
+    const container = containerRef.current
+    if (!container) return
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        isNearViewportRef.current = entry?.isIntersecting ?? true
+        syncAnimationLoop()
+      },
+      { rootMargin: "200px" }
+    )
+    const handleVisibilityChange = () => syncAnimationLoop()
+
+    observer.observe(container)
+    document.addEventListener("visibilitychange", handleVisibilityChange)
+
+    return () => {
+      observer.disconnect()
+      document.removeEventListener("visibilitychange", handleVisibilityChange)
+    }
+  }, [syncAnimationLoop])
 
   const params = useMemo((): PresetParams => {
     if (config.preset === "custom") {
@@ -376,7 +417,7 @@ export function AnimatedGradient({
       })
       resizeObserver.observe(container)
 
-      frameIdRef.current = requestAnimationFrame(renderFrame)
+      syncAnimationLoop()
 
       return () => {
         if (frameIdRef.current !== undefined) {
@@ -394,7 +435,13 @@ export function AnimatedGradient({
       showWebglError()
       return
     }
-  }, [hasWebGLError, initialTimeSeconds, params, resizeWhilePaused])
+  }, [
+    hasWebGLError,
+    initialTimeSeconds,
+    params,
+    resizeWhilePaused,
+    syncAnimationLoop,
+  ])
 
   if (hasWebGLError) {
     return (

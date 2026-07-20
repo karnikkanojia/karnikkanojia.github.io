@@ -85,16 +85,21 @@ export function WorkExperience({
       list.querySelectorAll<HTMLElement>("[data-work-experience-position]")
     )
     const revealAnimations: ReturnType<typeof animate>[] = []
+    const supportsScrollDrivenReveal =
+      CSS.supports("animation-timeline: view()") &&
+      CSS.supports("animation-range: 0% 100%")
     const trailTimelines = new Map<
       HTMLElement,
       ReturnType<typeof createTimeline>
     >()
     let animationFrame: number | undefined
 
-    items.forEach((item) => {
-      item.style.opacity = "0"
-      item.style.transform = "translateY(24px)"
-    })
+    if (!supportsScrollDrivenReveal) {
+      items.forEach((item) => {
+        item.style.opacity = "0"
+        item.style.transform = "translateY(24px)"
+      })
+    }
 
     positionItems.forEach((item) => {
       const verticalTrail = item.querySelector<HTMLElement>(
@@ -133,26 +138,28 @@ export function WorkExperience({
       trailTimelines.set(item, timeline)
     })
 
-    const observer = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((entry) => {
-          if (!entry.isIntersecting) return
+    const observer = supportsScrollDrivenReveal
+      ? undefined
+      : new IntersectionObserver(
+          (entries) => {
+            entries.forEach((entry) => {
+              if (!entry.isIntersecting) return
 
-          const item = entry.target as HTMLElement
-          const animation = animate(item, {
-            opacity: [0, 1],
-            translateY: [24, 0],
-            duration: 560,
-            ease: cubicBezier(0.16, 1, 0.3, 1),
-          })
-          revealAnimations.push(animation)
-          observer.unobserve(item)
-        })
-      },
-      { threshold: 0.08, rootMargin: "0px 0px -10% 0px" }
-    )
+              const item = entry.target as HTMLElement
+              const animation = animate(item, {
+                opacity: [0, 1],
+                translateY: [24, 0],
+                duration: 560,
+                ease: cubicBezier(0.16, 1, 0.3, 1),
+              })
+              revealAnimations.push(animation)
+              observer?.unobserve(item)
+            })
+          },
+          { threshold: 0.08, rootMargin: "0px 0px -10% 0px" }
+        )
 
-    items.forEach((item) => observer.observe(item))
+    if (observer) items.forEach((item) => observer.observe(item))
 
     const updateTrailProgress = () => {
       const viewportHeight = window.innerHeight
@@ -181,9 +188,10 @@ export function WorkExperience({
     updateTrailProgress()
     window.addEventListener("scroll", handleScroll, { passive: true })
     return () => {
-      observer.disconnect()
+      observer?.disconnect()
       window.removeEventListener("scroll", handleScroll)
-      if (animationFrame !== undefined) window.cancelAnimationFrame(animationFrame)
+      if (animationFrame !== undefined)
+        window.cancelAnimationFrame(animationFrame)
       revealAnimations.forEach((animation) => animation.cancel())
       trailTimelines.forEach((timeline) => timeline.cancel())
       remove(items)
@@ -198,7 +206,7 @@ export function WorkExperience({
     <div
       ref={listRef}
       className={cn(
-        "mx-auto w-full max-w-3xl bg-background px-4 text-foreground font-sans",
+        "mx-auto w-full max-w-3xl bg-background px-4 font-sans text-foreground",
         className
       )}
     >
@@ -242,7 +250,7 @@ export function ExperienceItem({ experience }: ExperienceItemProps) {
               label={`Visit ${experience.companyName}`}
             >
               <a
-                className="link inline-flex items-center gap-1"
+                className="inline-flex items-center gap-1 link"
                 href={experience.companyWebsite}
                 target="_blank"
                 rel="noopener noreferrer"
@@ -264,12 +272,10 @@ export function ExperienceItem({ experience }: ExperienceItemProps) {
         </h3>
 
         {experience.isCurrentEmployer && (
-          <span
-            className="relative flex items-center justify-center"
-            aria-label="Current Employer"
-          >
+          <span className="relative flex items-center justify-center">
             <span className="absolute inline-flex size-3 animate-ping rounded-full bg-sky-500 opacity-50" />
             <span className="relative inline-flex size-2 rounded-full bg-sky-500" />
+            <span className="sr-only">Current employer</span>
           </span>
         )}
       </div>
@@ -330,14 +336,14 @@ export function ExperiencePositionItem({
             style={{ transform: "scaleY(0)" }}
           />
         </span>
-        <CollapsibleTrigger
-          className={cn(
-            "group/experience-position not-prose block w-full text-left select-none",
-            "relative before:absolute before:-top-1 before:-right-1 before:-bottom-1.5 before:left-7 before:rounded-lg hover:before:bg-muted/30",
-            "data-disabled:before:content-none"
-          )}
-        >
-          <div className="relative z-1 mb-1 flex items-start gap-3 text-base">
+        <h4 className="not-prose relative z-1 mb-1 text-base font-medium text-balance text-foreground">
+          <CollapsibleTrigger
+            className={cn(
+              "group/experience-position flex w-full items-start gap-3 text-left select-none",
+              "relative before:absolute before:-top-1 before:-right-1 before:-bottom-1.5 before:left-7 before:rounded-lg hover:before:bg-muted/30",
+              "data-disabled:before:content-none"
+            )}
+          >
             <div
               className={cn(
                 "flex size-6 shrink-0 items-center justify-center rounded-lg",
@@ -348,9 +354,7 @@ export function ExperiencePositionItem({
               {position.icon ?? <CodeXmlIcon />}
             </div>
 
-            <h4 className="flex-1 font-medium text-balance text-foreground">
-              {position.title}
-            </h4>
+            <span className="flex-1">{position.title}</span>
 
             <div className="shrink-0 text-muted-foreground group-disabled/experience-position:hidden [&_svg]:h-lh [&_svg]:w-4">
               <ChevronsUpDownIcon
@@ -359,40 +363,40 @@ export function ExperiencePositionItem({
                 initialOpen={position.isExpanded}
               />
             </div>
+          </CollapsibleTrigger>
+        </h4>
+
+        <dl className="relative z-1 flex items-center gap-2 pl-9 font-navbar text-xs tracking-wide text-muted-foreground uppercase">
+          {position.employmentType && (
+            <>
+              <div>
+                <dt className="sr-only">Employment Type</dt>
+                <dd>{position.employmentType}</dd>
+              </div>
+
+              <span aria-hidden>-</span>
+            </>
+          )}
+
+          <div>
+            <dt className="sr-only">Employment Period</dt>
+            <dd className="flex items-center gap-0.5 tabular-nums">
+              <span>{start}</span>
+              <span>.</span>
+              <span>{isOngoing ? "Present" : end}</span>
+            </dd>
           </div>
 
-          <dl className="relative z-1 flex items-center gap-2 pl-9 font-navbar text-xs tracking-wide text-muted-foreground uppercase">
-            {position.employmentType && (
-              <>
-                <div>
-                  <dt className="sr-only">Employment Type</dt>
-                  <dd>{position.employmentType}</dd>
-                </div>
-
-                <span aria-hidden>-</span>
-              </>
-            )}
-
-            <div>
-              <dt className="sr-only">Employment Period</dt>
-              <dd className="flex items-center gap-0.5 tabular-nums">
-                <span>{start}</span>
-                <span>.</span>
-                <span>{isOngoing ? "Present" : end}</span>
-              </dd>
-            </div>
-
-            {duration && (
-              <>
-                <span aria-hidden>-</span>
-                <div>
-                  <dt className="sr-only">Duration</dt>
-                  <dd className="tabular-nums">{duration}</dd>
-                </div>
-              </>
-            )}
-          </dl>
-        </CollapsibleTrigger>
+          {duration && (
+            <>
+              <span aria-hidden>-</span>
+              <div>
+                <dt className="sr-only">Duration</dt>
+                <dd className="tabular-nums">{duration}</dd>
+              </div>
+            </>
+          )}
+        </dl>
 
         <CollapsibleContent className="relative z-1 overflow-hidden">
           {position.description && (

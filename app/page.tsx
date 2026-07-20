@@ -6,7 +6,7 @@ import { ContactFooter } from "@/components/contact-footer"
 import { BlogsBento, ProjectsBento } from "@/components/bento-sections"
 import { getMediumPosts } from "@/lib/medium"
 
-export const dynamic = "force-dynamic"
+export const revalidate = 3600
 import { BrainIcon, DatabaseIcon, HospitalIcon } from "lucide-react"
 import {
   WorkExperience,
@@ -131,12 +131,25 @@ export default async function Home() {
     <>
       <Navbar />
       <IntroTransition>
-        <main className="min-h-screen w-full overflow-x-clip bg-white text-black">
+        <a
+          href="#content"
+          className="skip-link fixed top-3 left-3 z-[300] rounded-md bg-black px-4 py-2 text-white shadow-lg"
+        >
+          Skip to main content
+        </a>
+        <main
+          id="content"
+          tabIndex={-1}
+          className="min-h-screen w-full overflow-x-clip bg-white text-black focus:outline-none"
+        >
           <Hero />
           {sections.map((section) => (
             <section
               key={section.id}
               id={section.id}
+              data-deferred-section={
+                section.id === "about" ? undefined : "true"
+              }
               className={`relative z-10 flex scroll-mt-12 bg-white px-5 text-black md:px-8 ${
                 section.id === "work"
                   ? "min-h-screen items-center py-12 md:py-16"
@@ -144,10 +157,8 @@ export default async function Home() {
                     ? "min-h-0 items-start py-0"
                     : section.id === "projects" || section.id === "blogs"
                       ? "min-h-0 items-start py-8 md:py-6"
-                    : "min-h-[70vh] items-end py-12 md:py-16"
-              } ${
-                section.id === "about" ? "md:-mt-[100vh]" : ""
-              }`}
+                      : "min-h-[70vh] items-end py-12 md:py-16"
+              } ${section.id === "about" ? "md:-mt-[100vh]" : ""}`}
             >
               <div
                 className={
@@ -160,22 +171,25 @@ export default async function Home() {
                       : "w-full max-w-3xl"
                 }
               >
-                {section.id !== "github" &&
-                  section.id !== "work" &&
-                  section.id !== "projects" &&
-                  section.id !== "blogs" && (
-                  <p className="mb-4 text-sm tracking-wide text-black/55">
-                    {section.eyebrow}
-                  </p>
+                {section.id !== "about" && (
+                  <h2 className="sr-only">{section.title}</h2>
                 )}
                 {section.id !== "github" &&
                   section.id !== "work" &&
                   section.id !== "projects" &&
                   section.id !== "blogs" && (
-                  <h2 className="max-w-4xl text-3xl leading-[1.02] font-medium tracking-tight text-balance md:text-5xl">
-                    {section.title}
-                  </h2>
-                )}
+                    <p className="mb-4 text-sm tracking-wide text-black/55">
+                      {section.eyebrow}
+                    </p>
+                  )}
+                {section.id !== "github" &&
+                  section.id !== "work" &&
+                  section.id !== "projects" &&
+                  section.id !== "blogs" && (
+                    <h2 className="max-w-4xl text-3xl leading-[1.02] font-medium tracking-tight text-balance md:text-5xl">
+                      {section.title}
+                    </h2>
+                  )}
                 {section.id === "work" && (
                   <WorkExperience
                     className="mt-10 md:mt-14"

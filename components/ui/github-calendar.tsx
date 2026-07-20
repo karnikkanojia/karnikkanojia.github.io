@@ -122,13 +122,17 @@ export function GithubCalendar({
   const [hoveredDate, setHoveredDate] = React.useState<string | null>(null)
   const [hoveredCount, setHoveredCount] = React.useState<number | null>(null)
   const gridRef = React.useRef<HTMLDivElement>(null)
+  const summaryId = React.useId()
 
   React.useEffect(() => {
+    const controller = new AbortController()
+
     const fetchData = async () => {
       try {
         setLoading(true)
         const response = await fetch(
-          `/api/github-contributions/${encodeURIComponent(username)}`
+          `/api/github-contributions/${encodeURIComponent(username)}`,
+          { signal: controller.signal }
         )
         if (!response.ok) {
           throw new Error("Failed to fetch GitHub data")
@@ -136,15 +140,18 @@ export function GithubCalendar({
         const jsonData = await response.json()
         setData(jsonData)
       } catch (err) {
+        if (err instanceof DOMException && err.name === "AbortError") return
         setError(err instanceof Error ? err.message : "An error occurred")
       } finally {
-        setLoading(false)
+        if (!controller.signal.aborted) setLoading(false)
       }
     }
 
     if (username) {
       fetchData()
     }
+
+    return () => controller.abort()
   }, [username])
 
   React.useEffect(() => {
@@ -163,25 +170,27 @@ export function GithubCalendar({
 
   if (error) {
     return (
-      <div
+      <p
+        role="status"
         className={cn(
           "border border-red-300 bg-red-50 p-4 font-navbar text-[10px] tracking-wide text-red-700 uppercase",
           className
         )}
       >
         Error: {error}
-      </div>
+      </p>
     )
   }
 
   if (loading) {
     return (
-      <div
-        className={cn(
-          "h-40 w-full animate-pulse border border-black/10 bg-[#f1f1ee]",
-          className
-        )}
-      />
+      <div className={className}>
+        <p className="sr-only">Loading GitHub contribution data</p>
+        <div
+          aria-hidden="true"
+          className="h-40 w-full animate-pulse border border-black/10 bg-[#f1f1ee]"
+        />
+      </div>
     )
   }
 
@@ -217,7 +226,7 @@ export function GithubCalendar({
             labelClassName="[&_svg]:!size-3.5 [&_svg]:stroke-[1.75]"
           >
             <a
-              className="link inline-flex items-center gap-2"
+              className="inline-flex items-center gap-2 link"
               href={`https://github.com/${username}`}
               target="_blank"
               rel="noopener noreferrer"
@@ -252,7 +261,15 @@ export function GithubCalendar({
         </div>
       )}
 
-      <div className="my-5 border border-black/12 bg-[#e8e8e3] p-2 sm:p-3 md:my-6">
+      <figure
+        aria-labelledby={summaryId}
+        className="my-5 border border-black/12 bg-[#e8e8e3] p-2 sm:p-3 md:my-6"
+      >
+        <figcaption id={summaryId} className="sr-only">
+          GitHub contribution calendar for {username}:{" "}
+          {data?.totalContributions} contributions across {weeks.length} weeks,
+          with {activeDays} active days.
+        </figcaption>
         <CursorFollowLabel
           className="w-full"
           label={hoveredLabel}
@@ -260,6 +277,7 @@ export function GithubCalendar({
         >
           <div
             ref={gridRef}
+            aria-hidden="true"
             className="grid w-full auto-cols-fr grid-flow-col gap-px sm:gap-0.75"
             onMouseLeave={() => {
               setHoveredDate(null)
@@ -281,13 +299,12 @@ export function GithubCalendar({
                     <div
                       key={day.date}
                       data-contribution-day
-                      aria-label={`${day.contributionCount} contributions on ${day.date}`}
                       onMouseEnter={() => {
                         setHoveredDate(day.date)
                         setHoveredCount(day.contributionCount)
                       }}
                       className={cn(
-                        "github-contribution-day aspect-square w-full opacity-0 [box-shadow:inset_0_0_0_1px_rgb(0_0_0/0.08)] transition-[transform,background-color,box-shadow] duration-160 ease-[cubic-bezier(0.23,1,0.32,1)]",
+                        "github-contribution-day aspect-square w-full [box-shadow:inset_0_0_0_1px_rgb(0_0_0/0.08)] transition-[transform,background-color,box-shadow] duration-160 ease-[cubic-bezier(0.23,1,0.32,1)]",
                         getLevelClass(day.contributionLevel, colorSchema),
                         isGlowing && "z-10",
                         shapeClass,
@@ -318,7 +335,26 @@ export function GithubCalendar({
             ))}
           </div>
         </CursorFollowLabel>
-      </div>
+        <table className="sr-only">
+          <caption>Active GitHub contribution days for {username}</caption>
+          <thead>
+            <tr>
+              <th scope="col">Date</th>
+              <th scope="col">Contributions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {contributionDays
+              .filter((day) => day.contributionCount > 0)
+              .map((day) => (
+                <tr key={day.date}>
+                  <th scope="row">{day.date}</th>
+                  <td>{day.contributionCount}</td>
+                </tr>
+              ))}
+          </tbody>
+        </table>
+      </figure>
 
       <div className="flex flex-col gap-3 font-navbar text-[9px] leading-none font-light tracking-[0.12em] text-black/45 uppercase sm:flex-row sm:items-center sm:justify-between sm:text-[10px]">
         <span>
@@ -326,6 +362,7 @@ export function GithubCalendar({
         </span>
         <div
           className="flex items-center gap-2"
+          role="img"
           aria-label="Contribution intensity"
         >
           <span>Less</span>

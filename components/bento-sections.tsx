@@ -19,6 +19,7 @@ type BentoItem = {
   href: string
   className?: string
   imageClassName?: string
+  imageSizes?: string
 }
 
 const projects: BentoItem[] = [
@@ -31,6 +32,8 @@ const projects: BentoItem[] = [
     imageAlt: "Abstract command center dashboard with service health charts",
     href: "#contact",
     className: "md:col-span-7",
+    imageSizes:
+      "(min-width: 1200px) 650px, (min-width: 768px) 58vw, calc(100vw - 40px)",
   },
   {
     title: "Vision Lab",
@@ -41,6 +44,8 @@ const projects: BentoItem[] = [
     imageAlt: "Abstract medical imaging model interface",
     href: "#contact",
     className: "md:col-span-5",
+    imageSizes:
+      "(min-width: 1200px) 460px, (min-width: 768px) 42vw, calc(100vw - 40px)",
   },
   {
     title: "Changeflow",
@@ -51,6 +56,8 @@ const projects: BentoItem[] = [
     imageAlt: "Abstract data synchronization flow",
     href: "#contact",
     className: "md:col-span-5",
+    imageSizes:
+      "(min-width: 1200px) 460px, (min-width: 768px) 42vw, calc(100vw - 40px)",
   },
   {
     title: "Infrastructure Atlas",
@@ -61,70 +68,77 @@ const projects: BentoItem[] = [
     imageAlt: "Abstract infrastructure dependency map",
     href: "#contact",
     className: "md:col-span-7",
+    imageSizes:
+      "(min-width: 1200px) 650px, (min-width: 768px) 58vw, calc(100vw - 40px)",
   },
 ]
 
 function BentoCard({ item }: { item: BentoItem }) {
   return (
-    <CursorFollowLabel
-      className={cn("group min-w-0", item.className)}
-      label="View"
-      icon={<ArrowUpRight aria-hidden="true" />}
-    >
-      <a
-        href={item.href}
-        aria-label={`View ${item.title}`}
-        target={item.href.startsWith("http") ? "_blank" : undefined}
-        rel={item.href.startsWith("http") ? "noreferrer" : undefined}
-        className="bento-card flex h-full min-h-75 flex-col overflow-hidden rounded-[1.05rem] border border-transparent bg-[#f4f4f1] p-2 transition-[transform,border-color] duration-200 ease-[cubic-bezier(0.23,1,0.32,1)] active:scale-[0.985] md:min-h-0"
+    <li className={cn("min-w-0", item.className)}>
+      <CursorFollowLabel
+        className="group h-full min-w-0"
+        label="View"
+        icon={<ArrowUpRight aria-hidden="true" />}
       >
-        <div
-          className={cn(
-            "bento-card-image relative min-h-42.5 flex-1 overflow-hidden rounded-[0.75rem] bg-[#e8e8e4] md:min-h-0",
-            item.imageClassName
-          )}
+        <a
+          href={item.href}
+          aria-label={`View ${item.title}`}
+          target={item.href.startsWith("http") ? "_blank" : undefined}
+          rel={item.href.startsWith("http") ? "noreferrer" : undefined}
+          className="bento-card flex h-full min-h-75 flex-col overflow-hidden rounded-[1.05rem] border border-transparent bg-[#f4f4f1] p-2 transition-[transform,border-color] duration-200 ease-[cubic-bezier(0.23,1,0.32,1)] active:scale-[0.985] md:min-h-0"
         >
-          {item.image && (
-            <Image
-              src={item.image}
-              alt={item.imageAlt ?? ""}
-              fill
-              sizes="(min-width: 768px) 66vw, 100vw"
-              className="object-cover transition-transform duration-240 ease-[cubic-bezier(0.23,1,0.32,1)]"
-            />
-          )}
-          <span className="bento-card-arrow absolute top-2.5 left-2.5 z-10 grid size-9 scale-[0.96] place-items-center rounded-3xl border border-black/8 bg-white text-black opacity-0 shadow-[0_4px_16px_rgb(0_0_0/0.08)] transition-[opacity,transform] duration-180 ease-[cubic-bezier(0.23,1,0.32,1)]">
-            <ArrowUpRight aria-hidden="true" className="size-4 stroke-[1.6]" />
-          </span>
-        </div>
-        <div className="px-2.5 pt-3.5 pb-2 md:px-3 md:pt-4 md:pb-2.5">
-          {item.pills?.length ? (
-            <div className="bento-card-meta flex flex-wrap gap-1.5 transition-colors duration-180">
-              {item.pills.map((pill, pillIndex) => (
-                <span
-                  key={`${pill}-${pillIndex}`}
-                  className="inline-flex items-center rounded-md border bg-muted/50 px-1.5 py-0.5 font-navbar text-[10px] tracking-wide text-muted-foreground uppercase transition-[transform,background-color,border-color] duration-150 ease-[cubic-bezier(0.23,1,0.32,1)] group-active:scale-[0.96] group-active:border-black/30 group-active:bg-black/5"
-                >
-                  {pill}
-                </span>
-              ))}
-            </div>
-          ) : (
-            <p className="bento-card-meta font-navbar text-[10px] tracking-[0.08em] text-black/48 uppercase transition-colors duration-180">
-              {item.meta}
-            </p>
-          )}
-          <h3 className="bento-card-title mt-1.5 text-[1.35rem] leading-[1.02] font-medium tracking-tight text-balance transition-colors duration-180 md:text-[1.55rem]">
-            {item.title}
-          </h3>
-          {item.description && (
-            <p className="bento-card-description mt-2 max-w-[52ch] text-[13px] leading-[1.4] text-black/58 transition-colors duration-180">
-              {item.description}
-            </p>
-          )}
-        </div>
-      </a>
-    </CursorFollowLabel>
+          <div
+            className={cn(
+              "bento-card-image relative min-h-42.5 flex-1 overflow-hidden rounded-[0.75rem] bg-[#e8e8e4] md:min-h-0",
+              item.imageClassName
+            )}
+          >
+            {item.image && (
+              <Image
+                src={item.image}
+                alt={item.imageAlt ?? ""}
+                fill
+                sizes={item.imageSizes ?? "(min-width: 768px) 66vw, 100vw"}
+                className="object-cover transition-transform duration-240 ease-[cubic-bezier(0.23,1,0.32,1)]"
+              />
+            )}
+            <span className="bento-card-arrow absolute top-2.5 left-2.5 z-10 grid size-9 scale-[0.96] place-items-center rounded-3xl border border-black/8 bg-white text-black opacity-0 shadow-[0_4px_16px_rgb(0_0_0/0.08)] transition-[opacity,transform] duration-180 ease-[cubic-bezier(0.23,1,0.32,1)]">
+              <ArrowUpRight
+                aria-hidden="true"
+                className="size-4 stroke-[1.6]"
+              />
+            </span>
+          </div>
+          <div className="px-2.5 pt-3.5 pb-2 md:px-3 md:pt-4 md:pb-2.5">
+            {item.pills?.length ? (
+              <div className="bento-card-meta flex flex-wrap gap-1.5 transition-colors duration-180">
+                {item.pills.map((pill, pillIndex) => (
+                  <span
+                    key={`${pill}-${pillIndex}`}
+                    className="inline-flex items-center rounded-md border bg-muted/50 px-1.5 py-0.5 font-navbar text-[10px] tracking-wide text-muted-foreground uppercase transition-[transform,background-color,border-color] duration-150 ease-[cubic-bezier(0.23,1,0.32,1)] group-active:scale-[0.96] group-active:border-black/30 group-active:bg-black/5"
+                  >
+                    {pill}
+                  </span>
+                ))}
+              </div>
+            ) : (
+              <p className="bento-card-meta font-navbar text-[10px] tracking-[0.08em] text-black/48 uppercase transition-colors duration-180">
+                {item.meta}
+              </p>
+            )}
+            <h3 className="bento-card-title mt-1.5 text-[1.35rem] leading-[1.02] font-medium tracking-tight text-balance transition-colors duration-180 md:text-[1.55rem]">
+              {item.title}
+            </h3>
+            {item.description && (
+              <p className="bento-card-description mt-2 max-w-[52ch] text-[13px] leading-[1.4] text-black/58 transition-colors duration-180">
+                {item.description}
+              </p>
+            )}
+          </div>
+        </a>
+      </CursorFollowLabel>
+    </li>
   )
 }
 
@@ -139,11 +153,11 @@ function BentoSection({
 }) {
   return (
     <div className="md:flex md:h-[calc(100svh-3rem)] md:min-h-125 md:flex-col">
-      <div className="grid grid-cols-1 gap-2.5 md:min-h-0 md:flex-1 md:grid-cols-12 md:grid-rows-2 md:gap-3">
+      <ul className="grid grid-cols-1 gap-2.5 md:min-h-0 md:flex-1 md:grid-cols-12 md:grid-rows-2 md:gap-3">
         {items.map((item) => (
           <BentoCard key={item.title} item={item} />
         ))}
-      </div>
+      </ul>
       <div className="mt-5 flex justify-end md:mt-4">
         <CursorFollowLabel
           as="span"
@@ -192,6 +206,12 @@ export function BlogsBento({ posts }: { posts: MediumPost[] }) {
         : index % 2 === 0
           ? "md:col-span-8"
           : "md:col-span-4",
+    imageSizes:
+      posts.length === 1
+        ? "(min-width: 1200px) 1120px, calc(100vw - 40px)"
+        : index % 2 === 0
+          ? "(min-width: 1200px) 740px, (min-width: 768px) 66vw, calc(100vw - 40px)"
+          : "(min-width: 1200px) 360px, (min-width: 768px) 34vw, calc(100vw - 40px)",
   }))
 
   return (

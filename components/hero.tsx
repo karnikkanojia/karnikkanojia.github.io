@@ -407,12 +407,8 @@ export function HeroSurface({
       <button
         type="button"
         data-hero-surface="true"
-        aria-label={
-          gradientAnimating
-            ? "Pause animated gradient"
-            : "Play animated gradient"
-        }
-        aria-pressed={!gradientAnimating}
+        aria-label="Animated gradient"
+        aria-pressed={gradientAnimating}
         className="relative block h-full w-full cursor-pointer overflow-hidden rounded-[0.625rem] border-0 bg-white p-0 text-left focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-black"
         onClick={() => setGradientAnimating((isAnimating) => !isAnimating)}
       >
@@ -485,7 +481,6 @@ function HeroCopy({ className, ref }: HeroCopyProps) {
               width={20}
               height={20}
               className="size-5 translate-y-[3.5px] rounded-sm"
-              priority
             />
           </MaskedWord>
           <MaskedWord>currently</MaskedWord>

@@ -40,6 +40,7 @@ const dateFormatter = new Intl.DateTimeFormat("en-IN", {
 
 export function ContactFooter() {
   const [now, setNow] = useState<Date | null>(null)
+  const [isInteractive, setIsInteractive] = useState(false)
   const shellRef = useRef<HTMLElement>(null)
   const footerRef = useRef<HTMLElement>(null)
 
@@ -51,6 +52,19 @@ export function ContactFooter() {
     return () => window.clearInterval(timer)
   }, [])
 
+  useEffect(() => {
+    const shell = shellRef.current
+    if (!shell) return
+
+    const observer = new IntersectionObserver(
+      ([entry]) => setIsInteractive(entry?.isIntersecting ?? false),
+      { threshold: 0.01 }
+    )
+
+    observer.observe(shell)
+    return () => observer.disconnect()
+  }, [])
+
   useLayoutEffect(() => {
     const shell = shellRef.current
     const footer = footerRef.current
@@ -58,15 +72,13 @@ export function ContactFooter() {
 
     let renderFrameId = 0
     let measureFrameId = 0
-    let shellTop = 0
     let travel = 0
 
     const render = () => {
       renderFrameId = 0
+      const shellViewportTop = shell.getBoundingClientRect().top
       const progress =
-        travel === 0
-          ? 0
-          : Math.min(Math.max((window.scrollY - shellTop) / travel, 0), 1)
+        travel === 0 ? 0 : Math.min(Math.max(-shellViewportTop / travel, 0), 1)
 
       footer.style.transform = `translate3d(0, ${-travel * progress}px, 0)`
     }
@@ -81,7 +93,6 @@ export function ContactFooter() {
       const footerHeight = footer.offsetHeight
 
       shell.style.height = `${footerHeight}px`
-      shellTop = shell.getBoundingClientRect().top + window.scrollY
       travel = Math.max(footerHeight - window.innerHeight, 0)
       render()
     }
@@ -118,6 +129,8 @@ export function ContactFooter() {
     >
       <footer
         ref={footerRef}
+        inert={!isInteractive}
+        aria-hidden={!isInteractive}
         className="contact-footer pointer-events-auto fixed inset-x-0 top-0 z-0 min-h-184 bg-[#080808] px-5 pt-8 pb-7 text-[#f1f1ed] will-change-transform md:min-h-svh md:px-8 md:pt-10 md:pb-8"
       >
         <div

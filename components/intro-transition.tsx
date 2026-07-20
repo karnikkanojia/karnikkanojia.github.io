@@ -14,6 +14,7 @@ type IntroTransitionProps = {
 
 export function IntroTransition({ children }: IntroTransitionProps) {
   const loaderRef = useRef<HTMLDivElement>(null)
+  const contentRef = useRef<HTMLDivElement>(null)
   const videoRef = useRef<HTMLVideoElement>(null)
   const playbackStartedRef = useRef(false)
   const finishingRef = useRef(false)
@@ -111,6 +112,16 @@ export function IntroTransition({ children }: IntroTransitionProps) {
   }, [introVisible, lenis])
 
   useEffect(() => {
+    const content = contentRef.current
+    if (!content) return
+
+    content.inert = introVisible
+    return () => {
+      content.inert = false
+    }
+  }, [introVisible])
+
+  useEffect(() => {
     const video = videoRef.current
     if (!video) return
 
@@ -146,18 +157,20 @@ export function IntroTransition({ children }: IntroTransitionProps) {
 
   return (
     <>
-      <div className="relative z-10 flow-root min-h-screen w-full bg-white">
+      <div
+        ref={contentRef}
+        className="relative z-10 flow-root min-h-screen w-full bg-white"
+      >
         {children}
       </div>
       {introVisible && (
         <div
           ref={loaderRef}
+          data-site-intro
           className={`fixed inset-0 z-100 grid place-items-center overflow-hidden bg-white transition-opacity duration-900 ease-[cubic-bezier(0.77,0,0.175,1)] ${
             introFinishing ? "pointer-events-none opacity-0" : "opacity-100"
           }`}
-          aria-label="Loading"
-          aria-hidden={introFinishing}
-          role="status"
+          aria-hidden="true"
           onTransitionEnd={(event) => {
             if (
               introFinishing &&
@@ -176,8 +189,11 @@ export function IntroTransition({ children }: IntroTransitionProps) {
             <video
               ref={videoRef}
               className="block h-auto w-full translate-x-[2vw] md:translate-x-0"
+              width={1440}
+              height={810}
               muted
               playsInline
+              aria-hidden="true"
               preload="auto"
               poster="/videos/intro-poster.webp"
               onError={finishIntro}

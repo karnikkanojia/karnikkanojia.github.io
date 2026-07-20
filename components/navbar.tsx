@@ -3,7 +3,13 @@
 import { animate, createTimeline, cubicBezier, stagger } from "animejs"
 import { useLenis } from "lenis/react"
 import Image from "next/image"
-import { useEffect, useLayoutEffect, useRef, useState } from "react"
+import {
+  useCallback,
+  useEffect,
+  useLayoutEffect,
+  useRef,
+  useState,
+} from "react"
 
 const RESUME_URL =
   "https://drive.google.com/file/d/1BZi0plL9zUQAPkJ0Qz4lJjMWQUvh4_v5/view?usp=sharing"
@@ -148,7 +154,7 @@ function NavLink({ href, label, external }: NavbarLinkItem) {
 
 export function Navbar() {
   const logoRef = useRef<HTMLSpanElement>(null)
-  const linksRef = useRef<HTMLDivElement>(null)
+  const linksRef = useRef<HTMLUListElement>(null)
   const contactRef = useRef<HTMLDivElement>(null)
   const contactButtonRef = useRef<HTMLAnchorElement>(null)
   const contactShapeRef = useRef<HTMLSpanElement>(null)
@@ -156,10 +162,15 @@ export function Navbar() {
     null
   )
   const contactDotsRef = useRef<HTMLSpanElement>(null)
+  const mobileMenuDialogRef = useRef<HTMLDialogElement>(null)
+  const mobileMenuButtonRef = useRef<HTMLButtonElement>(null)
+  const mobileMenuCloseTimeoutRef = useRef<number | undefined>(undefined)
   const contactDotsHoverAnimationRef = useRef<ReturnType<
     typeof animate
   > | null>(null)
+  const [isIntroComplete, setIsIntroComplete] = useState(false)
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
+  const [isMobileViewport, setIsMobileViewport] = useState(false)
   const lenis = useLenis()
   const {
     isFooterActive,
@@ -168,11 +179,91 @@ export function Navbar() {
   } = useNavbarScrollState()
 
   useEffect(() => {
+    const markIntroComplete = () => setIsIntroComplete(true)
+
+    if (document.documentElement.dataset.siteIntroComplete === "true") {
+      markIntroComplete()
+      return
+    }
+
+    window.addEventListener("site-loader:complete", markIntroComplete, {
+      once: true,
+    })
+    return () =>
+      window.removeEventListener("site-loader:complete", markIntroComplete)
+  }, [])
+
+  useEffect(() => {
+    const query = window.matchMedia("(max-width: 767px)")
+    const updateViewport = () => setIsMobileViewport(query.matches)
+
+    updateViewport()
+    query.addEventListener("change", updateViewport)
+    return () => query.removeEventListener("change", updateViewport)
+  }, [])
+
+  const finishMobileMenuClose = useCallback((restoreFocus = true) => {
+    if (mobileMenuCloseTimeoutRef.current !== undefined) {
+      window.clearTimeout(mobileMenuCloseTimeoutRef.current)
+      mobileMenuCloseTimeoutRef.current = undefined
+    }
+
+    const dialog = mobileMenuDialogRef.current
+    if (dialog?.open) dialog.close()
+    if (restoreFocus) mobileMenuButtonRef.current?.focus()
+  }, [])
+
+  const closeMobileMenu = useCallback(() => {
+    if (mobileMenuCloseTimeoutRef.current !== undefined) {
+      window.clearTimeout(mobileMenuCloseTimeoutRef.current)
+    }
+
+    setIsMobileMenuOpen(false)
+    mobileMenuCloseTimeoutRef.current = window.setTimeout(
+      () => finishMobileMenuClose(),
+      520
+    )
+  }, [finishMobileMenuClose])
+
+  const openMobileMenu = () => {
+    const dialog = mobileMenuDialogRef.current
+    if (!dialog || dialog.open) return
+
+    dialog.showModal()
+    requestAnimationFrame(() => setIsMobileMenuOpen(true))
+  }
+
+  useEffect(() => {
     if (!isFooterActive) return
 
-    const frameId = requestAnimationFrame(() => setIsMobileMenuOpen(false))
+    const frameId = requestAnimationFrame(() => {
+      if (mobileMenuDialogRef.current?.open) closeMobileMenu()
+    })
     return () => cancelAnimationFrame(frameId)
-  }, [isFooterActive])
+  }, [closeMobileMenu, isFooterActive])
+
+  useEffect(() => {
+    if (!isMobileMenuOpen) return
+
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key !== "Escape") return
+
+      event.preventDefault()
+      closeMobileMenu()
+    }
+
+    document.addEventListener("keydown", handleKeyDown)
+    return () => document.removeEventListener("keydown", handleKeyDown)
+  }, [closeMobileMenu, isMobileMenuOpen])
+
+  useEffect(
+    () => () => {
+      if (mobileMenuCloseTimeoutRef.current !== undefined) {
+        window.clearTimeout(mobileMenuCloseTimeoutRef.current)
+      }
+    },
+    []
+  )
 
   const animateContactRadius = (radius: number) => {
     const contactShape = contactShapeRef.current
@@ -413,13 +504,7 @@ export function Navbar() {
     html.style.overscrollBehavior = "none"
     body.style.overflow = "hidden"
 
-    const closeOnEscape = (event: KeyboardEvent) => {
-      if (event.key === "Escape") setIsMobileMenuOpen(false)
-    }
-
-    window.addEventListener("keydown", closeOnEscape)
     return () => {
-      window.removeEventListener("keydown", closeOnEscape)
       lenis?.start()
       html.style.overflow = previousHtmlOverflow
       html.style.overscrollBehavior = previousHtmlOverscrollBehavior
@@ -431,6 +516,17 @@ export function Navbar() {
     <>
       <nav
         data-site-navbar
+        aria-label="Primary"
+        inert={
+          !isIntroComplete ||
+          isFooterActive ||
+          (!isNavbarVisible && !isMobileMenuOpen)
+        }
+        aria-hidden={
+          !isIntroComplete ||
+          isFooterActive ||
+          (!isNavbarVisible && !isMobileMenuOpen)
+        }
         className={`fixed top-0 right-0 left-0 z-[102] flex h-14 items-center justify-between px-5 font-navbar text-black transition-transform duration-220 ease-[cubic-bezier(0.23,1,0.32,1)] md:h-[4.125rem] md:px-6 ${
           !isFooterActive && (isNavbarVisible || isMobileMenuOpen)
             ? "translate-y-0"
@@ -464,14 +560,16 @@ export function Navbar() {
               : "translate-x-0 bg-transparent px-0 py-0"
           }`}
         >
-          <div
+          <ul
             ref={linksRef}
             className="group/nav-links hidden items-center gap-1 md:flex"
           >
             {DESKTOP_LINKS.map((link) => (
-              <NavLink key={link.label} {...link} />
+              <li key={link.label}>
+                <NavLink {...link} />
+              </li>
             ))}
-          </div>
+          </ul>
           <div
             ref={contactRef}
             className="inline-flex items-center gap-2.5"
@@ -495,20 +593,28 @@ export function Navbar() {
               </span>
             </a>
             <button
+              ref={mobileMenuButtonRef}
               type="button"
               aria-label={
-                isMobileMenuOpen
+                isMobileViewport && isMobileMenuOpen
                   ? "Close navigation menu"
-                  : "Open navigation menu"
+                  : isMobileViewport
+                    ? "Open navigation menu"
+                    : "Go to contact section"
               }
-              aria-controls="mobile-navigation"
-              aria-expanded={isMobileMenuOpen}
+              aria-controls={isMobileViewport ? "mobile-navigation" : undefined}
+              aria-expanded={isMobileViewport ? isMobileMenuOpen : undefined}
               className="relative isolate inline-flex size-[26px] shrink-0 transform-gpu border-0 bg-transparent p-0"
               onPointerEnter={() => animateContactDotsScale(1.25)}
               onPointerLeave={() => animateContactDotsScale(1)}
               onClick={() => {
-                if (window.matchMedia("(max-width: 767px)").matches) {
-                  setIsMobileMenuOpen((isOpen) => !isOpen)
+                if (isMobileViewport) {
+                  if (isMobileMenuOpen) closeMobileMenu()
+                  else openMobileMenu()
+                } else {
+                  document
+                    .querySelector("#contact")
+                    ?.scrollIntoView({ behavior: "smooth" })
                 }
               }}
             >
@@ -549,12 +655,11 @@ export function Navbar() {
           </div>
         </div>
       </nav>
-      <div
+      <dialog
+        ref={mobileMenuDialogRef}
         id="mobile-navigation"
-        aria-hidden={!isMobileMenuOpen || isFooterActive}
-        className={`fixed inset-0 z-[101] bg-[#f1f1f1] px-5 pt-24 pb-6 font-navbar md:hidden ${
-          isMobileMenuOpen && !isFooterActive ? "" : "pointer-events-none"
-        }`}
+        aria-label="Navigation menu"
+        className="fixed inset-0 m-0 h-full max-h-none w-full max-w-none border-0 bg-[#f1f1f1] p-0 font-navbar md:hidden [&::backdrop]:bg-transparent"
         style={{
           opacity: isMobileMenuOpen && !isFooterActive ? 1 : 0,
           transform:
@@ -565,35 +670,71 @@ export function Navbar() {
             "transform 460ms cubic-bezier(0.32, 0.72, 0, 1), opacity 180ms ease-out",
           willChange: "transform",
         }}
+        onCancel={(event) => {
+          event.preventDefault()
+          closeMobileMenu()
+        }}
+        onTransitionEnd={(event) => {
+          if (
+            !isMobileMenuOpen &&
+            event.target === event.currentTarget &&
+            event.propertyName === "transform"
+          ) {
+            finishMobileMenuClose()
+          }
+        }}
       >
-        <div className="flex h-full flex-col">
-          <div>
-            {MOBILE_LINKS.map((link) => (
-              <a
-                key={link.label}
-                href={link.href}
-                target={link.external ? "_blank" : undefined}
-                rel={link.external ? "noopener noreferrer" : undefined}
-                className="mobile-menu-link group flex items-center justify-between border-b border-black/10 px-0 py-5 text-base leading-none font-light text-black transition-[background-color,color,padding] duration-200 ease-[cubic-bezier(0.23,1,0.32,1)] hover:border-[#1c1c1c] hover:bg-[#1c1c1c] hover:px-3 hover:text-white"
-                tabIndex={isMobileMenuOpen ? 0 : -1}
-                onPointerEnter={(event) =>
-                  animateMobileMenuArrow(event.currentTarget)
-                }
-                onFocus={(event) => animateMobileMenuArrow(event.currentTarget)}
-                onClick={() => setIsMobileMenuOpen(false)}
-              >
-                <span>{link.label}</span>
-                <Image
-                  src="/noun-up-right-648092.svg"
-                  alt=""
-                  width={16}
-                  height={16}
-                />
-              </a>
-            ))}
-          </div>
+        <button
+          type="button"
+          aria-label="Close navigation menu"
+          className="absolute top-4 right-5 grid size-8 place-items-center rounded-full md:hidden"
+          onClick={closeMobileMenu}
+        >
+          <svg aria-hidden="true" viewBox="0 0 24 24" className="size-6">
+            <path
+              d="M7 7L17 17M17 7L7 17"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="1.5"
+              strokeLinecap="square"
+            />
+          </svg>
+        </button>
+        <div className="flex h-full flex-col px-5 pt-24 pb-6">
+          <nav aria-label="Mobile">
+            <ul>
+              {MOBILE_LINKS.map((link) => (
+                <li key={link.label}>
+                  <a
+                    href={link.href}
+                    target={link.external ? "_blank" : undefined}
+                    rel={link.external ? "noopener noreferrer" : undefined}
+                    className="mobile-menu-link group flex items-center justify-between border-b border-black/10 px-0 py-5 text-base leading-none font-light text-black transition-[background-color,color,padding] duration-200 ease-[cubic-bezier(0.23,1,0.32,1)] hover:border-[#1c1c1c] hover:bg-[#1c1c1c] hover:px-3 hover:text-white"
+                    onPointerEnter={(event) =>
+                      animateMobileMenuArrow(event.currentTarget)
+                    }
+                    onFocus={(event) =>
+                      animateMobileMenuArrow(event.currentTarget)
+                    }
+                    onClick={() => {
+                      setIsMobileMenuOpen(false)
+                      finishMobileMenuClose(false)
+                    }}
+                  >
+                    <span>{link.label}</span>
+                    <Image
+                      src="/noun-up-right-648092.svg"
+                      alt=""
+                      width={16}
+                      height={16}
+                    />
+                  </a>
+                </li>
+              ))}
+            </ul>
+          </nav>
         </div>
-      </div>
+      </dialog>
     </>
   )
 }

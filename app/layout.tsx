@@ -129,7 +129,21 @@ export default function RootLayout({
       lang="en"
       className={cn("font-sans", khTeka.variable, messinaSansMono.variable)}
     >
+      <head>
+        <link
+          rel="preload"
+          as="image"
+          href="/videos/intro-poster.webp"
+          fetchPriority="high"
+        />
+      </head>
       <body>
+        <noscript>
+          <style>{`
+            html, body { overflow: auto !important; overscroll-behavior: auto !important; }
+            [data-site-intro] { display: none !important; }
+          `}</style>
+        </noscript>
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(personJsonLd) }}
