@@ -7,10 +7,11 @@ export default function NotFound() {
       <Image
         src="/videos/intro-poster.webp"
         alt=""
-        fill
+        width={1440}
+        height={810}
         priority
-        sizes="100vw"
-        className="object-cover"
+        sizes="(max-width: 640px) 72vw, 24rem"
+        className="pointer-events-none absolute top-1/2 left-1/2 h-auto w-[72vw] max-w-[24rem] -translate-x-1/2 -translate-y-1/2 object-contain"
       />
 
       <div className="relative z-10 flex min-h-svh flex-col justify-between p-5 sm:p-8">
