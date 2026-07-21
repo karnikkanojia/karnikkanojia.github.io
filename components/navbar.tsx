@@ -229,9 +229,15 @@ export function Navbar() {
     const dialog = mobileMenuDialogRef.current
     if (!dialog || dialog.open) return
 
-    dialog.showModal()
-    requestAnimationFrame(() => setIsMobileMenuOpen(true))
+    setIsMobileMenuOpen(true)
   }
+
+  useLayoutEffect(() => {
+    if (!isMobileMenuOpen) return
+
+    const dialog = mobileMenuDialogRef.current
+    if (dialog && !dialog.open) dialog.showModal()
+  }, [isMobileMenuOpen])
 
   useEffect(() => {
     if (!isFooterActive) return
@@ -659,17 +665,8 @@ export function Navbar() {
         ref={mobileMenuDialogRef}
         id="mobile-navigation"
         aria-label="Navigation menu"
+        data-open={isMobileMenuOpen && !isFooterActive}
         className="fixed inset-0 m-0 h-full max-h-none w-full max-w-none border-0 bg-[#f1f1f1] p-0 font-navbar md:hidden [&::backdrop]:bg-transparent"
-        style={{
-          opacity: isMobileMenuOpen && !isFooterActive ? 1 : 0,
-          transform:
-            isMobileMenuOpen && !isFooterActive
-              ? "translate3d(0, 0, 0)"
-              : "translate3d(0, -100%, 0)",
-          transition:
-            "transform 460ms cubic-bezier(0.32, 0.72, 0, 1), opacity 180ms ease-out",
-          willChange: "transform",
-        }}
         onCancel={(event) => {
           event.preventDefault()
           closeMobileMenu()

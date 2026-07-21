@@ -167,6 +167,29 @@ html:not([data-site-navbar-ready]) [data-site-navbar] {
   white-space: nowrap;
 }
 
+#mobile-navigation {
+  opacity: 0;
+  transform: translate3d(0, -100%, 0);
+  transition-property: transform, opacity, display, overlay;
+  transition-duration: 460ms, 180ms, 460ms, 460ms;
+  transition-timing-function:
+    cubic-bezier(0.32, 0.72, 0, 1), ease-out, linear, linear;
+  transition-behavior: allow-discrete;
+  will-change: transform;
+}
+
+#mobile-navigation[data-open="true"] {
+  opacity: 1;
+  transform: translate3d(0, 0, 0);
+}
+
+@starting-style {
+  #mobile-navigation[data-open="true"] {
+    opacity: 0;
+    transform: translate3d(0, -100%, 0);
+  }
+}
+
 :where(a:any-link, button, [role="button"]):focus-visible {
   outline: 2px solid currentColor;
   outline-offset: 3px;
