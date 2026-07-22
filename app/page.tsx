@@ -3,6 +3,7 @@ import { IntroTransition } from "@/components/intro-transition"
 import { Navbar } from "@/components/navbar"
 import { GithubCalendar } from "@/components/ui/github-calendar"
 import { ContactFooter } from "@/components/contact-footer"
+import { AboutSection } from "@/components/about-section"
 import { BlogsBento, ProjectsBento } from "@/components/bento-sections"
 import { getMediumPosts } from "@/lib/medium"
 
@@ -97,11 +98,6 @@ const workExperiences: ExperienceItemType[] = [
 
 const sections = [
   {
-    id: "about",
-    eyebrow: "About Me",
-    title: "Keeping critical systems calm, clear, and dependable.",
-  },
-  {
     id: "work",
     eyebrow: "Work",
     title: "Reliability engineering for services people count on.",
@@ -143,22 +139,26 @@ export default async function Home() {
           className="min-h-screen w-full overflow-x-clip bg-white text-black focus:outline-none"
         >
           <Hero />
+          <section
+            id="about"
+            className="relative z-10 scroll-mt-12 bg-white px-2 py-2 md:-mt-[100vh] md:px-3 md:py-3"
+          >
+            <AboutSection />
+          </section>
           {sections.map((section) => (
             <section
               key={section.id}
               id={section.id}
-              data-deferred-section={
-                section.id === "about" ? undefined : "true"
-              }
-              className={`relative z-10 flex scroll-mt-12 bg-white px-5 text-black md:px-8 ${
+              data-deferred-section="true"
+              className={`relative z-10 flex scroll-mt-12 px-5 md:px-8 ${
                 section.id === "work"
                   ? "min-h-screen items-center py-12 md:py-16"
                   : section.id === "github"
                     ? "min-h-0 items-start py-0"
                     : section.id === "projects" || section.id === "blogs"
                       ? "min-h-0 items-start py-8 md:py-6"
-                      : "min-h-[70vh] items-end py-12 md:py-16"
-              } ${section.id === "about" ? "md:-mt-[100vh]" : ""}`}
+                      : "min-h-[70vh] items-end bg-white py-12 text-black md:py-16"
+              } bg-white text-black`}
             >
               <div
                 className={
@@ -171,9 +171,7 @@ export default async function Home() {
                       : "w-full max-w-3xl"
                 }
               >
-                {section.id !== "about" && (
-                  <h2 className="sr-only">{section.title}</h2>
-                )}
+                <h2 className="sr-only">{section.title}</h2>
                 {section.id !== "github" &&
                   section.id !== "work" &&
                   section.id !== "projects" &&

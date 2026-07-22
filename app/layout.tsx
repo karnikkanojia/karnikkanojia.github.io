@@ -54,6 +54,13 @@ export const metadata: Metadata = {
   icons: {
     icon: "/typography/karnik-k.svg",
     shortcut: "/typography/karnik-k.svg",
+    apple: [
+      {
+        url: "/apple-touch-icon.png",
+        sizes: "180x180",
+        type: "image/png",
+      },
+    ],
   },
   openGraph: {
     type: "website",
