@@ -3,6 +3,9 @@ import "./globals.css"
 import localFont from "next/font/local"
 import Script from "next/script"
 import { ReactLenis } from "lenis/react"
+
+import { ContactFooter } from "@/components/contact-footer"
+import { Navbar } from "@/components/navbar"
 import { cn } from "@/lib/utils"
 import { SITE_DESCRIPTION, SITE_NAME, SITE_URL } from "@/lib/site"
 
@@ -134,6 +137,7 @@ export default function RootLayout({
   return (
     <html
       lang="en"
+      suppressHydrationWarning
       className={cn("font-sans", khTeka.variable, messinaSansMono.variable)}
     >
       <head>
@@ -156,10 +160,12 @@ export default function RootLayout({
           dangerouslySetInnerHTML={{ __html: JSON.stringify(personJsonLd) }}
         />
         <Script id="initial-scroll-position" strategy="beforeInteractive">
-          {`if (!window.location.hash) { window.history.scrollRestoration = "manual"; window.scrollTo(0, 0); }`}
+          {`try { if (window.sessionStorage.getItem("portfolio:skip-intro-once") === "true") { window.sessionStorage.removeItem("portfolio:skip-intro-once"); document.documentElement.dataset.siteSkipIntro = "true"; document.documentElement.dataset.siteIntroComplete = "true"; document.documentElement.dataset.siteNavbarReady = "true"; } } catch {} if (window.location.pathname !== "/") { document.documentElement.dataset.siteIntroComplete = "true"; document.documentElement.dataset.siteNavbarReady = "true"; } if (!window.location.hash) { window.history.scrollRestoration = "manual"; window.scrollTo(0, 0); }`}
         </Script>
         <ReactLenis root options={{ anchors: true, autoRaf: true, lerp: 0.1 }}>
+          <Navbar />
           {children}
+          <ContactFooter />
         </ReactLenis>
       </body>
     </html>

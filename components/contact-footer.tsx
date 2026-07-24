@@ -7,10 +7,10 @@ import { SpotlightLogo } from "@/components/spotlight-logo"
 import { CursorFollowLabel } from "@/components/ui/cursor-follow-label"
 
 const navigation = [
-  { label: "About", href: "#about" },
-  { label: "Work", href: "#work" },
-  { label: "Projects", href: "#projects" },
-  { label: "Blogs", href: "#blogs" },
+  { label: "About", href: "/#about" },
+  { label: "Work", href: "/#work" },
+  { label: "Projects", href: "/#projects" },
+  { label: "Blogs", href: "/#blogs" },
 ]
 
 const profiles = [
@@ -161,7 +161,7 @@ export function ContactFooter() {
                   <li key={item.href}>
                     <a
                       href={item.href}
-                      className="footer-nav-link group flex min-h-14 items-center text-[clamp(1.65rem,3.2vw,2.55rem)] leading-none font-normal tracking-[-0.04em] md:min-h-[4.35rem]"
+                      className="footer-nav-link group inline-flex min-h-14 items-center text-[clamp(1.65rem,3.2vw,2.55rem)] leading-none font-normal tracking-[-0.04em] md:min-h-[4.35rem]"
                     >
                       <span>{item.label}</span>
                       <span

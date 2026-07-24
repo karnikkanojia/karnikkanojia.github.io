@@ -1,8 +1,7 @@
 import { Hero } from "@/components/hero"
 import { IntroTransition } from "@/components/intro-transition"
-import { Navbar } from "@/components/navbar"
+import { PullToRefresh } from "@/components/pull-to-refresh"
 import { GithubCalendar } from "@/components/ui/github-calendar"
-import { ContactFooter } from "@/components/contact-footer"
 import { AboutSection } from "@/components/about-section"
 import { BlogsBento, ProjectsBento } from "@/components/bento-sections"
 import { getMediumPosts } from "@/lib/medium"
@@ -124,8 +123,7 @@ export default async function Home() {
   const mediumPosts = await getMediumPosts().catch(() => [])
 
   return (
-    <>
-      <Navbar />
+    <PullToRefresh>
       <IntroTransition>
         <a
           href="#content"
@@ -210,7 +208,6 @@ export default async function Home() {
           ))}
         </main>
       </IntroTransition>
-      <ContactFooter />
-    </>
+    </PullToRefresh>
   )
 }
