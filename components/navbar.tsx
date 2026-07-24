@@ -1,8 +1,12 @@
 "use client"
 
+import { CursorFollowLabel } from "@/components/ui/cursor-follow-label"
 import { animate, createTimeline, cubicBezier, stagger } from "animejs"
 import { useLenis } from "lenis/react"
+import { ArrowLeft } from "lucide-react"
 import Image from "next/image"
+import Link from "next/link"
+import { usePathname } from "next/navigation"
 import {
   useCallback,
   useEffect,
@@ -21,15 +25,15 @@ type NavbarLinkItem = {
 }
 
 const DESKTOP_LINKS: NavbarLinkItem[] = [
-  { label: "ABOUT", href: "#about" },
-  { label: "WORK", href: "#work" },
-  { label: "PROJECTS", href: "#projects" },
-  { label: "BLOGS", href: "#blogs" },
+  { label: "ABOUT", href: "/#about" },
+  { label: "WORK", href: "/#work" },
+  { label: "PROJECTS", href: "/#projects" },
+  { label: "BLOGS", href: "/#blogs" },
   { label: "RESUME", href: RESUME_URL, external: true },
 ]
 const MOBILE_LINKS: NavbarLinkItem[] = [
   ...DESKTOP_LINKS,
-  { label: "CONTACT", href: "#contact" },
+  { label: "CONTACT", href: "/#contact" },
 ]
 const DOT_OFFSETS = [
   [-4.75, -4.75],
@@ -140,6 +144,17 @@ function useNavbarScrollState() {
 }
 
 function NavLink({ href, label, external }: NavbarLinkItem) {
+  if (!external) {
+    return (
+      <Link
+        href={href}
+        className="px-2 py-2 text-xs leading-none font-light text-black transition-opacity duration-150 ease-out group-hover/nav-links:opacity-35 hover:!opacity-100"
+      >
+        {label}
+      </Link>
+    )
+  }
+
   return (
     <a
       href={href}
@@ -150,6 +165,31 @@ function NavLink({ href, label, external }: NavbarLinkItem) {
       {label}
     </a>
   )
+}
+
+const ROOT_ROUTE_LABELS: Record<string, string> = {
+  projects: "PROJECT ARCHIVE",
+}
+
+type RouteRoot = {
+  href: string
+  isNested: boolean
+  label: string
+}
+
+function getRouteRoot(pathname: string): RouteRoot | undefined {
+  const segments = pathname.split("/").filter(Boolean)
+  const rootSegment = segments[0]
+
+  if (!rootSegment) return undefined
+
+  return {
+    href: `/${rootSegment}`,
+    isNested: segments.length > 1,
+    label:
+      ROOT_ROUTE_LABELS[rootSegment] ??
+      rootSegment.replaceAll("-", " ").toUpperCase(),
+  }
 }
 
 export function Navbar() {
@@ -171,6 +211,12 @@ export function Navbar() {
   const [isIntroComplete, setIsIntroComplete] = useState(false)
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
   const [isMobileViewport, setIsMobileViewport] = useState(false)
+  const [activeRouteLinkHref, setActiveRouteLinkHref] = useState<string | null>(
+    null
+  )
+  const pathname = usePathname()
+  const routeRoot = getRouteRoot(pathname)
+  const isRouteLinkActive = activeRouteLinkHref === routeRoot?.href
   const lenis = useLenis()
   const {
     isFooterActive,
@@ -327,6 +373,30 @@ export function Navbar() {
     const contactDots = contactDotsRef.current
     if (!logo || !links || !contact || !contactButton || !contactDots) return
 
+    if (window.location.pathname !== "/") {
+      logo.style.visibility = "visible"
+      logo.style.opacity = "1"
+      logo.style.transform = "none"
+      links.style.visibility = "visible"
+      Array.from(links.children).forEach((link) => {
+        const element = link as HTMLElement
+        element.style.opacity = "1"
+        element.style.transform = "none"
+      })
+      contact.style.visibility = "visible"
+      contact.style.opacity = "1"
+      contact.style.transform = "none"
+      contactButton.style.removeProperty("clip-path")
+      Array.from(contactDots.children).forEach((cell, index) => {
+        const element = cell as HTMLElement
+        const dot = element.firstElementChild as HTMLElement
+        const [x, y] = DOT_OFFSETS[index] ?? [0, 0]
+        element.style.transform = `translate(${x}px, ${y}px)`
+        dot.style.transform = "scale(1)"
+      })
+      return
+    }
+
     const clipCenterY = window.innerHeight * 0.5
     const logoRect = logo.getBoundingClientRect()
     const contactRect = contact.getBoundingClientRect()
@@ -363,6 +433,8 @@ export function Navbar() {
   }, [])
 
   useEffect(() => {
+    if (window.location.pathname !== "/") return
+
     const revealNavbar = () => {
       const logo = logoRef.current
       const links = linksRef.current
@@ -539,26 +611,96 @@ export function Navbar() {
             : "-translate-y-[calc(100%+0.5rem)]"
         }`}
       >
-        <a href="#" aria-label="Home" className="flex items-center">
-          <span
-            ref={logoRef}
-            className="inline-flex w-fit items-center"
-            style={{
-              visibility: "hidden",
-              opacity: 0,
-            }}
+        <div className="flex min-w-0 items-center gap-3">
+          <Link
+            href="/"
+            aria-label="Home"
+            className="flex shrink-0 items-center"
           >
-            <Image
-              src="/typography/karnik-wordmark.svg"
-              alt="Karnik Kanojia"
-              width={73}
-              height={22}
-              className="h-5 w-auto md:h-7"
-              style={{ width: "auto" }}
-              priority
-            />
-          </span>
-        </a>
+            <span
+              ref={logoRef}
+              className="inline-flex w-fit items-center"
+              style={{
+                visibility: "hidden",
+                opacity: 0,
+              }}
+            >
+              <Image
+                src="/typography/karnik-wordmark.svg"
+                alt="Karnik Kanojia"
+                width={73}
+                height={22}
+                className="h-5 w-auto md:h-7"
+                style={{ width: "auto" }}
+                priority
+              />
+            </span>
+          </Link>
+          {routeRoot && (
+            <div className="flex min-w-0 translate-y-px items-center gap-3 font-navbar text-[9px] leading-none tracking-[0.08em] text-black/58 uppercase md:text-[10px]">
+              <span
+                aria-hidden="true"
+                className="h-3.5 w-px shrink-0 bg-black/20"
+              />
+              {routeRoot.isNested ? (
+                <CursorFollowLabel
+                  as="span"
+                  label="Go back"
+                  className="min-w-0"
+                  icon={<ArrowLeft aria-hidden="true" />}
+                >
+                  <Link
+                    href={routeRoot.href}
+                    aria-label={`Go back to ${routeRoot.label.toLowerCase()}`}
+                    className="navbar-route-link relative inline-block max-w-[calc(100vw-9.5rem)] outline-2 outline-offset-4 outline-transparent transition-[opacity,transform] duration-150 ease-[cubic-bezier(0.23,1,0.32,1)] focus-visible:outline-black active:scale-[0.97] md:max-w-60"
+                    onFocus={() => setActiveRouteLinkHref(routeRoot.href)}
+                    onBlur={(event) =>
+                      setActiveRouteLinkHref(
+                        event.currentTarget.matches(":hover")
+                          ? routeRoot.href
+                          : null
+                      )
+                    }
+                    onPointerEnter={() =>
+                      setActiveRouteLinkHref(routeRoot.href)
+                    }
+                    onPointerLeave={(event) =>
+                      setActiveRouteLinkHref(
+                        event.currentTarget === document.activeElement
+                          ? routeRoot.href
+                          : null
+                      )
+                    }
+                    onPointerDown={() => setActiveRouteLinkHref(routeRoot.href)}
+                    onPointerUp={(event) =>
+                      setActiveRouteLinkHref(
+                        event.pointerType === "mouse" ||
+                          event.currentTarget === document.activeElement
+                          ? routeRoot.href
+                          : null
+                      )
+                    }
+                    onPointerCancel={() => setActiveRouteLinkHref(null)}
+                  >
+                    <span className="block truncate">{routeRoot.label}</span>
+                    <span
+                      aria-hidden="true"
+                      className="navbar-route-underline pointer-events-none absolute right-0 -bottom-[3px] left-0 h-px origin-left bg-current transition-transform duration-150 ease-[cubic-bezier(0.23,1,0.32,1)]"
+                      style={{ scale: isRouteLinkActive ? "1 1" : "0 1" }}
+                    />
+                  </Link>
+                </CursorFollowLabel>
+              ) : (
+                <span
+                  aria-hidden="true"
+                  className="max-w-[calc(100vw-9.5rem)] truncate md:max-w-60"
+                >
+                  {routeRoot.label}
+                </span>
+              )}
+            </div>
+          )}
+        </div>
         <div
           className={`flex items-center gap-2 rounded-[5px] transition-[background-color,padding,transform] duration-200 ease-[cubic-bezier(0.23,1,0.32,1)] ${
             isNavbarScrolled
@@ -581,9 +723,9 @@ export function Navbar() {
             className="inline-flex items-center gap-2.5"
             style={{ visibility: "hidden", opacity: 0 }}
           >
-            <a
+            <Link
               ref={contactButtonRef}
-              href="#contact"
+              href="/#contact"
               className="group hidden md:inline-flex"
               onPointerEnter={() => animateContactRadius(0)}
               onPointerLeave={() => animateContactRadius(14)}
@@ -597,7 +739,7 @@ export function Navbar() {
                   CONTACT
                 </span>
               </span>
-            </a>
+            </Link>
             <button
               ref={mobileMenuButtonRef}
               type="button"
@@ -618,9 +760,9 @@ export function Navbar() {
                   if (isMobileMenuOpen) closeMobileMenu()
                   else openMobileMenu()
                 } else {
-                  document
-                    .querySelector("#contact")
-                    ?.scrollIntoView({ behavior: "smooth" })
+                  const contact = document.querySelector("#contact")
+                  if (contact) contact.scrollIntoView({ behavior: "smooth" })
+                  else window.location.href = "/#contact"
                 }
               }}
             >

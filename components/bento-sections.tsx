@@ -5,6 +5,7 @@ import { ArrowUpRight } from "lucide-react"
 
 import { CursorFollowLabel } from "@/components/ui/cursor-follow-label"
 import type { MediumPost } from "@/lib/medium"
+import { projects } from "@/lib/projects"
 import { cn } from "@/lib/utils"
 
 const MEDIUM_PROFILE_URL = "https://medium.com/@karnikk1406120"
@@ -21,57 +22,6 @@ type BentoItem = {
   imageClassName?: string
   imageSizes?: string
 }
-
-const projects: BentoItem[] = [
-  {
-    title: "Ops Command Center",
-    description:
-      "A unified observability workspace for finding signal across incidents, services, and customer impact.",
-    pills: ["Observability", "Platform"],
-    image: "/images/bento/ops-command-center.svg",
-    imageAlt: "Abstract command center dashboard with service health charts",
-    href: "#contact",
-    className: "md:col-span-7",
-    imageSizes:
-      "(min-width: 1200px) 650px, (min-width: 768px) 58vw, calc(100vw - 40px)",
-  },
-  {
-    title: "Vision Lab",
-    description:
-      "An open-source imaging pipeline built to make model evaluation clear and repeatable.",
-    pills: ["Computer Vision", "Research"],
-    image: "/images/bento/vision-lab.svg",
-    imageAlt: "Abstract medical imaging model interface",
-    href: "#contact",
-    className: "md:col-span-5",
-    imageSizes:
-      "(min-width: 1200px) 460px, (min-width: 768px) 42vw, calc(100vw - 40px)",
-  },
-  {
-    title: "Changeflow",
-    description:
-      "Reliable data synchronization with visible checkpoints and recovery paths.",
-    pills: ["CDC", "Automation"],
-    image: "/images/bento/changeflow.svg",
-    imageAlt: "Abstract data synchronization flow",
-    href: "#contact",
-    className: "md:col-span-5",
-    imageSizes:
-      "(min-width: 1200px) 460px, (min-width: 768px) 42vw, calc(100vw - 40px)",
-  },
-  {
-    title: "Infrastructure Atlas",
-    description:
-      "A living map of services, dependencies, ownership, and the paths incidents travel.",
-    pills: ["SRE", "Systems Design"],
-    image: "/images/bento/infrastructure-atlas.svg",
-    imageAlt: "Abstract infrastructure dependency map",
-    href: "#contact",
-    className: "md:col-span-7",
-    imageSizes:
-      "(min-width: 1200px) 650px, (min-width: 768px) 58vw, calc(100vw - 40px)",
-  },
-]
 
 function BentoCard({ item }: { item: BentoItem }) {
   return (
@@ -145,11 +95,11 @@ function BentoCard({ item }: { item: BentoItem }) {
 function BentoSection({
   items,
   viewMoreLabel,
-  viewMoreHref = "#contact",
+  viewMoreHref,
 }: {
   items: BentoItem[]
   viewMoreLabel: string
-  viewMoreHref?: string
+  viewMoreHref: string
 }) {
   return (
     <div className="md:flex md:h-[calc(100svh-3rem)] md:min-h-125 md:flex-col">
@@ -168,7 +118,7 @@ function BentoSection({
             href={viewMoreHref}
             target={viewMoreHref.startsWith("http") ? "_blank" : undefined}
             rel={viewMoreHref.startsWith("http") ? "noreferrer" : undefined}
-            className="group inline-flex items-center gap-2 border-b border-black/25 pb-1 font-navbar text-[11px] tracking-[0.06em] uppercase transition-colors duration-180 hover:border-black"
+            className="group inline-flex items-center gap-2 border-b border-black/25 pb-1 font-navbar text-[11px] tracking-[0.06em] uppercase transition-colors duration-180 hover:border-black active:scale-[0.98]"
           >
             {viewMoreLabel}
             <ArrowUpRight
@@ -183,7 +133,24 @@ function BentoSection({
 }
 
 export function ProjectsBento() {
-  return <BentoSection items={projects} viewMoreLabel="View more projects" />
+  const items: BentoItem[] = projects.map((project) => ({
+    title: project.title,
+    description: project.description,
+    pills: project.tags,
+    image: project.image,
+    imageAlt: project.imageAlt,
+    href: `/projects/${project.slug}`,
+    className: project.homeClassName,
+    imageSizes: project.homeImageSizes,
+  }))
+
+  return (
+    <BentoSection
+      items={items}
+      viewMoreLabel="View all projects"
+      viewMoreHref="/projects"
+    />
+  )
 }
 
 export function BlogsBento({ posts }: { posts: MediumPost[] }) {

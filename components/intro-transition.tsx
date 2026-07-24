@@ -1,7 +1,14 @@
 "use client"
 
 import { useLenis } from "lenis/react"
-import { type ReactNode, useCallback, useEffect, useRef, useState } from "react"
+import {
+  type ReactNode,
+  useCallback,
+  useEffect,
+  useLayoutEffect,
+  useRef,
+  useState,
+} from "react"
 
 const NAVBAR_REVEAL_PROGRESS = 0.85
 const PLAYBACK_TIMEOUT_BUFFER_MS = 1_500
@@ -16,6 +23,7 @@ export function IntroTransition({ children }: IntroTransitionProps) {
   const loaderRef = useRef<HTMLDivElement>(null)
   const contentRef = useRef<HTMLDivElement>(null)
   const videoRef = useRef<HTMLVideoElement>(null)
+  const skipIntroRef = useRef(false)
   const playbackStartedRef = useRef(false)
   const finishingRef = useRef(false)
   const removedRef = useRef(false)
@@ -104,6 +112,20 @@ export function IntroTransition({ children }: IntroTransitionProps) {
     }
   }, [finishIntro, revealNavbar])
 
+  useLayoutEffect(() => {
+    if (document.documentElement.dataset.siteSkipIntro !== "true") return
+
+    skipIntroRef.current = true
+    finishingRef.current = true
+    removedRef.current = true
+    navbarRevealedRef.current = true
+    requestAnimationFrame(() => {
+      setIntroVisible(false)
+      window.dispatchEvent(new Event("site-loader:complete"))
+      window.dispatchEvent(new Event("site-loader:hero-enter"))
+    })
+  }, [])
+
   useEffect(() => {
     if (!introVisible) return
 
@@ -122,6 +144,7 @@ export function IntroTransition({ children }: IntroTransitionProps) {
   }, [introVisible])
 
   useEffect(() => {
+    if (skipIntroRef.current) return
     const video = videoRef.current
     if (!video) return
 
