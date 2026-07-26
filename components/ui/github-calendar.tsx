@@ -34,6 +34,14 @@ interface GithubCalendarProps {
   colorSchema?: "green" | "blue" | "purple" | "orange" | "gray"
 }
 
+const DATE_FORMATTER = new Intl.DateTimeFormat("en", {
+  day: "numeric",
+  month: "short",
+  year: "numeric",
+})
+
+const EMPTY_WEEKS: ContributionDay[][] = []
+
 // Color schemas for custom styling
 const colorSchemas = {
   gray: {
@@ -107,6 +115,108 @@ function getShapeClass(shape: string) {
   }
 }
 
+type ContributionGridProps = {
+  colorSchema: keyof typeof colorSchemas
+  glowIntensity: number
+  gridRef: React.RefObject<HTMLDivElement | null>
+  onDayHover: (date: string, contributionCount: number) => void
+  onLeave: () => void
+  shape: GithubCalendarProps["shape"]
+  variant: GithubCalendarProps["variant"]
+  weeks: ContributionDay[][]
+}
+
+const ContributionGrid = React.memo(function ContributionGrid({
+  colorSchema,
+  glowIntensity,
+  gridRef,
+  onDayHover,
+  onLeave,
+  shape = "rounded",
+  variant,
+  weeks,
+}: ContributionGridProps) {
+  const shapeClass = getShapeClass(shape)
+  const isMinimal = variant === "minimal"
+  const lastHoveredDateRef = React.useRef<string | null>(null)
+
+  const handlePointerMove = (event: React.PointerEvent<HTMLDivElement>) => {
+    const target = event.target
+    if (!(target instanceof HTMLElement)) return
+
+    const cell = target.closest<HTMLElement>("[data-contribution-day]")
+    if (!cell || !event.currentTarget.contains(cell)) return
+
+    const date = cell.dataset.contributionDate
+    const contributionCount = Number(cell.dataset.contributionCount)
+    if (date && date !== lastHoveredDateRef.current) {
+      lastHoveredDateRef.current = date
+      onDayHover(date, contributionCount)
+    }
+  }
+
+  const handlePointerLeave = () => {
+    lastHoveredDateRef.current = null
+    onLeave()
+  }
+
+  return (
+    <div
+      ref={gridRef}
+      aria-hidden="true"
+      className="grid w-full auto-cols-fr grid-flow-col gap-px sm:gap-0.75"
+      onPointerLeave={handlePointerLeave}
+      onPointerMove={handlePointerMove}
+    >
+      {weeks.map((week, weekIndex) => (
+        <div
+          key={weekIndex}
+          className="flex min-w-0 flex-col gap-px sm:gap-0.75"
+        >
+          {week.map((day) => {
+            const isGlowing =
+              variant === "city-lights" && day.contributionCount > 0
+
+            return (
+              <div
+                key={day.date}
+                data-contribution-day
+                data-contribution-count={day.contributionCount}
+                data-contribution-date={day.date}
+                className={cn(
+                  "github-contribution-day aspect-square w-full [box-shadow:inset_0_0_0_1px_rgb(0_0_0/0.08)] transition-transform duration-100 ease-[cubic-bezier(0.23,1,0.32,1)]",
+                  getLevelClass(day.contributionLevel, colorSchema),
+                  isGlowing && "z-10",
+                  shapeClass,
+                  isMinimal && "scale-75 rounded-full"
+                )}
+                style={
+                  isGlowing
+                    ? {
+                        boxShadow:
+                          day.contributionLevel !== "NONE"
+                            ? `0 0 ${day.contributionCount > 3 ? `${glowIntensity * 1.5}px` : `${glowIntensity}px`} ${
+                                colorSchema === "green"
+                                  ? "#10b981"
+                                  : colorSchema === "blue"
+                                    ? "#3b82f6"
+                                    : colorSchema === "purple"
+                                      ? "#a855f7"
+                                      : "#f97316"
+                              }`
+                            : "none",
+                      }
+                    : undefined
+                }
+              />
+            )
+          })}
+        </div>
+      ))}
+    </div>
+  )
+})
+
 export function GithubCalendar({
   username,
   variant = "default",
@@ -119,10 +229,34 @@ export function GithubCalendar({
   const [data, setData] = React.useState<GithubContributionData | null>(null)
   const [loading, setLoading] = React.useState(true)
   const [error, setError] = React.useState<string | null>(null)
-  const [hoveredDate, setHoveredDate] = React.useState<string | null>(null)
-  const [hoveredCount, setHoveredCount] = React.useState<number | null>(null)
+  const [hoveredDay, setHoveredDay] = React.useState<{
+    date: string
+    contributionCount: number
+  } | null>(null)
   const gridRef = React.useRef<HTMLDivElement>(null)
   const summaryId = React.useId()
+  const weeks = data?.contributions ?? EMPTY_WEEKS
+  const contributionDays = React.useMemo(() => weeks.flat(), [weeks])
+  const activeContributionDays = React.useMemo(
+    () => contributionDays.filter((day) => day.contributionCount > 0),
+    [contributionDays]
+  )
+  const hoveredLabel = hoveredDay
+    ? `${hoveredDay.contributionCount} ${
+        hoveredDay.contributionCount === 1 ? "contribution" : "contributions"
+      } . ${DATE_FORMATTER.format(new Date(`${hoveredDay.date}T00:00:00`))}`
+    : ""
+  const handleDayHover = React.useCallback(
+    (date: string, contributionCount: number) => {
+      setHoveredDay((current) =>
+        current?.date === date && current.contributionCount === contributionCount
+          ? current
+          : { date, contributionCount }
+      )
+    },
+    []
+  )
+  const handleGridLeave = React.useCallback(() => setHoveredDay(null), [])
 
   React.useEffect(() => {
     const controller = new AbortController()
@@ -157,13 +291,10 @@ export function GithubCalendar({
   React.useEffect(() => {
     if (!data || !gridRef.current) return
 
-    const days = gridRef.current.querySelectorAll("[data-contribution-day]")
-    animate(days, {
+    animate(gridRef.current, {
       opacity: [0, 1],
       translateY: [4, 0],
-      delay: (_: unknown, index = 0) =>
-        Math.floor(index / 7) * 10 + (index % 7) * 10,
-      duration: 360,
+      duration: 420,
       ease: cubicBezier(0.23, 1, 0.32, 1),
     })
   }, [data])
@@ -194,21 +325,7 @@ export function GithubCalendar({
     )
   }
 
-  const weeks = data?.contributions || []
-  const contributionDays = weeks.flat()
-  const activeDays = contributionDays.filter(
-    (day) => day.contributionCount > 0
-  ).length
-  const hoveredLabel = hoveredDate
-    ? `${hoveredCount} ${hoveredCount === 1 ? "contribution" : "contributions"} . ${new Intl.DateTimeFormat(
-        "en",
-        {
-          day: "numeric",
-          month: "short",
-          year: "numeric",
-        }
-      ).format(new Date(`${hoveredDate}T00:00:00`))}`
-    : ""
+  const activeDays = activeContributionDays.length
 
   return (
     <div
@@ -272,68 +389,21 @@ export function GithubCalendar({
         </figcaption>
         <CursorFollowLabel
           className="w-full"
+          followStrength={1}
           label={hoveredLabel}
-          showLabel={hoveredDate !== null}
+          labelClassName="w-[250px] justify-center whitespace-nowrap"
+          showLabel={hoveredDay !== null}
         >
-          <div
-            ref={gridRef}
-            aria-hidden="true"
-            className="grid w-full auto-cols-fr grid-flow-col gap-px sm:gap-0.75"
-            onMouseLeave={() => {
-              setHoveredDate(null)
-              setHoveredCount(null)
-            }}
-          >
-            {weeks.map((week, weekIndex) => (
-              <div
-                key={weekIndex}
-                className="flex min-w-0 flex-col gap-px sm:gap-0.75"
-              >
-                {week.map((day) => {
-                  const isGlowing =
-                    variant === "city-lights" && day.contributionCount > 0
-                  const isMinimal = variant === "minimal"
-                  const shapeClass = getShapeClass(shape)
-
-                  return (
-                    <div
-                      key={day.date}
-                      data-contribution-day
-                      onMouseEnter={() => {
-                        setHoveredDate(day.date)
-                        setHoveredCount(day.contributionCount)
-                      }}
-                      className={cn(
-                        "github-contribution-day aspect-square w-full [box-shadow:inset_0_0_0_1px_rgb(0_0_0/0.08)] transition-[transform,background-color,box-shadow] duration-160 ease-[cubic-bezier(0.23,1,0.32,1)]",
-                        getLevelClass(day.contributionLevel, colorSchema),
-                        isGlowing && "z-10",
-                        shapeClass,
-                        isMinimal && "scale-75 rounded-full"
-                      )}
-                      style={
-                        isGlowing
-                          ? {
-                              boxShadow:
-                                day.contributionLevel !== "NONE"
-                                  ? `0 0 ${day.contributionCount > 3 ? `${glowIntensity * 1.5}px` : `${glowIntensity}px`} ${
-                                      colorSchema === "green"
-                                        ? "#10b981"
-                                        : colorSchema === "blue"
-                                          ? "#3b82f6"
-                                          : colorSchema === "purple"
-                                            ? "#a855f7"
-                                            : "#f97316"
-                                    }`
-                                  : "none",
-                            }
-                          : undefined
-                      }
-                    />
-                  )
-                })}
-              </div>
-            ))}
-          </div>
+          <ContributionGrid
+            colorSchema={colorSchema}
+            glowIntensity={glowIntensity}
+            gridRef={gridRef}
+            onDayHover={handleDayHover}
+            onLeave={handleGridLeave}
+            shape={shape}
+            variant={variant}
+            weeks={weeks}
+          />
         </CursorFollowLabel>
         <table className="sr-only">
           <caption>Active GitHub contribution days for {username}</caption>
@@ -344,14 +414,12 @@ export function GithubCalendar({
             </tr>
           </thead>
           <tbody>
-            {contributionDays
-              .filter((day) => day.contributionCount > 0)
-              .map((day) => (
-                <tr key={day.date}>
-                  <th scope="row">{day.date}</th>
-                  <td>{day.contributionCount}</td>
-                </tr>
-              ))}
+            {activeContributionDays.map((day) => (
+              <tr key={day.date}>
+                <th scope="row">{day.date}</th>
+                <td>{day.contributionCount}</td>
+              </tr>
+            ))}
           </tbody>
         </table>
       </figure>

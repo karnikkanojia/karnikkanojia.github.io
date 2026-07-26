@@ -139,7 +139,7 @@ export default async function Home() {
           <Hero />
           <section
             id="about"
-            className="relative z-10 scroll-mt-12 bg-white px-2 py-2 md:-mt-[100vh] md:px-3 md:py-3"
+            className="relative z-20 scroll-mt-12 bg-white px-2 py-2 md:-mt-[100vh] md:px-3 md:py-3"
           >
             <AboutSection />
           </section>
@@ -152,7 +152,7 @@ export default async function Home() {
                 section.id === "work"
                   ? "min-h-screen items-center py-12 md:py-16"
                   : section.id === "github"
-                    ? "min-h-0 items-start py-0"
+                    ? "min-h-0 items-start py-6 md:py-8"
                     : section.id === "projects" || section.id === "blogs"
                       ? "min-h-0 items-start py-8 md:py-6"
                       : "min-h-[70vh] items-end bg-white py-12 text-black md:py-16"
