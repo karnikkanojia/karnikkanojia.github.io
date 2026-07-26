@@ -22,6 +22,7 @@ type CursorFollowLabelProps = {
   labelClassName?: string
   offset?: { x: number; y: number }
   showLabel?: boolean
+  followStrength?: number
 }
 
 export function CursorFollowLabel({
@@ -33,6 +34,7 @@ export function CursorFollowLabel({
   labelClassName,
   offset = { x: 10, y: 10 },
   showLabel = true,
+  followStrength = 0.22,
 }: CursorFollowLabelProps) {
   const positionRef = useRef<HTMLDivElement>(null)
   const labelRef = useRef<HTMLDivElement>(null)
@@ -126,8 +128,9 @@ export function CursorFollowLabel({
   const renderPosition = () => {
     const current = currentRef.current
     const target = targetRef.current
-    current.x += (target.x - current.x) * 0.22
-    current.y += (target.y - current.y) * 0.22
+    const strength = Math.min(1, Math.max(0.01, followStrength))
+    current.x += (target.x - current.x) * strength
+    current.y += (target.y - current.y) * strength
 
     positionLabel(current.x, current.y)
 
@@ -144,6 +147,17 @@ export function CursorFollowLabel({
   const moveToPointer = (event: ReactPointerEvent<HTMLDivElement>) => {
     if (event.pointerType !== "mouse") return
     targetRef.current = { x: event.clientX, y: event.clientY }
+    if (!isHoveringRef.current) {
+      isHoveringRef.current = true
+      currentRef.current = targetRef.current
+      positionLabel(event.clientX, event.clientY)
+      if (labelRef.current) {
+        labelRef.current.style.opacity = showLabel ? "1" : "0"
+        labelRef.current.style.transform = showLabel
+          ? "scale(1)"
+          : "scale(0.96)"
+      }
+    }
     if (frameRef.current === undefined) {
       frameRef.current = requestAnimationFrame(renderPosition)
     }

@@ -9,7 +9,7 @@ export type MediumPost = {
 
 const MEDIUM_PROFILE_URL = "https://medium.com/@karnikk1406120"
 const MEDIUM_FEED_URL = "https://medium.com/feed/@karnikk1406120"
-const ONE_HOUR = 60 * 60
+const ONE_DAY = 60 * 60 * 24
 
 function getTagValue(source: string, tagName: string) {
   const match = source.match(
@@ -94,7 +94,7 @@ function toMediumPost(item: string): MediumPost | undefined {
 
 export async function getMediumPosts(): Promise<MediumPost[]> {
   const response = await fetch(MEDIUM_FEED_URL, {
-    next: { revalidate: ONE_HOUR },
+    next: { revalidate: ONE_DAY },
     headers: { Accept: "application/rss+xml, application/xml;q=0.9" },
   })
 
