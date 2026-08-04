@@ -61,9 +61,13 @@ export function Hero() {
     const desktop = window.matchMedia(DESKTOP_QUERY)
     let introComplete =
       document.documentElement.dataset.siteIntroComplete === "true"
+    let navbarSettled =
+      document.documentElement.dataset.siteNavbarSettled === "true"
     let entryComplete = false
     let entryStarted = false
+    let wordsStarted = false
     let entryAnimations: Animation[] = []
+    let wordAnimations: Animation[] = []
     let frameId: number | undefined
     let sectionTop = 0
     let scrollDistance = 1
@@ -226,6 +230,34 @@ export function Hero() {
       measure()
       requestRender()
     }
+    const startWordEntry = () => {
+      if (wordsStarted || !entryStarted || !desktop.matches) return
+      wordsStarted = true
+
+      wordAnimations = maskWords.map((word, index) =>
+        word.animate(
+          [{ transform: "translateY(110%)" }, { transform: "translateY(0)" }],
+          {
+            delay: index * 45,
+            duration: 520,
+            easing: "cubic-bezier(0.23, 1, 0.32, 1)",
+            fill: "both",
+          }
+        )
+      )
+
+      Promise.all(wordAnimations.map((animation) => animation.finished)).then(
+        () => {
+          maskWords.forEach((word) => {
+            word.style.transform = "translateY(0)"
+            word.style.willChange = "auto"
+          })
+          wordAnimations.forEach((animation) => animation.cancel())
+          wordAnimations = []
+        },
+        () => undefined
+      )
+    }
     const startEntry = () => {
       if (entryStarted) return
       entryStarted = true
@@ -253,6 +285,7 @@ export function Hero() {
         word.style.transform = "translateY(110%)"
         word.style.willChange = "transform"
       })
+      if (navbarSettled) startWordEntry()
 
       const frameAnimation = heroWindow.animate(
         [
@@ -268,17 +301,6 @@ export function Hero() {
           easing: "cubic-bezier(0.77, 0, 0.175, 1)",
           fill: "both",
         }
-      )
-      const wordAnimations = maskWords.map((word, index) =>
-        word.animate(
-          [{ transform: "translateY(110%)" }, { transform: "translateY(0)" }],
-          {
-            delay: 90 + index * 45,
-            duration: 520,
-            easing: "cubic-bezier(0.23, 1, 0.32, 1)",
-            fill: "both",
-          }
-        )
       )
       const backplateAnimations = backplates.map((backplate, index) =>
         backplate.animate(
@@ -299,11 +321,7 @@ export function Hero() {
         )
       )
 
-      entryAnimations = [
-        frameAnimation,
-        ...backplateAnimations,
-        ...wordAnimations,
-      ]
+      entryAnimations = [frameAnimation, ...backplateAnimations]
       Promise.all(entryAnimations.map((animation) => animation.finished)).then(
         () => {
           heroWindow.style.transform = `translateY(${entryTranslateY}px) scale(${DESKTOP_ENTRY_SCALE})`
@@ -314,10 +332,6 @@ export function Hero() {
           backplateTargetScale = DESKTOP_ENTRY_SCALE
           backplateTargetY = entryTranslateY
           previousScale = DESKTOP_ENTRY_SCALE
-          maskWords.forEach((word) => {
-            word.style.transform = "translateY(0)"
-            word.style.willChange = "auto"
-          })
           entryAnimations.forEach((animation) => animation.cancel())
           entryAnimations = []
           entryComplete = true
@@ -330,11 +344,16 @@ export function Hero() {
       introComplete = true
       startEntry()
     }
+    const onNavbarSettled = () => {
+      navbarSettled = true
+      startWordEntry()
+    }
 
     measure()
     window.addEventListener("scroll", requestRender, { passive: true })
     window.addEventListener("resize", onResize)
     window.addEventListener("site-loader:complete", onIntroComplete)
+    window.addEventListener("site-loader:navbar-settled", onNavbarSettled)
     desktop.addEventListener("change", requestRender)
     if (introComplete) startEntry()
 
@@ -342,9 +361,11 @@ export function Hero() {
       if (frameId !== undefined) cancelAnimationFrame(frameId)
       cancelBackplateAnimation()
       entryAnimations.forEach((animation) => animation.cancel())
+      wordAnimations.forEach((animation) => animation.cancel())
       window.removeEventListener("scroll", requestRender)
       window.removeEventListener("resize", onResize)
       window.removeEventListener("site-loader:complete", onIntroComplete)
+      window.removeEventListener("site-loader:navbar-settled", onNavbarSettled)
       desktop.removeEventListener("change", requestRender)
     }
   }, [])
