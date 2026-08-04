@@ -146,7 +146,7 @@ export function ContactFooter() {
           <section aria-labelledby="footer-navigation-title">
             <h2
               id="footer-navigation-title"
-              className="mb-9 flex items-center gap-2.5 text-[0.78rem] leading-none font-normal md:mb-10 md:text-sm"
+              className="mb-9 flex items-center gap-2.5 text-xs leading-none font-normal md:mb-10"
             >
               <span aria-hidden="true" className="relative flex size-2">
                 <span className="absolute inset-0 animate-ping rounded-full bg-[#4a8dff] opacity-55" />
@@ -161,7 +161,7 @@ export function ContactFooter() {
                   <li key={item.href}>
                     <a
                       href={item.href}
-                      className="footer-nav-link group inline-flex min-h-14 items-center text-[clamp(1.65rem,3.2vw,2.55rem)] leading-none font-normal tracking-[-0.04em] md:min-h-[4.35rem]"
+                      className="footer-nav-link group inline-flex min-h-14 items-center text-2xl leading-none font-normal tracking-[-0.04em] md:min-h-[4.35rem] md:text-4xl"
                     >
                       <span>{item.label}</span>
                       <span
@@ -189,7 +189,7 @@ export function ContactFooter() {
           >
             <h2
               id="footer-details-title"
-              className="font-navbar text-[0.65rem] tracking-[0.08em] text-white/50 uppercase md:text-[0.7rem]"
+              className="font-navbar text-xs tracking-[0.08em] text-white/50 uppercase"
             >
               Profile details
             </h2>
@@ -208,7 +208,7 @@ export function ContactFooter() {
                       href={profile.href}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="footer-profile-link inline-flex items-center gap-1.5 text-[1.2rem] leading-tight tracking-[-0.02em] md:text-[1.25rem]"
+                      className="footer-profile-link inline-flex items-center gap-1.5 text-xl leading-tight tracking-[-0.02em]"
                     >
                       {profile.label}
                       <ArrowUpRight
@@ -222,7 +222,7 @@ export function ContactFooter() {
             </ul>
 
             <div className="mt-20 md:mt-24">
-              <div className="inline-flex items-center gap-2 bg-white/6 px-2.5 py-2 text-[0.75rem] leading-none md:text-xs">
+              <div className="inline-flex items-center gap-2 bg-white/6 px-2.5 py-2 text-xs leading-none">
                 <span aria-hidden="true" className="relative flex size-2">
                   <span className="absolute inset-0 animate-ping rounded-full bg-[#40d978] opacity-55" />
                   <span className="relative size-2 rounded-full bg-[#40d978] shadow-[0_0_0_3px_rgb(64_217_120/0.12)]" />
@@ -230,7 +230,7 @@ export function ContactFooter() {
                 Open to meaningful work
               </div>
 
-              <p className="mt-5 max-w-xs text-[0.82rem] leading-[1.3] text-white/52 md:text-sm">
+              <p className="mt-5 max-w-xs text-xs leading-[1.3] text-white/52">
                 Based in Lucknow, India.
                 <br />
                 Working worldwide.
@@ -245,7 +245,7 @@ export function ContactFooter() {
               >
                 <a
                   href="mailto:karnikkanojia8@gmail.com"
-                  className="footer-email inline-block text-[0.82rem] leading-tight underline decoration-white/60 underline-offset-3 md:text-sm"
+                  className="footer-email inline-block text-xs leading-tight underline decoration-white/60 underline-offset-3"
                 >
                   ↳ karnikkanojia8@gmail.com
                 </a>
@@ -256,7 +256,7 @@ export function ContactFooter() {
           <div className="mt-20 grid grid-cols-[minmax(0,1fr)_auto] items-end gap-x-2 self-end md:col-span-2 md:mt-16 md:grid-cols-[2.35fr_1fr_1fr] md:gap-x-20 md:gap-y-0">
             <time
               dateTime={now?.toISOString()}
-              className="block text-[clamp(0.5rem,2.56vw,0.6rem)] leading-[1.2] whitespace-nowrap tabular-nums md:text-sm"
+              className="block text-xs leading-[1.2] whitespace-nowrap tabular-nums"
               aria-live="off"
             >
               Lucknow {now ? timeFormatter.format(now) : "--:--:-- --"}
@@ -275,7 +275,7 @@ export function ContactFooter() {
                 <ArrowUp aria-hidden="true" className="size-4" />
               </button>
 
-              <p className="text-[clamp(0.5rem,2.56vw,0.6rem)] leading-none whitespace-nowrap md:text-sm">
+              <p className="text-xs leading-none whitespace-nowrap">
                 ©{now?.getFullYear() ?? new Date().getFullYear()} Karnik Kanojia
               </p>
             </div>
