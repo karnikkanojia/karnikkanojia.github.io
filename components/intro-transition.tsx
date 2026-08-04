@@ -10,7 +10,8 @@ import {
   useState,
 } from "react"
 
-const NAVBAR_REVEAL_PROGRESS = 0.85
+const DESKTOP_VISUAL_END_SECONDS = 2.6
+const MOBILE_VISUAL_END_SECONDS = 2.4
 const PLAYBACK_TIMEOUT_BUFFER_MS = 1_500
 const EXIT_DURATION_MS = 900
 const EXIT_TIMEOUT_BUFFER_MS = 100
@@ -28,7 +29,7 @@ export function IntroTransition({ children }: IntroTransitionProps) {
   const finishingRef = useRef(false)
   const removedRef = useRef(false)
   const navbarRevealedRef = useRef(false)
-  const navbarRevealTimeoutRef = useRef<number | undefined>(undefined)
+  const visualEndTimeoutRef = useRef<number | undefined>(undefined)
   const playbackTimeoutRef = useRef<number | undefined>(undefined)
   const exitTimeoutRef = useRef<number | undefined>(undefined)
   const [introVisible, setIntroVisible] = useState(true)
@@ -59,9 +60,9 @@ export function IntroTransition({ children }: IntroTransitionProps) {
   const finishIntro = useCallback(() => {
     if (finishingRef.current) return
     finishingRef.current = true
-    if (navbarRevealTimeoutRef.current !== undefined) {
-      window.clearTimeout(navbarRevealTimeoutRef.current)
-      navbarRevealTimeoutRef.current = undefined
+    if (visualEndTimeoutRef.current !== undefined) {
+      window.clearTimeout(visualEndTimeoutRef.current)
+      visualEndTimeoutRef.current = undefined
     }
     if (playbackTimeoutRef.current !== undefined) {
       window.clearTimeout(playbackTimeoutRef.current)
@@ -99,18 +100,23 @@ export function IntroTransition({ children }: IntroTransitionProps) {
 
     try {
       await video.play()
-      navbarRevealTimeoutRef.current = window.setTimeout(
-        revealNavbar,
-        video.duration * NAVBAR_REVEAL_PROGRESS * 1_000
+      const visualEndSeconds = video.currentSrc.includes("intro-mobile")
+        ? MOBILE_VISUAL_END_SECONDS
+        : DESKTOP_VISUAL_END_SECONDS
+
+      visualEndTimeoutRef.current = window.setTimeout(
+        finishIntro,
+        Math.max(0, (visualEndSeconds - video.currentTime) * 1_000)
       )
       playbackTimeoutRef.current = window.setTimeout(
         finishIntro,
-        video.duration * 1_000 + PLAYBACK_TIMEOUT_BUFFER_MS
+        Math.max(0, (video.duration - video.currentTime) * 1_000) +
+          PLAYBACK_TIMEOUT_BUFFER_MS
       )
     } catch {
       finishIntro()
     }
-  }, [finishIntro, revealNavbar])
+  }, [finishIntro])
 
   useLayoutEffect(() => {
     if (document.documentElement.dataset.siteSkipIntro !== "true") return
@@ -160,14 +166,14 @@ export function IntroTransition({ children }: IntroTransitionProps) {
       video.pause()
       video.removeEventListener("loadedmetadata", onLoadedMetadata)
       video.removeEventListener("ended", onEnded)
-      if (navbarRevealTimeoutRef.current !== undefined) {
-        window.clearTimeout(navbarRevealTimeoutRef.current)
+      if (visualEndTimeoutRef.current !== undefined) {
+        window.clearTimeout(visualEndTimeoutRef.current)
       }
       if (playbackTimeoutRef.current !== undefined) {
         window.clearTimeout(playbackTimeoutRef.current)
       }
     }
-  }, [finishIntro, introVisible, playIntro, revealNavbar])
+  }, [finishIntro, introVisible, playIntro])
 
   useEffect(
     () => () => {
@@ -205,9 +211,10 @@ export function IntroTransition({ children }: IntroTransitionProps) {
           }}
         >
           <div
-            className={`w-[98vw] transform-gpu transition-transform duration-900 ease-[cubic-bezier(0.16,1,0.3,1)] md:w-[70vw] ${
-              introFinishing ? "scale-[0.96]" : "scale-100"
+            className={`w-[98vw] transform-gpu transition-[transform,opacity] duration-900 ease-[cubic-bezier(0.77,0,0.175,1)] md:w-[70vw] ${
+              introFinishing ? "opacity-0" : "opacity-100"
             }`}
+            style={{ transform: `scale(${introFinishing ? 0.04 : 1})` }}
           >
             <video
               ref={videoRef}

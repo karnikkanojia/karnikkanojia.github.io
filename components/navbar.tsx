@@ -704,7 +704,7 @@ export function Navbar() {
         <div
           className={`flex items-center gap-2 rounded-[5px] transition-[background-color,padding,transform] duration-200 ease-[cubic-bezier(0.23,1,0.32,1)] ${
             isNavbarScrolled
-              ? "-translate-x-1 bg-[#f1f1f1] px-3 py-2"
+              ? "-translate-x-1 bg-[#f1f1f1]/92 px-3 py-2"
               : "translate-x-0 bg-transparent px-0 py-0"
           }`}
         >
