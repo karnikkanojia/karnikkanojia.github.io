@@ -243,7 +243,7 @@ export function AboutSection() {
                 <ArrowRight aria-hidden="true" size={17} strokeWidth={2.25} />
               </button>
             </div>
-            <p className="font-navbar text-[0.65rem] tracking-[0.08em] text-black/55">
+            <p className="font-navbar text-xs tracking-[0.08em] text-black/55">
               {String(activeIndex + 1).padStart(2, "0")}.
               {String(stats.length).padStart(2, "0")}
             </p>
@@ -252,7 +252,7 @@ export function AboutSection() {
           <div className="mt-3 lg:mt-4">
             <div aria-live="polite">
               {activeIndex === 0 ? (
-                <p className="text-[clamp(2.35rem,3vw,3.05rem)] leading-none font-medium tracking-[-0.07em]">
+                <p className="text-2xl leading-none font-medium tracking-[-0.07em] md:text-4xl">
                   {stats[0]}
                 </p>
               ) : (
@@ -262,7 +262,7 @@ export function AboutSection() {
                   className="flex w-full max-w-60 overflow-hidden rounded-md border border-black/20"
                 >
                   <div className="min-w-0 flex-1 px-3 py-2">
-                    <div className="flex items-center justify-between font-navbar text-[0.5rem] leading-none tracking-[0.1em] text-black/50 uppercase">
+                    <div className="flex items-center justify-between font-navbar text-xs leading-none tracking-[0.1em] text-black/50 uppercase">
                       <span className="inline-flex items-center gap-1">
                         <span
                           aria-hidden="true"
@@ -294,12 +294,12 @@ export function AboutSection() {
               )}
             </div>
             {activeIndex === 0 ? (
-              <p className="mt-2.5 max-w-52 text-sm leading-[1.32] text-black/55 md:text-base">
+              <p className="mt-2.5 max-w-52 text-base leading-[1.32] text-black/55">
                 Years building dependable systems across healthcare and applied
                 research.
               </p>
             ) : (
-              <p className="mt-2.5 max-w-52 text-sm leading-[1.32] text-black/55 md:text-base">
+              <p className="mt-2.5 max-w-52 text-base leading-[1.32] text-black/55">
                 New York bound for NYU&rsquo;s MS in Data Science.
               </p>
             )}
@@ -311,7 +311,7 @@ export function AboutSection() {
             <h2 className="sr-only">About Karnik Kanojia</h2>
             <p
               ref={copyRef}
-              className="max-w-[36ch] text-[clamp(1.9rem,2vw,3.25rem)] leading-[1.08] tracking-[-0.035em] text-pretty"
+              className="max-w-[36ch] text-2xl leading-[1.08] tracking-[-0.035em] text-pretty md:text-4xl"
             >
               {aboutCopy}
             </p>

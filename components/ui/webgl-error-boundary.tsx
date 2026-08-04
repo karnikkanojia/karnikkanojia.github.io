@@ -1,43 +1,43 @@
-"use client";
+"use client"
 
-import { cn } from "@/lib/utils";
-import * as React from "react";
+import { cn } from "@/lib/utils"
+import * as React from "react"
 
 interface WebGLErrorBoundaryProps {
-  children: React.ReactNode;
-  fallback?: React.ReactNode;
-  onError?: (error: Error, errorInfo: React.ErrorInfo) => void;
+  children: React.ReactNode
+  fallback?: React.ReactNode
+  onError?: (error: Error, errorInfo: React.ErrorInfo) => void
 }
 
 interface WebGLErrorBoundaryState {
-  hasError: boolean;
+  hasError: boolean
 }
 
 export class WebGLErrorBoundary extends React.Component<
   WebGLErrorBoundaryProps,
   WebGLErrorBoundaryState
 > {
-  public state: WebGLErrorBoundaryState = { hasError: false };
+  public state: WebGLErrorBoundaryState = { hasError: false }
 
   static getDerivedStateFromError(): WebGLErrorBoundaryState {
-    return { hasError: true };
+    return { hasError: true }
   }
 
   componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
-    this.props.onError?.(error, errorInfo);
+    this.props.onError?.(error, errorInfo)
   }
 
   render() {
     if (this.state.hasError) {
-      return this.props.fallback ?? <WebGLFallback />;
+      return this.props.fallback ?? <WebGLFallback />
     }
-    return this.props.children;
+    return this.props.children
   }
 }
 
 interface WebGLFallbackProps {
-  className?: string;
-  message?: string;
+  className?: string
+  message?: string
 }
 
 export function WebGLFallback({
@@ -47,14 +47,13 @@ export function WebGLFallback({
   return (
     <div
       className={cn(
-        "flex h-full w-full items-center justify-center bg-gradient-to-br from-zinc-950 via-slate-900 to-zinc-900 px-4 text-center text-sm text-white/75",
-        className,
+        "flex h-full w-full items-center justify-center bg-gradient-to-br from-zinc-950 via-slate-900 to-zinc-900 px-4 text-center text-base text-white/75",
+        className
       )}
       role="status"
       aria-live="polite"
     >
       <p>{message}</p>
     </div>
-  );
+  )
 }
-

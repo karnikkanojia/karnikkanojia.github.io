@@ -201,7 +201,7 @@ export function CursorFollowLabel({
             <div
               ref={labelRef}
               className={cn(
-                "inline-flex max-w-[calc(100vw-24px)] origin-top-left scale-[0.96] items-center gap-1.5 bg-[#dddddd] px-3 py-1.5 font-navbar text-[10px] leading-none font-light tracking-wide text-black uppercase opacity-0 shadow-[0_6px_20px_rgb(0_0_0/0.12)] transition-[opacity,transform] duration-150 ease-[cubic-bezier(0.23,1,0.32,1)] [&_span]:min-w-0 [&_svg]:size-2.5 [&_svg]:shrink-0 [&_svg]:stroke-[1.5]",
+                "inline-flex max-w-[calc(100vw-24px)] origin-top-left scale-[0.96] items-center gap-1.5 bg-[#dddddd] px-3 py-1.5 font-navbar text-xs leading-none font-light tracking-wide text-black uppercase opacity-0 shadow-[0_6px_20px_rgb(0_0_0/0.12)] transition-[opacity,transform] duration-150 ease-[cubic-bezier(0.23,1,0.32,1)] [&_span]:min-w-0 [&_svg]:size-2.5 [&_svg]:shrink-0 [&_svg]:stroke-[1.5]",
                 labelClassName
               )}
             >

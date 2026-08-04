@@ -461,7 +461,7 @@ function HeroCopy({ className, ref }: HeroCopyProps) {
         ref={ref}
         className="flex max-w-[min(48rem,calc(100vw-2.5rem))] flex-col items-start text-left"
       >
-        <h1 className="flex max-w-3xl flex-col items-start gap-0 text-3xl leading-[1.02] font-medium tracking-normal md:text-4xl">
+        <h1 className="flex max-w-3xl flex-col items-start gap-0 text-2xl leading-[1.02] font-medium tracking-normal md:text-4xl">
           <span>
             <MaskedWord>exploring</MaskedWord>{" "}
             <MaskedWord>
@@ -490,7 +490,7 @@ function HeroCopy({ className, ref }: HeroCopyProps) {
             <MaskedWord>systems</MaskedWord>
           </span>
         </h1>
-        <p className="mt-0 flex flex-wrap items-center gap-x-[0.3em] text-sm font-normal tracking-wide text-black/58 md:text-base">
+        <p className="mt-0 flex flex-wrap items-center gap-x-[0.3em] text-base font-normal tracking-wide text-black/58">
           <MaskedWord>site</MaskedWord>
           <MaskedWord>reliability</MaskedWord>
           <MaskedWord>engineer</MaskedWord>

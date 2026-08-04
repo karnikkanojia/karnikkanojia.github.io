@@ -87,14 +87,14 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
           <div className="mx-auto max-w-6xl">
             <div className="grid gap-8 md:grid-cols-12 md:items-end">
               <div className="md:col-span-8">
-                <p className="font-navbar text-[10px] tracking-[0.09em] text-black/60 uppercase">
+                <p className="font-navbar text-xs tracking-[0.09em] text-black/60 uppercase">
                   {project.label}
                 </p>
-                <h1 className="mt-5 max-w-[26ch] text-[clamp(1.35rem,2.1vw,2rem)] leading-[1.08] font-medium tracking-[-0.02em] text-balance">
+                <h1 className="mt-5 max-w-[26ch] text-2xl leading-[1.08] font-medium tracking-[-0.02em] text-balance md:text-4xl">
                   {project.title}
                 </h1>
               </div>
-              <p className="max-w-[42ch] text-[14px] leading-[1.5] text-black/62 md:col-span-4 md:justify-self-end md:pb-1 md:text-[15px]">
+              <p className="max-w-[42ch] text-base leading-[1.5] text-black/62 md:col-span-4 md:justify-self-end md:pb-1">
                 {project.summary}
               </p>
             </div>
@@ -118,23 +118,23 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
           <div className="mx-auto grid max-w-6xl gap-14 md:grid-cols-12 md:gap-8">
             <aside className="md:col-span-4">
               <div className="md:sticky md:top-24">
-                <p className="font-navbar text-[10px] tracking-[0.09em] text-black/60 uppercase">
+                <p className="font-navbar text-xs tracking-[0.09em] text-black/60 uppercase">
                   Project details
                 </p>
                 <dl className="mt-6 divide-y divide-black/10 border-y border-black/10">
                   <div className="grid grid-cols-[5rem_1fr] gap-4 py-4">
-                    <dt className="font-navbar text-[10px] tracking-[0.08em] text-black/58 uppercase">
+                    <dt className="font-navbar text-xs tracking-[0.08em] text-black/58 uppercase">
                       Focus
                     </dt>
-                    <dd className="text-[12px] leading-[1.4] text-black/70">
+                    <dd className="text-xs leading-[1.4] text-black/70">
                       {project.tags.join(", ")}
                     </dd>
                   </div>
                   <div className="grid grid-cols-[5rem_1fr] gap-4 py-4">
-                    <dt className="font-navbar text-[10px] tracking-[0.08em] text-black/58 uppercase">
+                    <dt className="font-navbar text-xs tracking-[0.08em] text-black/58 uppercase">
                       Stack
                     </dt>
-                    <dd className="text-[12px] leading-[1.4] text-black/70">
+                    <dd className="text-xs leading-[1.4] text-black/70">
                       {project.stack.join(", ")}
                     </dd>
                   </div>
@@ -144,16 +144,16 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
 
             <div className="md:col-span-7 md:col-start-6">
               <section aria-labelledby="challenge-title">
-                <p className="font-navbar text-[10px] tracking-[0.09em] text-black/60 uppercase">
+                <p className="font-navbar text-xs tracking-[0.09em] text-black/60 uppercase">
                   01 . Context
                 </p>
                 <h2
                   id="challenge-title"
-                  className="mt-4 text-[clamp(1.25rem,1.8vw,1.7rem)] leading-[1.02] font-medium tracking-[-0.025em]"
+                  className="mt-4 text-xl leading-[1.02] font-medium tracking-[-0.025em] md:text-2xl"
                 >
                   The challenge
                 </h2>
-                <p className="mt-5 max-w-[58ch] text-[14px] leading-[1.55] text-black/65 md:text-[15px]">
+                <p className="mt-5 max-w-[58ch] text-base leading-[1.55] text-black/65">
                   {project.challenge}
                 </p>
               </section>
@@ -162,12 +162,12 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
                 aria-labelledby="contribution-title"
                 className="mt-20 border-t border-black/12 pt-16 md:mt-28 md:pt-20"
               >
-                <p className="font-navbar text-[10px] tracking-[0.09em] text-black/60 uppercase">
+                <p className="font-navbar text-xs tracking-[0.09em] text-black/60 uppercase">
                   02 . Contribution
                 </p>
                 <h2
                   id="contribution-title"
-                  className="mt-4 text-[clamp(1.25rem,1.8vw,1.7rem)] leading-[1.02] font-medium tracking-[-0.025em]"
+                  className="mt-4 text-xl leading-[1.02] font-medium tracking-[-0.025em] md:text-2xl"
                 >
                   What I built
                 </h2>
@@ -175,11 +175,11 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
                   {project.contribution.map((item, index) => (
                     <li
                       key={item}
-                      className="grid grid-cols-[2.5rem_1fr] gap-3 py-5 text-[13px] leading-[1.5] text-black/68 md:grid-cols-[3.5rem_1fr] md:py-6 md:text-[14px]"
+                      className="grid grid-cols-[2.5rem_1fr] gap-3 py-5 text-base leading-[1.5] text-black/68 md:grid-cols-[3.5rem_1fr] md:py-6"
                     >
                       <span
                         aria-hidden="true"
-                        className="font-navbar text-[10px] tracking-wider text-black/58"
+                        className="font-navbar text-xs tracking-wider text-black/58"
                       >
                         {String(index + 1).padStart(2, "0")}
                       </span>
@@ -193,12 +193,12 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
                 aria-labelledby="impact-title"
                 className="mt-20 border-t border-black/12 pt-16 md:mt-28 md:pt-20"
               >
-                <p className="font-navbar text-[10px] tracking-[0.09em] text-black/60 uppercase">
+                <p className="font-navbar text-xs tracking-[0.09em] text-black/60 uppercase">
                   03 . Outcome
                 </p>
                 <h2
                   id="impact-title"
-                  className="mt-4 text-[clamp(1.25rem,1.8vw,1.7rem)] leading-[1.02] font-medium tracking-[-0.025em]"
+                  className="mt-4 text-xl leading-[1.02] font-medium tracking-[-0.025em] md:text-2xl"
                 >
                   Measurable impact
                 </h2>
@@ -208,7 +208,7 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
                       key={outcome}
                       className="flex min-h-36 items-end rounded-xl bg-[#f4f4f1] p-5 md:min-h-44 md:p-6"
                     >
-                      <p className="max-w-[15ch] text-[1.35rem] leading-[1] font-medium tracking-[-0.025em] md:text-[1.65rem]">
+                      <p className="max-w-[15ch] text-2xl leading-[1] font-medium tracking-[-0.025em]">
                         {outcome}
                       </p>
                     </div>
@@ -224,14 +224,14 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
           className="border-t border-black/10 px-5 py-16 md:px-8 md:py-20"
         >
           <div className="mx-auto max-w-6xl">
-            <p className="font-navbar text-[10px] tracking-[0.09em] text-black/60 uppercase">
+            <p className="font-navbar text-xs tracking-[0.09em] text-black/60 uppercase">
               Next project
             </p>
             <Link
               href={`/projects/${nextProject.slug}`}
               className="group mt-6 flex items-end justify-between gap-5 border-b border-black/20 pb-5 outline-2 outline-offset-4 outline-transparent transition-[transform,border-color] duration-200 ease-[cubic-bezier(0.23,1,0.32,1)] hover:border-black focus-visible:border-black focus-visible:outline-black active:scale-[0.99]"
             >
-              <span className="text-[clamp(1.45rem,2.4vw,2.2rem)] leading-[1] font-medium tracking-[-0.03em] text-balance">
+              <span className="text-2xl leading-[1] font-medium tracking-[-0.03em] text-balance md:text-4xl">
                 {nextProject.title}
               </span>
               <ArrowUpRight

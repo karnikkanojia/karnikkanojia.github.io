@@ -25,7 +25,7 @@ const khTeka = localFont({
 })
 
 const messinaSansMono = localFont({
-  src: "../fonts/Messina/MessinaSansMonoWeb-VF_TESTFONT.woff2",
+  src: "../fonts/Messina/MessinaSansMonoWeb-Regular.woff2",
   variable: "--font-messina-sans-mono",
   weight: "100 900",
 })

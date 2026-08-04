@@ -72,22 +72,22 @@ function BentoCard({ item }: { item: BentoItem }) {
                 {item.pills.map((pill, pillIndex) => (
                   <span
                     key={`${pill}-${pillIndex}`}
-                    className="inline-flex items-center rounded-md border bg-muted/50 px-1.5 py-0.5 font-navbar text-[10px] tracking-wide text-muted-foreground uppercase transition-[transform,background-color,border-color] duration-150 ease-[cubic-bezier(0.23,1,0.32,1)] group-active:scale-[0.96] group-active:border-black/30 group-active:bg-black/5"
+                    className="inline-flex items-center rounded-md border bg-muted/50 px-1.5 py-0.5 font-navbar text-xs tracking-wide text-muted-foreground uppercase transition-[transform,background-color,border-color] duration-150 ease-[cubic-bezier(0.23,1,0.32,1)] group-active:scale-[0.96] group-active:border-black/30 group-active:bg-black/5"
                   >
                     {pill}
                   </span>
                 ))}
               </div>
             ) : (
-              <p className="bento-card-meta font-navbar text-[10px] tracking-[0.08em] text-black/48 uppercase transition-colors duration-180">
+              <p className="bento-card-meta font-navbar text-xs tracking-[0.08em] text-black/48 uppercase transition-colors duration-180">
                 {item.meta}
               </p>
             )}
-            <h3 className="bento-card-title mt-1.5 text-[1.35rem] leading-[1.02] font-medium tracking-tight text-balance transition-colors duration-180 md:text-[1.55rem]">
+            <h3 className="bento-card-title mt-1.5 text-2xl leading-[1.02] font-medium tracking-tight text-balance transition-colors duration-180">
               {item.title}
             </h3>
             {item.description && (
-              <p className="bento-card-description mt-2 max-w-[52ch] text-[13px] leading-[1.4] text-black/58 transition-colors duration-180">
+              <p className="bento-card-description mt-2 max-w-[52ch] text-xs leading-[1.4] text-black/58 transition-colors duration-180">
                 {item.description}
               </p>
             )}
@@ -159,7 +159,7 @@ function BentoSection({
         <button
           type="button"
           onClick={toggleLayout}
-          className="group hidden items-center gap-2 border-b border-black/25 pb-1 font-navbar text-[11px] tracking-[0.06em] uppercase transition-colors duration-180 hover:border-black active:scale-[0.98] md:inline-flex"
+          className="group hidden items-center gap-2 border-b border-black/25 pb-1 font-navbar text-xs tracking-[0.06em] uppercase transition-colors duration-180 hover:border-black active:scale-[0.98] md:inline-flex"
           aria-pressed={layout === "alternate"}
         >
           <PanelsTopLeft aria-hidden="true" className="size-3.5" />
@@ -174,7 +174,7 @@ function BentoSection({
             href={viewMoreHref}
             target={viewMoreHref.startsWith("http") ? "_blank" : undefined}
             rel={viewMoreHref.startsWith("http") ? "noreferrer" : undefined}
-            className="group inline-flex items-center gap-2 border-b border-black/25 pb-1 font-navbar text-[11px] tracking-[0.06em] uppercase transition-colors duration-180 hover:border-black active:scale-[0.98]"
+            className="group inline-flex items-center gap-2 border-b border-black/25 pb-1 font-navbar text-xs tracking-[0.06em] uppercase transition-colors duration-180 hover:border-black active:scale-[0.98]"
           >
             {viewMoreLabel}
             <ArrowUpRight
@@ -230,8 +230,7 @@ export function BlogsBento({ posts }: { posts: MediumPost[] }) {
         : index % 2 === 0
           ? "md:col-span-8"
           : "md:col-span-4",
-    alternateSpan:
-      posts.length === 1 ? 12 : index % 2 === 0 ? 4 : 8,
+    alternateSpan: posts.length === 1 ? 12 : index % 2 === 0 ? 4 : 8,
     imageSizes:
       posts.length === 1
         ? "(min-width: 1200px) 1120px, calc(100vw - 40px)"
