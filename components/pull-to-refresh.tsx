@@ -244,7 +244,7 @@ export function PullToRefresh({
               : "Pull to refresh site"
         }
       >
-        <div className="absolute inset-0 bg-[linear-gradient(90deg,transparent_49.75%,rgba(255,255,255,0.08)_50%,transparent_50.25%),linear-gradient(rgba(255,255,255,0.04)_1px,transparent_1px)] bg-[size:100%_100%,100%_16px]" />
+        <div className="absolute inset-0 bg-[linear-gradient(90deg,transparent_49.75%,rgba(255,255,255,0.08)_50%,transparent_50.25%),linear-gradient(rgba(255,255,255,0.04)_1px,transparent_1px)] bg-size-[100%_100%,100%_16px]" />
         <div
           ref={orbitRef}
           className={`absolute -top-16 left-1/2 h-44 w-44 -translate-x-1/2 rounded-full border border-white/25 will-change-transform ${
@@ -256,11 +256,11 @@ export function PullToRefresh({
           <div className="absolute inset-1/2 h-2 w-2 -translate-x-1/2 -translate-y-1/2 rounded-full bg-white" />
           <div className="absolute top-1/2 -right-1 h-2 w-2 -translate-y-1/2 rounded-full bg-white" />
         </div>
-        <div className="absolute inset-x-0 top-2.5 flex items-center justify-between px-5 font-navbar text-[9px] leading-none tracking-[0.17em] uppercase">
+        <div className="absolute inset-x-0 top-2.5 flex items-center justify-between px-5 font-navbar text-xs leading-none tracking-[0.17em] uppercase">
           <span className="text-white/48">Pull down</span>
           <span className="text-white/48">Refresh</span>
         </div>
-        <div className="absolute inset-x-0 top-[4.35rem] text-center font-navbar text-[10px] leading-none tracking-[0.2em] uppercase">
+        <div className="absolute inset-x-0 top-[4.35rem] text-center font-navbar text-xs leading-none tracking-[0.2em] uppercase">
           {status === "loading"
             ? "Refreshing"
             : status === "ready"

@@ -148,7 +148,7 @@ function NavLink({ href, label, external }: NavbarLinkItem) {
     return (
       <Link
         href={href}
-        className="px-2 py-2 text-xs leading-none font-light text-black transition-opacity duration-150 ease-out group-hover/nav-links:opacity-35 hover:!opacity-100"
+        className="px-2 py-2 text-sm leading-none font-light text-black transition-opacity duration-150 ease-out group-hover/nav-links:opacity-35 hover:opacity-100!"
       >
         {label}
       </Link>
@@ -160,7 +160,7 @@ function NavLink({ href, label, external }: NavbarLinkItem) {
       href={href}
       target={external ? "_blank" : undefined}
       rel={external ? "noopener noreferrer" : undefined}
-      className="px-2 py-2 text-xs leading-none font-light text-black transition-opacity duration-150 ease-out group-hover/nav-links:opacity-35 hover:!opacity-100"
+      className="px-2 py-2 text-sm leading-none font-light text-black transition-opacity duration-150 ease-out group-hover/nav-links:opacity-35 hover:opacity-100!"
     >
       {label}
     </a>
@@ -613,7 +613,7 @@ export function Navbar() {
           isFooterActive ||
           (!isNavbarVisible && !isMobileMenuOpen)
         }
-        className={`fixed top-0 right-0 left-0 z-[102] flex h-14 items-center justify-between px-5 font-navbar text-black transition-transform duration-220 ease-[cubic-bezier(0.23,1,0.32,1)] md:h-[4.125rem] md:px-6 ${
+        className={`fixed top-0 right-0 left-0 z-102 flex h-14 items-center justify-between bg-transparent px-5 font-navbar text-black transition-transform duration-220 ease-[cubic-bezier(0.23,1,0.32,1)] md:h-16.5 md:px-6 ${
           !isFooterActive && (isNavbarVisible || isMobileMenuOpen)
             ? "translate-y-0"
             : "-translate-y-[calc(100%+0.5rem)]"
@@ -645,7 +645,7 @@ export function Navbar() {
             </span>
           </Link>
           {routeRoot && (
-            <div className="flex min-w-0 translate-y-px items-center gap-3 font-navbar text-[9px] leading-none tracking-[0.08em] text-black/58 uppercase md:text-[10px]">
+            <div className="flex min-w-0 translate-y-px items-center gap-3 font-navbar text-sm leading-none tracking-[0.08em] text-black/58 uppercase">
               <span
                 aria-hidden="true"
                 className="h-3.5 w-px shrink-0 bg-black/20"
@@ -693,7 +693,7 @@ export function Navbar() {
                     <span className="block truncate">{routeRoot.label}</span>
                     <span
                       aria-hidden="true"
-                      className="navbar-route-underline pointer-events-none absolute right-0 -bottom-[3px] left-0 h-px origin-left bg-current transition-transform duration-150 ease-[cubic-bezier(0.23,1,0.32,1)]"
+                      className="navbar-route-underline pointer-events-none absolute right-0 -bottom-0.75 left-0 h-px origin-left bg-current transition-transform duration-150 ease-[cubic-bezier(0.23,1,0.32,1)]"
                       style={{ scale: isRouteLinkActive ? "1 1" : "0 1" }}
                     />
                   </Link>
@@ -712,13 +712,13 @@ export function Navbar() {
         <div
           className={`flex items-center gap-2 rounded-[5px] transition-[background-color,padding,transform] duration-200 ease-[cubic-bezier(0.23,1,0.32,1)] ${
             isNavbarScrolled
-              ? "-translate-x-1 bg-[#f1f1f1]/92 px-3 py-2"
+              ? "-translate-x-1 bg-[#f1f1f1]/72 px-3 py-2 backdrop-blur-sm md:px-4 md:py-3"
               : "translate-x-0 bg-transparent px-0 py-0"
           }`}
         >
           <ul
             ref={linksRef}
-            className="group/nav-links hidden items-center gap-1 md:flex"
+            className="group/nav-links hidden items-center gap-3 md:flex"
           >
             {DESKTOP_LINKS.map((link) => (
               <li key={link.label}>
@@ -740,10 +740,10 @@ export function Navbar() {
             >
               <span
                 ref={contactShapeRef}
-                className="relative inline-flex h-7 w-[92px] items-center justify-start overflow-hidden rounded-[14px] transition-transform duration-150 ease-out will-change-transform group-active:scale-[0.97]"
+                className="relative inline-flex h-7 w-23 items-center justify-start overflow-hidden rounded-[14px] transition-transform duration-150 ease-out will-change-transform group-active:scale-[0.97]"
               >
                 <span className="absolute inset-0 bg-black" />
-                <span className="absolute inset-0 z-10 inline-flex items-center justify-center text-xs leading-none font-light whitespace-nowrap text-white">
+                <span className="absolute inset-0 z-10 inline-flex items-center justify-center text-sm leading-none font-light whitespace-nowrap text-white">
                   CONTACT
                 </span>
               </span>
@@ -760,7 +760,7 @@ export function Navbar() {
               }
               aria-controls={isMobileViewport ? "mobile-navigation" : undefined}
               aria-expanded={isMobileViewport ? isMobileMenuOpen : undefined}
-              className="relative isolate inline-flex size-[26px] shrink-0 transform-gpu border-0 bg-transparent p-0"
+              className="relative isolate inline-flex size-6.5 shrink-0 transform-gpu border-0 bg-transparent p-0"
               onPointerEnter={() => animateContactDotsScale(1.25)}
               onPointerLeave={() => animateContactDotsScale(1)}
               onClick={() => {
@@ -777,14 +777,14 @@ export function Navbar() {
               <span
                 ref={contactDotsRef}
                 aria-hidden="true"
-                className={`pointer-events-none absolute inset-0 overflow-hidden rounded-full transition-opacity duration-150 ease-out [contain:paint] ${
+                className={`pointer-events-none absolute inset-0 overflow-hidden rounded-full transition-opacity duration-150 ease-out contain-[paint] ${
                   isMobileMenuOpen ? "opacity-0" : "opacity-100"
                 }`}
               >
                 {[0, 1, 2, 3].map((dot) => (
                   <span
                     key={dot}
-                    className="absolute top-[10.5px] left-[10.5px] size-[5px]"
+                    className="absolute top-[10.5px] left-[10.5px] size-1.25"
                   >
                     <span className="block size-full rounded-full bg-black" />
                   </span>
@@ -816,7 +816,7 @@ export function Navbar() {
         id="mobile-navigation"
         aria-label="Navigation menu"
         data-open={isMobileMenuOpen && !isFooterActive}
-        className="fixed inset-0 m-0 h-full max-h-none w-full max-w-none border-0 bg-[#f1f1f1] p-0 font-navbar md:hidden [&::backdrop]:bg-transparent"
+        className="fixed inset-0 m-0 h-full max-h-none w-full max-w-none border-0 bg-[#f1f1f1] p-0 font-navbar md:hidden backdrop:bg-transparent"
         onCancel={(event) => {
           event.preventDefault()
           closeMobileMenu()
@@ -856,7 +856,7 @@ export function Navbar() {
                     href={link.href}
                     target={link.external ? "_blank" : undefined}
                     rel={link.external ? "noopener noreferrer" : undefined}
-                    className="mobile-menu-link group flex items-center justify-between border-b border-black/10 px-0 py-5 text-base leading-none font-light text-black transition-[background-color,color,padding] duration-200 ease-[cubic-bezier(0.23,1,0.32,1)] hover:border-[#1c1c1c] hover:bg-[#1c1c1c] hover:px-3 hover:text-white"
+                    className="mobile-menu-link group flex items-center justify-between border-b border-black/10 px-0 py-5 text-lg leading-none font-light text-black transition-[background-color,color,padding] duration-200 ease-[cubic-bezier(0.23,1,0.32,1)] hover:border-[#1c1c1c] hover:bg-[#1c1c1c] hover:px-3 hover:text-white"
                     onPointerEnter={(event) =>
                       animateMobileMenuArrow(event.currentTarget)
                     }

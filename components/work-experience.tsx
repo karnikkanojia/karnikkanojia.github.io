@@ -240,7 +240,7 @@ export function ExperienceItem({ experience }: ExperienceItemProps) {
           )}
         </div>
 
-        <h3 className="text-lg leading-snug font-medium">
+        <h3 className="text-xl leading-snug font-medium">
           {experience.companyWebsite ? (
             <CursorFollowLabel
               as="span"
@@ -327,7 +327,7 @@ export function ExperiencePositionItem({
           aria-hidden
           className={cn(
             "pointer-events-none absolute top-3 left-3 z-0 w-px overflow-hidden bg-black/15",
-            hasSkills ? "bottom-[10px]" : "bottom-0"
+            hasSkills ? "bottom-2.5" : "bottom-0"
           )}
         >
           <span
@@ -400,7 +400,7 @@ export function ExperiencePositionItem({
 
         <CollapsibleContent className="relative z-1 overflow-hidden">
           {position.description && (
-            <Prose className="prose-sm pt-2 pl-9 prose-p:my-1.5 prose-p:leading-[1.4] prose-ul:my-1.5 prose-li:my-1 prose-li:leading-[1.4]">
+            <Prose className="pt-2 pl-9 prose-p:my-1.5 prose-p:leading-[1.4] prose-ul:my-1.5 prose-li:my-1 prose-li:leading-[1.4]">
               <ReactMarkdown>{position.description}</ReactMarkdown>
             </Prose>
           )}
@@ -410,7 +410,7 @@ export function ExperiencePositionItem({
           <ul className="not-prose relative z-1 flex flex-wrap gap-1.5 pt-3 pl-9">
             <span
               aria-hidden
-              className="pointer-events-none absolute bottom-[10px] left-3 h-px w-5 overflow-hidden bg-black/15"
+              className="pointer-events-none absolute bottom-2.5 left-3 h-px w-5 overflow-hidden bg-black/15"
             >
               <span
                 data-work-experience-skill-trail-progress
@@ -446,7 +446,7 @@ function Skill({ className, ...props }: ComponentProps<"span">) {
   return (
     <span
       className={cn(
-        "inline-flex items-center rounded-md border bg-muted/50 px-1.5 py-0.5 font-navbar text-[10px] tracking-wide text-muted-foreground uppercase",
+        "inline-flex items-center rounded-md border bg-muted/50 px-1.5 py-0.5 font-navbar text-xs tracking-wide text-muted-foreground uppercase",
         className
       )}
       {...props}

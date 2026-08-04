@@ -127,7 +127,7 @@ export default async function Home() {
       <IntroTransition>
         <a
           href="#content"
-          className="skip-link fixed top-3 left-3 z-[300] rounded-md bg-black px-4 py-2 text-white shadow-lg"
+          className="skip-link fixed top-3 left-3 z-300 rounded-md bg-black px-4 py-2 text-white shadow-lg"
         >
           Skip to main content
         </a>
@@ -139,7 +139,7 @@ export default async function Home() {
           <Hero />
           <section
             id="about"
-            className="relative z-20 scroll-mt-12 bg-white px-2 py-2 md:-mt-[100vh] md:px-3 md:py-3"
+            className="relative z-20 scroll-mt-12 bg-white px-2 py-2 md:mt-[-100vh] md:px-3 md:py-3"
           >
             <AboutSection />
           </section>
@@ -174,7 +174,7 @@ export default async function Home() {
                   section.id !== "work" &&
                   section.id !== "projects" &&
                   section.id !== "blogs" && (
-                    <p className="mb-4 text-sm tracking-wide text-black/55">
+                    <p className="mb-4 text-base tracking-wide text-black/55">
                       {section.eyebrow}
                     </p>
                   )}
@@ -182,7 +182,7 @@ export default async function Home() {
                   section.id !== "work" &&
                   section.id !== "projects" &&
                   section.id !== "blogs" && (
-                    <h2 className="max-w-4xl text-3xl leading-[1.02] font-medium tracking-tight text-balance md:text-5xl">
+                    <h2 className="max-w-4xl text-4xl leading-[1.02] font-medium tracking-tight text-balance md:text-5xl">
                       {section.title}
                     </h2>
                   )}

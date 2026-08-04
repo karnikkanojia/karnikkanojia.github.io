@@ -42,11 +42,11 @@ export default function ProjectsPage() {
       <div className="mx-auto max-w-6xl">
         <header className="grid gap-8 border-b border-black/12 pb-12 md:grid-cols-12 md:items-end md:pb-16">
           <div className="md:col-span-8">
-            <h1 className="max-w-[26ch] text-[clamp(1.35rem,2.1vw,2rem)] leading-[1.08] font-medium tracking-[-0.02em] text-balance">
+            <h1 className="max-w-[26ch] text-2xl leading-[1.08] font-medium tracking-[-0.02em] text-balance md:text-4xl">
               Systems built for the real world.
             </h1>
           </div>
-          <p className="max-w-[38ch] text-[15px] leading-[1.5] text-black/58 md:col-span-4 md:justify-self-end md:pb-1">
+          <p className="max-w-[38ch] text-base leading-[1.5] text-black/58 md:col-span-4 md:justify-self-end md:pb-1">
             Selected work across reliability engineering, automation, computer
             vision, and operational tooling.
           </p>
@@ -64,7 +64,7 @@ export default function ProjectsPage() {
                   <div className="md:col-span-1 md:self-start md:pt-1">
                     <p
                       aria-hidden="true"
-                      className="font-navbar text-[10px] tracking-[0.08em] text-black/60 uppercase"
+                      className="font-navbar text-xs tracking-[0.08em] text-black/60 uppercase"
                     >
                       {String(index + 1).padStart(2, "0")}
                     </p>
@@ -82,7 +82,7 @@ export default function ProjectsPage() {
                   </div>
 
                   <div className="order-1 md:order-none md:col-span-4 md:self-start">
-                    <h2 className="project-list-title max-w-[15ch] text-[1.5rem] leading-[1] font-medium tracking-[-0.025em] text-balance transition-colors duration-180 md:text-[clamp(1.5rem,2.2vw,2.2rem)]">
+                    <h2 className="project-list-title max-w-[15ch] text-2xl leading-[1] font-medium tracking-[-0.025em] text-balance transition-colors duration-180 md:text-4xl">
                       {project.title}
                     </h2>
                     <ul
@@ -92,7 +92,7 @@ export default function ProjectsPage() {
                       {project.tags.map((tag) => (
                         <li
                           key={tag}
-                          className="project-tag-pill rounded-md border border-black/15 px-1.5 py-0.5 font-navbar text-[10px] tracking-wide text-black/62 uppercase transition-[transform,background-color,border-color] duration-150 ease-[cubic-bezier(0.23,1,0.32,1)]"
+                          className="project-tag-pill rounded-md border border-black/15 px-1.5 py-0.5 font-navbar text-xs tracking-wide text-black/62 uppercase transition-[transform,background-color,border-color] duration-150 ease-[cubic-bezier(0.23,1,0.32,1)]"
                         >
                           {tag}
                         </li>
@@ -101,10 +101,10 @@ export default function ProjectsPage() {
                   </div>
 
                   <div className="order-3 md:order-none md:col-span-4 md:self-stretch">
-                    <p className="max-w-[42ch] text-[14px] leading-[1.5] text-black/58 transition-colors duration-180">
+                    <p className="max-w-[42ch] text-base leading-[1.5] text-black/58 transition-colors duration-180">
                       {project.description}
                     </p>
-                    <p className="mt-5 font-navbar text-[10px] leading-[1.5] tracking-[0.08em] text-black/58 uppercase md:mt-8">
+                    <p className="mt-5 font-navbar text-xs leading-[1.5] tracking-[0.08em] text-black/58 uppercase md:mt-8">
                       {project.outcomes.join(" . ")}
                     </p>
                   </div>
