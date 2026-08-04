@@ -127,7 +127,7 @@ export default async function Home() {
       <IntroTransition>
         <a
           href="#content"
-          className="skip-link fixed top-3 left-3 z-[300] rounded-md bg-black px-4 py-2 text-white shadow-lg"
+          className="skip-link fixed top-3 left-3 z-300 rounded-md bg-black px-4 py-2 text-white shadow-lg"
         >
           Skip to main content
         </a>
@@ -139,7 +139,7 @@ export default async function Home() {
           <Hero />
           <section
             id="about"
-            className="relative z-20 scroll-mt-12 bg-white px-2 py-2 md:-mt-[100vh] md:px-3 md:py-3"
+            className="relative z-20 scroll-mt-12 bg-white px-2 py-2 md:mt-[-100vh] md:px-3 md:py-3"
           >
             <AboutSection />
           </section>

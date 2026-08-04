@@ -374,9 +374,9 @@ export function Hero() {
     <section
       ref={sectionRef}
       data-hero-scroll-section
-      className="relative mt-13 h-[calc(100vh-3.25rem)] w-full px-3 pt-1 pb-3 md:mt-[3.625rem] md:h-[calc(300vh-3.625rem)] md:px-0 md:py-0"
+      className="relative mt-13 h-[calc(100vh-3.25rem)] w-full px-3 pt-1 pb-3 md:mt-14.5 md:h-[calc(300vh-3.625rem)] md:px-0 md:py-0"
     >
-      <div className="flex h-full flex-col md:relative md:sticky md:top-[3.625rem] md:h-[calc(100vh-3.625rem)] md:px-4 md:pt-2 md:pb-4">
+      <div className="flex h-full flex-col md:sticky md:top-14.5 md:h-[calc(100vh-3.625rem)] md:px-4 md:pt-2 md:pb-4">
         <div className="relative h-[65vh] w-full shrink-0 md:h-full">
           <div
             data-hero-backplate
@@ -388,7 +388,7 @@ export function Hero() {
             aria-hidden="true"
             className="pointer-events-none absolute inset-0 rounded-[0.625rem] bg-[#ff886b] will-change-transform"
           />
-          <div ref={windowRef} className="absolute inset-0 z-[2]">
+          <div ref={windowRef} className="absolute inset-0 z-2">
             <HeroSurface animateGradient />
           </div>
         </div>
@@ -474,8 +474,8 @@ function HeroCopy({ className, ref }: HeroCopyProps) {
             </MaskedWord>{" "}
             <MaskedWord>building</MaskedWord>
           </span>
-          <span className="-mt-[0.12em]">
-            <MaskedWord className="-mx-[0.08em] px-[0.08em] align-baseline whitespace-nowrap">
+          <span className="mt-[-0.12em]">
+            <MaskedWord className="mx-[-0.08em] px-[0.08em] align-baseline whitespace-nowrap">
               <span
                 className="inline-flex items-baseline gap-[0.16em] font-light italic"
                 style={{ fontFamily: "Georgia, serif" }}
@@ -522,7 +522,7 @@ function MaskedWord({
 }) {
   return (
     <span
-      className={`-my-[0.18em] inline-block overflow-hidden py-[0.18em] ${className}`}
+      className={`my-[-0.18em] inline-block overflow-hidden py-[0.18em] ${className}`}
     >
       <span data-hero-mask-word className={`inline-flex ${contentClassName}`}>
         {children}

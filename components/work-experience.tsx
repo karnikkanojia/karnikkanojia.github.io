@@ -327,7 +327,7 @@ export function ExperiencePositionItem({
           aria-hidden
           className={cn(
             "pointer-events-none absolute top-3 left-3 z-0 w-px overflow-hidden bg-black/15",
-            hasSkills ? "bottom-[10px]" : "bottom-0"
+            hasSkills ? "bottom-2.5" : "bottom-0"
           )}
         >
           <span
@@ -410,7 +410,7 @@ export function ExperiencePositionItem({
           <ul className="not-prose relative z-1 flex flex-wrap gap-1.5 pt-3 pl-9">
             <span
               aria-hidden
-              className="pointer-events-none absolute bottom-[10px] left-3 h-px w-5 overflow-hidden bg-black/15"
+              className="pointer-events-none absolute bottom-2.5 left-3 h-px w-5 overflow-hidden bg-black/15"
             >
               <span
                 data-work-experience-skill-trail-progress

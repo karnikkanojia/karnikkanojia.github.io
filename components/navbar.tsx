@@ -693,7 +693,7 @@ export function Navbar() {
                     <span className="block truncate">{routeRoot.label}</span>
                     <span
                       aria-hidden="true"
-                      className="navbar-route-underline pointer-events-none absolute right-0 -bottom-[3px] left-0 h-px origin-left bg-current transition-transform duration-150 ease-[cubic-bezier(0.23,1,0.32,1)]"
+                      className="navbar-route-underline pointer-events-none absolute right-0 -bottom-0.75 left-0 h-px origin-left bg-current transition-transform duration-150 ease-[cubic-bezier(0.23,1,0.32,1)]"
                       style={{ scale: isRouteLinkActive ? "1 1" : "0 1" }}
                     />
                   </Link>
@@ -740,7 +740,7 @@ export function Navbar() {
             >
               <span
                 ref={contactShapeRef}
-                className="relative inline-flex h-7 w-[92px] items-center justify-start overflow-hidden rounded-[14px] transition-transform duration-150 ease-out will-change-transform group-active:scale-[0.97]"
+                className="relative inline-flex h-7 w-23 items-center justify-start overflow-hidden rounded-[14px] transition-transform duration-150 ease-out will-change-transform group-active:scale-[0.97]"
               >
                 <span className="absolute inset-0 bg-black" />
                 <span className="absolute inset-0 z-10 inline-flex items-center justify-center text-sm leading-none font-light whitespace-nowrap text-white">
@@ -760,7 +760,7 @@ export function Navbar() {
               }
               aria-controls={isMobileViewport ? "mobile-navigation" : undefined}
               aria-expanded={isMobileViewport ? isMobileMenuOpen : undefined}
-              className="relative isolate inline-flex size-[26px] shrink-0 transform-gpu border-0 bg-transparent p-0"
+              className="relative isolate inline-flex size-6.5 shrink-0 transform-gpu border-0 bg-transparent p-0"
               onPointerEnter={() => animateContactDotsScale(1.25)}
               onPointerLeave={() => animateContactDotsScale(1)}
               onClick={() => {
@@ -777,14 +777,14 @@ export function Navbar() {
               <span
                 ref={contactDotsRef}
                 aria-hidden="true"
-                className={`pointer-events-none absolute inset-0 overflow-hidden rounded-full transition-opacity duration-150 ease-out [contain:paint] ${
+                className={`pointer-events-none absolute inset-0 overflow-hidden rounded-full transition-opacity duration-150 ease-out contain-[paint] ${
                   isMobileMenuOpen ? "opacity-0" : "opacity-100"
                 }`}
               >
                 {[0, 1, 2, 3].map((dot) => (
                   <span
                     key={dot}
-                    className="absolute top-[10.5px] left-[10.5px] size-[5px]"
+                    className="absolute top-[10.5px] left-[10.5px] size-1.25"
                   >
                     <span className="block size-full rounded-full bg-black" />
                   </span>
@@ -816,7 +816,7 @@ export function Navbar() {
         id="mobile-navigation"
         aria-label="Navigation menu"
         data-open={isMobileMenuOpen && !isFooterActive}
-        className="fixed inset-0 m-0 h-full max-h-none w-full max-w-none border-0 bg-[#f1f1f1] p-0 font-navbar md:hidden [&::backdrop]:bg-transparent"
+        className="fixed inset-0 m-0 h-full max-h-none w-full max-w-none border-0 bg-[#f1f1f1] p-0 font-navbar md:hidden backdrop:bg-transparent"
         onCancel={(event) => {
           event.preventDefault()
           closeMobileMenu()
