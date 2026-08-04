@@ -435,6 +435,13 @@ export function Navbar() {
   useEffect(() => {
     if (window.location.pathname !== "/") return
 
+    const markNavbarSettled = () => {
+      if (document.documentElement.dataset.siteNavbarSettled === "true") return
+
+      document.documentElement.dataset.siteNavbarSettled = "true"
+      window.dispatchEvent(new Event("site-loader:navbar-settled"))
+    }
+
     const revealNavbar = () => {
       const logo = logoRef.current
       const links = linksRef.current
@@ -487,6 +494,7 @@ export function Navbar() {
             translateY: [contactTranslation.y, 0],
             duration: 940,
             ease: "inOutQuart",
+            onComplete: markNavbarSettled,
           },
           260
         )
