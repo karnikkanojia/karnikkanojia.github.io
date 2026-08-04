@@ -148,7 +148,7 @@ function NavLink({ href, label, external }: NavbarLinkItem) {
     return (
       <Link
         href={href}
-        className="px-2 py-2 text-xs leading-none font-light text-black transition-opacity duration-150 ease-out group-hover/nav-links:opacity-35 hover:!opacity-100"
+        className="px-2 py-2 text-[13px] leading-none font-light text-black transition-opacity duration-150 ease-out group-hover/nav-links:opacity-35 hover:!opacity-100"
       >
         {label}
       </Link>
@@ -160,7 +160,7 @@ function NavLink({ href, label, external }: NavbarLinkItem) {
       href={href}
       target={external ? "_blank" : undefined}
       rel={external ? "noopener noreferrer" : undefined}
-      className="px-2 py-2 text-xs leading-none font-light text-black transition-opacity duration-150 ease-out group-hover/nav-links:opacity-35 hover:!opacity-100"
+      className="px-2 py-2 text-[13px] leading-none font-light text-black transition-opacity duration-150 ease-out group-hover/nav-links:opacity-35 hover:!opacity-100"
     >
       {label}
     </a>
@@ -645,7 +645,7 @@ export function Navbar() {
             </span>
           </Link>
           {routeRoot && (
-            <div className="flex min-w-0 translate-y-px items-center gap-3 font-navbar text-[9px] leading-none tracking-[0.08em] text-black/58 uppercase md:text-[10px]">
+            <div className="flex min-w-0 translate-y-px items-center gap-3 font-navbar text-[10px] leading-none tracking-[0.08em] text-black/58 uppercase md:text-[11px]">
               <span
                 aria-hidden="true"
                 className="h-3.5 w-px shrink-0 bg-black/20"
@@ -743,7 +743,7 @@ export function Navbar() {
                 className="relative inline-flex h-7 w-[92px] items-center justify-start overflow-hidden rounded-[14px] transition-transform duration-150 ease-out will-change-transform group-active:scale-[0.97]"
               >
                 <span className="absolute inset-0 bg-black" />
-                <span className="absolute inset-0 z-10 inline-flex items-center justify-center text-xs leading-none font-light whitespace-nowrap text-white">
+                <span className="absolute inset-0 z-10 inline-flex items-center justify-center text-[13px] leading-none font-light whitespace-nowrap text-white">
                   CONTACT
                 </span>
               </span>
@@ -856,7 +856,7 @@ export function Navbar() {
                     href={link.href}
                     target={link.external ? "_blank" : undefined}
                     rel={link.external ? "noopener noreferrer" : undefined}
-                    className="mobile-menu-link group flex items-center justify-between border-b border-black/10 px-0 py-5 text-base leading-none font-light text-black transition-[background-color,color,padding] duration-200 ease-[cubic-bezier(0.23,1,0.32,1)] hover:border-[#1c1c1c] hover:bg-[#1c1c1c] hover:px-3 hover:text-white"
+                    className="mobile-menu-link group flex items-center justify-between border-b border-black/10 px-0 py-5 text-[17px] leading-none font-light text-black transition-[background-color,color,padding] duration-200 ease-[cubic-bezier(0.23,1,0.32,1)] hover:border-[#1c1c1c] hover:bg-[#1c1c1c] hover:px-3 hover:text-white"
                     onPointerEnter={(event) =>
                       animateMobileMenuArrow(event.currentTarget)
                     }
