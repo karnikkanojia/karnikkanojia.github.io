@@ -148,7 +148,7 @@ function NavLink({ href, label, external }: NavbarLinkItem) {
     return (
       <Link
         href={href}
-        className="px-2 py-2 text-sm leading-none font-light text-black transition-opacity duration-150 ease-out group-hover/nav-links:opacity-35 hover:opacity-100!"
+        className="px-2 py-2 text-sm leading-none font-light text-black transition-opacity duration-150 ease-out group-hover/nav-links:opacity-35 hover:!opacity-100"
       >
         {label}
       </Link>
@@ -160,7 +160,7 @@ function NavLink({ href, label, external }: NavbarLinkItem) {
       href={href}
       target={external ? "_blank" : undefined}
       rel={external ? "noopener noreferrer" : undefined}
-      className="px-2 py-2 text-sm leading-none font-light text-black transition-opacity duration-150 ease-out group-hover/nav-links:opacity-35 hover:opacity-100!"
+      className="px-2 py-2 text-sm leading-none font-light text-black transition-opacity duration-150 ease-out group-hover/nav-links:opacity-35 hover:!opacity-100"
     >
       {label}
     </a>
@@ -613,7 +613,7 @@ export function Navbar() {
           isFooterActive ||
           (!isNavbarVisible && !isMobileMenuOpen)
         }
-        className={`fixed top-0 right-0 left-0 z-102 flex h-14 items-center justify-between bg-transparent px-5 font-navbar text-black transition-transform duration-220 ease-[cubic-bezier(0.23,1,0.32,1)] md:h-16.5 md:px-6 ${
+        className={`fixed top-0 right-0 left-0 z-[102] flex h-14 items-center justify-between bg-transparent px-5 font-navbar text-black transition-transform duration-220 ease-[cubic-bezier(0.23,1,0.32,1)] md:h-[4.125rem] md:px-6 ${
           !isFooterActive && (isNavbarVisible || isMobileMenuOpen)
             ? "translate-y-0"
             : "-translate-y-[calc(100%+0.5rem)]"
@@ -712,7 +712,7 @@ export function Navbar() {
         <div
           className={`flex items-center gap-2 rounded-[5px] transition-[background-color,padding,transform] duration-200 ease-[cubic-bezier(0.23,1,0.32,1)] ${
             isNavbarScrolled
-              ? "-translate-x-1 bg-[#f1f1f1]/72 px-3 py-2 backdrop-blur-sm md:px-4 md:py-3"
+              ? "-translate-x-1 bg-[#e5e5e5]/72 px-3 py-2 backdrop-blur-sm md:px-4 md:py-3"
               : "translate-x-0 bg-transparent px-0 py-0"
           }`}
         >

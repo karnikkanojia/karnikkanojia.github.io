@@ -262,7 +262,7 @@ export function AboutSection() {
                   className="flex w-full max-w-60 overflow-hidden rounded-md border border-black/20"
                 >
                   <div className="min-w-0 flex-1 px-3 py-2">
-                    <div className="flex items-center justify-between font-navbar text-xs leading-none tracking-widest text-black/50 uppercase">
+                    <div className="flex items-center justify-between font-navbar text-xs leading-none tracking-[0.1em] text-black/50 uppercase">
                       <span className="inline-flex items-center gap-1">
                         <span
                           aria-hidden="true"
