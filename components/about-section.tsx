@@ -1,12 +1,31 @@
 "use client"
 
 import { ArrowLeft, ArrowRight, Plane } from "lucide-react"
+import {
+  animate,
+  cubicBezier,
+  set,
+  splitText,
+  stagger,
+  type JSAnimation,
+} from "animejs"
 import Image from "next/image"
-import { useEffect, useRef, useState } from "react"
+import { useEffect, useLayoutEffect, useRef, useState } from "react"
 
 import { CursorImageTrail } from "@/components/ui/cursor-image-trail"
 
 const stats = ["2", "BLR → NYU"] as const
+
+const aboutCopy =
+  "I focus on building reliable systems at the intersection of artificial intelligence and healthcare. I am drawn to problems where accuracy, trust, and real-world deployment are as critical as the underlying models. My approach emphasizes understanding constraints, designing for robustness, and developing technologies that clinicians and patients can depend on with confidence."
+
+const aboutActionVerbs = new Set([
+  "reliable",
+  "healthcare.",
+  "robustness",
+  "clinicians",
+  "patients",
+])
 
 const trailImages = [
   "/images/cursor-trail/mouse1.webp",
@@ -20,47 +39,136 @@ const trailImages = [
   "/images/cursor-trail/mouse11.webp",
   "/images/cursor-trail/mouse12.webp",
 ]
+const CURSOR_TRAIL_ENABLED = false
+
+type MaskedRevealOptions = {
+  enterDuration?: number
+  exitDuration?: number
+  enterStagger?: number
+  exitStagger?: number
+}
+
+function observeMaskedReveal(
+  trigger: HTMLElement,
+  targets: HTMLElement[],
+  {
+    enterDuration = 620,
+    exitDuration = 320,
+    enterStagger = 24,
+    exitStagger = 8,
+  }: MaskedRevealOptions = {}
+) {
+  let animation: JSAnimation | null = null
+  let isRevealed = false
+
+  // Seed Anime.js's own transform state. The stylesheet keeps the split words
+  // masked before hydration, but Anime.js does not read that external
+  // translateY value into its transform cache. Without this, the first
+  // 115% -> 0% reveal is treated as 0% -> 0% and snaps in instantly.
+  set(targets, { y: "115%" })
+
+  const animateTargets = (reveal: boolean) => {
+    if (reveal === isRevealed) return
+
+    animation?.cancel()
+    isRevealed = reveal
+
+    animation = animate(targets, {
+      y: reveal ? "0%" : "115%",
+      duration: reveal ? enterDuration : exitDuration,
+      delay: reveal
+        ? stagger(enterStagger)
+        : stagger(exitStagger, { from: "last" }),
+      ease: cubicBezier(0.23, 1, 0.32, 1),
+      composition: "replace",
+    })
+  }
+
+  const observer = new IntersectionObserver(
+    ([entry]) => {
+      const rootTop = entry.rootBounds?.top ?? 0
+
+      if (entry.intersectionRatio >= 0.2) {
+        animateTargets(true)
+      } else if (entry.boundingClientRect.top > rootTop) {
+        animateTargets(false)
+      }
+    },
+    { threshold: [0, 0.2] }
+  )
+
+  const startObserving = () => observer.observe(trigger)
+
+  // The intro overlays the page while the About section mounts. Waiting until
+  // it has finished prevents its initial layout pass from consuming this
+  // reveal before the visitor can actually scroll to the section.
+  if (document.documentElement.dataset.siteIntroComplete === "true") {
+    startObserving()
+  } else {
+    window.addEventListener("site-loader:complete", startObserving, {
+      once: true,
+    })
+  }
+
+  return () => {
+    observer.disconnect()
+    window.removeEventListener("site-loader:complete", startObserving)
+    animation?.cancel()
+  }
+}
 
 export function AboutSection() {
   const [activeIndex, setActiveIndex] = useState(0)
   const copyRef = useRef<HTMLParagraphElement>(null)
+  const signatureRef = useRef<HTMLDivElement>(null)
+  const signatureCopyRef = useRef<HTMLParagraphElement>(null)
+  const signatureImageRef = useRef<HTMLSpanElement>(null)
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     const copy = copyRef.current
     if (!copy) return
 
-    let frameId: number | undefined
+    const split = splitText(copy, {
+      words: { wrap: "clip", class: "about-copy-word" },
+    })
 
-    const updateReveal = () => {
-      frameId = undefined
-      const { top, height } = copy.getBoundingClientRect()
-      const revealStart = window.innerHeight * 0.98
-      const postVisibilityOffset = Math.min(160, window.innerHeight * 0.18)
-      const revealEnd = window.innerHeight - height - postVisibilityOffset
-      const progress = Math.min(
-        1,
-        Math.max(0, (revealStart - top) / (revealStart - revealEnd))
-      )
-      const easedProgress = Math.pow(progress, 1.35)
-
-      copy.style.setProperty("--about-copy-reveal", `${easedProgress * 100}%`)
-      copy.toggleAttribute("data-reveal-complete", progress === 1)
-    }
-
-    const requestRevealUpdate = () => {
-      if (frameId === undefined) {
-        frameId = requestAnimationFrame(updateReveal)
+    split.words.forEach((word) => {
+      if (aboutActionVerbs.has(word.textContent?.trim() ?? "")) {
+        word.classList.add("about-action-verb")
       }
-    }
+    })
 
-    requestRevealUpdate()
-    window.addEventListener("scroll", requestRevealUpdate, { passive: true })
-    window.addEventListener("resize", requestRevealUpdate)
+    const stopReveal = observeMaskedReveal(copy, split.words)
 
     return () => {
-      window.removeEventListener("scroll", requestRevealUpdate)
-      window.removeEventListener("resize", requestRevealUpdate)
-      if (frameId !== undefined) cancelAnimationFrame(frameId)
+      stopReveal()
+      split.revert()
+    }
+  }, [])
+
+  useLayoutEffect(() => {
+    const signature = signatureRef.current
+    const signatureCopy = signatureCopyRef.current
+    const signatureImage = signatureImageRef.current
+    if (!signature || !signatureCopy || !signatureImage) return
+
+    const split = splitText(signatureCopy, {
+      words: { wrap: "clip", class: "about-signature-word" },
+    })
+    const stopReveal = observeMaskedReveal(
+      signature,
+      [signatureImage, ...split.words],
+      {
+        enterDuration: 520,
+        exitDuration: 280,
+        enterStagger: 32,
+        exitStagger: 8,
+      }
+    )
+
+    return () => {
+      stopReveal()
+      split.revert()
     }
   }, [])
 
@@ -82,17 +190,14 @@ export function AboutSection() {
     <CursorImageTrail
       items={trailImages}
       itemSize={112}
-      trailLength={6}
+      trailLength={CURSOR_TRAIL_ENABLED ? 6 : 0}
       spawnDistance={72}
       rotationRange={12}
-      className="bg-white px-5 pt-24 pb-10 text-black md:px-8 md:pt-32 md:pb-12 lg:px-5"
+      className="bg-white px-8 pt-24 pb-10 text-black md:px-10 md:pt-32 md:pb-12 lg:px-12"
     >
       <div className="grid gap-14 lg:grid-cols-[minmax(17rem,31%)_minmax(0,1fr)] lg:gap-0">
         <aside className="flex flex-col lg:pr-12">
-          <div
-            aria-hidden="true"
-            className="flex h-px w-full gap-1"
-          >
+          <div aria-hidden="true" className="flex h-px w-full gap-1">
             <span className="relative block h-px min-w-0 flex-1 overflow-hidden bg-black/20">
               {activeIndex === 0 && (
                 <span
@@ -167,13 +272,9 @@ export function AboutSection() {
                               'url("https://www.google.com/s2/favicons?domain=airindia.com&sz=64")',
                           }}
                         />
-                        <span>
-                          AI101
-                        </span>
+                        <span>AI101</span>
                       </span>
-                      <span>
-                        23.10 - 09.40
-                      </span>
+                      <span>23.10 - 09.40</span>
                     </div>
                     <div className="mt-2 grid grid-cols-[auto_1fr_auto] items-center gap-2">
                       <span className="text-xl leading-none font-medium tracking-[-0.04em]">
@@ -193,12 +294,12 @@ export function AboutSection() {
               )}
             </div>
             {activeIndex === 0 ? (
-              <p className="mt-2.5 max-w-[13rem] text-sm leading-[1.32] text-black/55 md:text-base">
+              <p className="mt-2.5 max-w-52 text-sm leading-[1.32] text-black/55 md:text-base">
                 Years building dependable systems across healthcare and applied
                 research.
               </p>
             ) : (
-              <p className="mt-2.5 max-w-[13rem] text-sm leading-[1.32] text-black/55 md:text-base">
+              <p className="mt-2.5 max-w-52 text-sm leading-[1.32] text-black/55 md:text-base">
                 New York bound for NYU&rsquo;s MS in Data Science.
               </p>
             )}
@@ -206,31 +307,38 @@ export function AboutSection() {
         </aside>
 
         <div className="flex flex-col lg:pl-[7.2vw]">
-          <div className="about-section-copy">
+          <div>
             <h2 className="sr-only">About Karnik Kanojia</h2>
             <p
               ref={copyRef}
-              className="about-copy-reveal max-w-[30ch] text-pretty text-[clamp(1.9rem,2vw,3.25rem)] leading-[1.08] tracking-[-0.035em]"
+              className="max-w-[36ch] text-[clamp(1.9rem,2vw,3.25rem)] leading-[1.08] tracking-[-0.035em] text-pretty"
             >
-              I focus on building reliable systems at the intersection of
-              artificial intelligence and healthcare. I am drawn to problems
-              where accuracy, trust, and real-world deployment are as critical
-              as the underlying models. My approach emphasizes understanding
-              constraints, designing for robustness, and developing
-              technologies that clinicians and patients can depend on with
-              confidence.
+              {aboutCopy}
             </p>
           </div>
 
-          <div className="mt-12 flex items-center gap-3 lg:mt-14">
-            <Image
-              src="/images/profile/karnik-linkedin.webp"
-              alt="Karnik Kanojia"
-              width={40}
-              height={40}
-              className="size-10 shrink-0 rounded-full border border-black/20 object-cover"
-            />
-            <p className="font-navbar text-xs leading-[1.05] text-black/60 word-spacing-[-0.1em]">
+          <div
+            ref={signatureRef}
+            className="mt-12 flex items-center gap-3 lg:mt-14"
+          >
+            <span className="block size-10 shrink-0 overflow-hidden rounded-full">
+              <span
+                ref={signatureImageRef}
+                className="about-signature-image block size-full overflow-hidden rounded-full border border-black/20"
+              >
+                <Image
+                  src="/images/profile/karnik-linkedin.webp"
+                  alt="Karnik Kanojia"
+                  width={40}
+                  height={40}
+                  className="size-full object-cover"
+                />
+              </span>
+            </span>
+            <p
+              ref={signatureCopyRef}
+              className="word-spacing-[-0.1em] font-navbar text-xs leading-[1.05] text-black/60"
+            >
               KARNIK KANOJIA
               <span className="block">SITE RELIABILITY ENGINEER</span>
             </p>

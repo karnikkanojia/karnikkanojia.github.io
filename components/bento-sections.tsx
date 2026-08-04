@@ -1,7 +1,9 @@
 "use client"
 
 import Image from "next/image"
-import { ArrowUpRight } from "lucide-react"
+import { ArrowUpRight, PanelsTopLeft } from "lucide-react"
+import { createLayout } from "animejs"
+import { useEffect, useRef, useState } from "react"
 
 import { CursorFollowLabel } from "@/components/ui/cursor-follow-label"
 import type { MediumPost } from "@/lib/medium"
@@ -19,13 +21,17 @@ type BentoItem = {
   imageAlt?: string
   href: string
   className?: string
+  alternateSpan?: 4 | 5 | 7 | 8 | 12
   imageClassName?: string
   imageSizes?: string
 }
 
 function BentoCard({ item }: { item: BentoItem }) {
   return (
-    <li className={cn("min-w-0", item.className)}>
+    <li
+      className={cn("min-w-0", item.className)}
+      data-alternate-span={item.alternateSpan}
+    >
       <CursorFollowLabel
         className="group h-full min-w-0"
         label="View"
@@ -101,14 +107,64 @@ function BentoSection({
   viewMoreLabel: string
   viewMoreHref: string
 }) {
+  const gridRef = useRef<HTMLUListElement>(null)
+  const layoutRef = useRef<ReturnType<typeof createLayout> | null>(null)
+  const [layout, setLayout] = useState<"overview" | "alternate">("overview")
+
+  useEffect(() => {
+    const grid = gridRef.current
+    if (!grid) return
+
+    const autoLayout = createLayout(grid, {
+      children: Array.from(grid.querySelectorAll<HTMLLIElement>(":scope > li")),
+      duration: 280,
+      ease: "out(4)",
+    })
+
+    layoutRef.current = autoLayout
+
+    return () => {
+      autoLayout.revert()
+      layoutRef.current = null
+    }
+  }, [])
+
+  function toggleLayout() {
+    const nextLayout = layout === "overview" ? "alternate" : "overview"
+    const autoLayout = layoutRef.current
+
+    if (!autoLayout) {
+      setLayout(nextLayout)
+      return
+    }
+
+    autoLayout.update(({ root }) => {
+      root.dataset.layout = nextLayout
+    })
+    setLayout(nextLayout)
+  }
+
   return (
     <div className="md:flex md:h-[calc(100svh-3rem)] md:min-h-125 md:flex-col">
-      <ul className="grid grid-cols-1 gap-2.5 md:min-h-0 md:flex-1 md:grid-cols-12 md:grid-rows-2 md:gap-3">
+      <ul
+        ref={gridRef}
+        data-layout={layout}
+        className="bento-layout grid grid-cols-1 gap-2.5 md:min-h-0 md:flex-1 md:grid-cols-12 md:grid-rows-2 md:gap-3"
+      >
         {items.map((item) => (
           <BentoCard key={item.title} item={item} />
         ))}
       </ul>
-      <div className="mt-5 flex justify-end md:mt-4">
+      <div className="mt-5 flex items-center justify-between md:mt-4">
+        <button
+          type="button"
+          onClick={toggleLayout}
+          className="group hidden items-center gap-2 border-b border-black/25 pb-1 font-navbar text-[11px] tracking-[0.06em] uppercase transition-colors duration-180 hover:border-black active:scale-[0.98] md:inline-flex"
+          aria-pressed={layout === "alternate"}
+        >
+          <PanelsTopLeft aria-hidden="true" className="size-3.5" />
+          {layout === "overview" ? "Rearrange" : "Reset layout"}
+        </button>
         <CursorFollowLabel
           as="span"
           label="View"
@@ -133,7 +189,7 @@ function BentoSection({
 }
 
 export function ProjectsBento() {
-  const items: BentoItem[] = projects.map((project) => ({
+  const items: BentoItem[] = projects.map((project, index) => ({
     title: project.title,
     description: project.description,
     pills: project.tags,
@@ -141,6 +197,7 @@ export function ProjectsBento() {
     imageAlt: project.imageAlt,
     href: `/projects/${project.slug}`,
     className: project.homeClassName,
+    alternateSpan: index % 2 === 0 ? 5 : 7,
     imageSizes: project.homeImageSizes,
   }))
 
@@ -173,6 +230,8 @@ export function BlogsBento({ posts }: { posts: MediumPost[] }) {
         : index % 2 === 0
           ? "md:col-span-8"
           : "md:col-span-4",
+    alternateSpan:
+      posts.length === 1 ? 12 : index % 2 === 0 ? 4 : 8,
     imageSizes:
       posts.length === 1
         ? "(min-width: 1200px) 1120px, calc(100vw - 40px)"

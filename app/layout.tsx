@@ -5,6 +5,7 @@ import Script from "next/script"
 import { ReactLenis } from "lenis/react"
 
 import { ContactFooter } from "@/components/contact-footer"
+import { BlendCursor } from "@/components/blend-cursor"
 import { Navbar } from "@/components/navbar"
 import { cn } from "@/lib/utils"
 import { SITE_DESCRIPTION, SITE_NAME, SITE_URL } from "@/lib/site"
@@ -148,7 +149,8 @@ export default function RootLayout({
           fetchPriority="high"
         />
       </head>
-      <body>
+      <body id="custom-cursor-root">
+        <BlendCursor />
         <noscript>
           <style>{`
             html, body { overflow: auto !important; overscroll-behavior: auto !important; }
