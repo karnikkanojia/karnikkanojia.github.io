@@ -174,7 +174,7 @@ export default async function Home() {
                   section.id !== "work" &&
                   section.id !== "projects" &&
                   section.id !== "blogs" && (
-                    <p className="mb-4 text-sm tracking-wide text-black/55">
+                    <p className="mb-4 text-base tracking-wide text-black/55">
                       {section.eyebrow}
                     </p>
                   )}
@@ -182,7 +182,7 @@ export default async function Home() {
                   section.id !== "work" &&
                   section.id !== "projects" &&
                   section.id !== "blogs" && (
-                    <h2 className="max-w-4xl text-3xl leading-[1.02] font-medium tracking-tight text-balance md:text-5xl">
+                    <h2 className="max-w-4xl text-4xl leading-[1.02] font-medium tracking-tight text-balance md:text-5xl">
                       {section.title}
                     </h2>
                   )}

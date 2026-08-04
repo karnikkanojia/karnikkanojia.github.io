@@ -240,7 +240,7 @@ export function ExperienceItem({ experience }: ExperienceItemProps) {
           )}
         </div>
 
-        <h3 className="text-lg leading-snug font-medium">
+        <h3 className="text-xl leading-snug font-medium">
           {experience.companyWebsite ? (
             <CursorFollowLabel
               as="span"
@@ -400,7 +400,7 @@ export function ExperiencePositionItem({
 
         <CollapsibleContent className="relative z-1 overflow-hidden">
           {position.description && (
-            <Prose className="prose-sm pt-2 pl-9 prose-p:my-1.5 prose-p:leading-[1.4] prose-ul:my-1.5 prose-li:my-1 prose-li:leading-[1.4]">
+            <Prose className="pt-2 pl-9 prose-p:my-1.5 prose-p:leading-[1.4] prose-ul:my-1.5 prose-li:my-1 prose-li:leading-[1.4]">
               <ReactMarkdown>{position.description}</ReactMarkdown>
             </Prose>
           )}
@@ -446,7 +446,7 @@ function Skill({ className, ...props }: ComponentProps<"span">) {
   return (
     <span
       className={cn(
-        "inline-flex items-center rounded-md border bg-muted/50 px-1.5 py-0.5 font-navbar text-[10px] tracking-wide text-muted-foreground uppercase",
+        "inline-flex items-center rounded-md border bg-muted/50 px-1.5 py-0.5 font-navbar text-xs tracking-wide text-muted-foreground uppercase",
         className
       )}
       {...props}
