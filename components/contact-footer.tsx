@@ -13,13 +13,18 @@ const navigation = [
   { label: "Blogs", href: "/#blogs" },
 ]
 
-const profiles = [
-  { label: "GitHub", href: "https://github.com/karnikkanojia" },
-  { label: "LinkedIn", href: "https://www.linkedin.com/in/karnikkanojia" },
-  {
-    label: "Resume",
-    href: "https://drive.google.com/file/d/1BZi0plL9zUQAPkJ0Qz4lJjMWQUvh4_v5/view?usp=sharing",
-  },
+const profileRows = [
+  [
+    { label: "GitHub", href: "https://github.com/karnikkanojia" },
+    { label: "X", href: "https://x.com/KanojiaKarnik" },
+  ],
+  [
+    { label: "LinkedIn", href: "https://www.linkedin.com/in/karnikkanojia" },
+    {
+      label: "Instagram",
+      href: "https://www.instagram.com/karnikkanojia/",
+    },
+  ],
 ]
 
 const timeFormatter = new Intl.DateTimeFormat("en-IN", {
@@ -131,7 +136,9 @@ export function ContactFooter() {
         ref={footerRef}
         inert={!isInteractive}
         aria-hidden={!isInteractive}
-        className="contact-footer pointer-events-auto fixed inset-x-0 top-0 z-0 min-h-184 bg-[#080808] px-5 pt-8 pb-7 text-[#f1f1ed] will-change-transform md:min-h-svh md:px-8 md:pt-10 md:pb-8"
+        className={`contact-footer pointer-events-auto fixed inset-x-0 top-0 z-0 min-h-184 bg-[#080808] px-5 pt-8 pb-7 text-[#f1f1ed] will-change-transform md:min-h-svh md:px-8 md:pt-10 md:pb-8 ${
+          isInteractive ? "visible" : "invisible"
+        }`}
       >
         <div
           aria-hidden="true"
@@ -161,12 +168,12 @@ export function ContactFooter() {
                   <li key={item.href}>
                     <a
                       href={item.href}
-                      className="footer-nav-link group inline-flex min-h-14 items-center text-2xl leading-none font-normal tracking-[-0.04em] md:min-h-[4.35rem] md:text-4xl"
+                      className="footer-nav-link group inline-flex min-h-14 origin-left items-center text-2xl leading-none font-normal tracking-[-0.04em] active:scale-[0.98] md:min-h-[4.35rem] md:text-4xl"
                     >
                       <span>{item.label}</span>
                       <span
                         aria-hidden="true"
-                        className="ml-2 translate-x-[-0.35rem] opacity-0 transition-[transform,opacity] duration-200 ease-[cubic-bezier(0.23,1,0.32,1)] group-hover:translate-x-0 group-hover:opacity-100"
+                        className="footer-nav-arrow ml-2 translate-x-[-0.35rem] opacity-0 transition-[transform,opacity] duration-200 ease-[cubic-bezier(0.23,1,0.32,1)]"
                       >
                         <Image
                           src="/noun-up-right-648092.svg"
@@ -194,35 +201,27 @@ export function ContactFooter() {
               Profile details
             </h2>
 
-            <ul className="mt-12 space-y-1.5 md:mt-14">
-              {profiles.map((profile) => (
-                <li key={profile.label}>
-                  <CursorFollowLabel
-                    as="span"
-                    className="inline-flex"
-                    icon={<ArrowUpRight aria-hidden="true" />}
-                    label={`Open ${profile.label}`}
-                    labelClassName="[&_svg]:!size-3.5 [&_svg]:stroke-[1.75]"
-                  >
-                    <a
-                      href={profile.href}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="footer-profile-link inline-flex items-center gap-1.5 text-xl leading-tight tracking-[-0.02em]"
-                    >
-                      {profile.label}
-                      <ArrowUpRight
-                        aria-hidden="true"
-                        className="size-3 md:size-4"
-                      />
-                    </a>
-                  </CursorFollowLabel>
-                </li>
+            <div className="mt-12 flex flex-col items-start gap-2 md:mt-14">
+              {profileRows.map((row, rowIndex) => (
+                <ul key={rowIndex} className="flex flex-nowrap gap-2">
+                  {row.map((profile) => (
+                    <li key={profile.label}>
+                      <a
+                        href={profile.href}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="footer-profile-link inline-flex min-h-9 origin-left items-center justify-center rounded-[18px] bg-[#252724] px-4 py-1.5 font-navbar text-sm leading-none font-normal tracking-[-0.01em] text-[#f1f1ed] uppercase hover:rounded-none focus-visible:rounded-none active:scale-[0.97]"
+                      >
+                        {profile.label}
+                      </a>
+                    </li>
+                  ))}
+                </ul>
               ))}
-            </ul>
+            </div>
 
             <div className="mt-20 md:mt-24">
-              <div className="inline-flex items-center gap-2 bg-white/6 px-2.5 py-2 text-xs leading-none">
+              <div className="inline-flex items-center gap-2 rounded-lg border border-white/10 bg-white/8 px-2.5 py-2 text-xs leading-none backdrop-blur-sm">
                 <span aria-hidden="true" className="relative flex size-2">
                   <span className="absolute inset-0 animate-ping rounded-full bg-[#40d978] opacity-55" />
                   <span className="relative size-2 rounded-full bg-[#40d978] shadow-[0_0_0_3px_rgb(64_217_120/0.12)]" />
@@ -245,7 +244,7 @@ export function ContactFooter() {
               >
                 <a
                   href="mailto:karnikkanojia8@gmail.com"
-                  className="footer-email inline-block text-xs leading-tight underline decoration-white/60 underline-offset-3"
+                  className="footer-email inline-block origin-left py-1 text-base leading-tight underline decoration-white/60 underline-offset-3 active:scale-[0.97]"
                 >
                   ↳ karnikkanojia8@gmail.com
                 </a>
@@ -270,7 +269,7 @@ export function ContactFooter() {
                 type="button"
                 onClick={scrollToTop}
                 aria-label="Back to top"
-                className="footer-back-to-top inline-flex size-9 items-center justify-center rounded-[11px] bg-[#f1f1ed] text-[#080808] transition-[transform,background-color] duration-150 ease-[cubic-bezier(0.23,1,0.32,1)] hover:bg-white active:scale-[0.97]"
+                className="footer-back-to-top relative inline-flex size-9 items-center justify-center rounded-[11px] bg-[#f1f1ed] text-[#080808] transition-[transform,background-color] duration-150 ease-[cubic-bezier(0.23,1,0.32,1)] after:absolute after:-inset-1.5 active:scale-[0.97]"
               >
                 <ArrowUp aria-hidden="true" className="size-4" />
               </button>

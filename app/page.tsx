@@ -4,6 +4,7 @@ import { PullToRefresh } from "@/components/pull-to-refresh"
 import { GithubCalendar } from "@/components/ui/github-calendar"
 import { AboutSection } from "@/components/about-section"
 import { BlogsBento, ProjectsBento } from "@/components/bento-sections"
+import { BlogFooterTransition } from "@/components/blog-footer-transition"
 import { getMediumPosts } from "@/lib/medium"
 
 export const revalidate = 3600
@@ -134,7 +135,7 @@ export default async function Home() {
         <main
           id="content"
           tabIndex={-1}
-          className="min-h-screen w-full overflow-x-clip bg-white text-black focus:outline-none"
+          className="min-h-screen w-full overflow-x-clip rounded-b-[0.625rem] bg-white text-black focus:outline-none"
         >
           <Hero />
           <section
@@ -143,69 +144,71 @@ export default async function Home() {
           >
             <AboutSection />
           </section>
-          {sections.map((section) => (
-            <section
-              key={section.id}
-              id={section.id}
-              data-deferred-section="true"
-              className={`relative z-10 flex scroll-mt-12 px-5 md:px-8 ${
-                section.id === "work"
-                  ? "min-h-screen items-center py-12 md:py-16"
-                  : section.id === "github"
-                    ? "min-h-0 items-start py-6 md:py-8"
-                    : section.id === "projects" || section.id === "blogs"
-                      ? "min-h-0 items-start py-8 md:py-6"
-                      : "min-h-[70vh] items-end bg-white py-12 text-black md:py-16"
-              } bg-white text-black`}
-            >
-              <div
-                className={
-                  section.id === "work"
-                    ? "mx-auto w-full max-w-3xl text-left"
-                    : section.id === "github" ||
-                        section.id === "projects" ||
-                        section.id === "blogs"
-                      ? "mx-auto w-full max-w-6xl"
-                      : "w-full max-w-3xl"
-                }
-              >
+          {sections.map((section) =>
+            section.id === "blogs" ? (
+              <BlogFooterTransition key={section.id}>
                 <h2 className="sr-only">{section.title}</h2>
-                {section.id !== "github" &&
-                  section.id !== "work" &&
-                  section.id !== "projects" &&
-                  section.id !== "blogs" && (
-                    <p className="mb-4 text-base tracking-wide text-black/55">
-                      {section.eyebrow}
-                    </p>
-                  )}
-                {section.id !== "github" &&
-                  section.id !== "work" &&
-                  section.id !== "projects" &&
-                  section.id !== "blogs" && (
-                    <h2 className="max-w-4xl text-4xl leading-[1.02] font-medium tracking-tight text-balance md:text-5xl">
-                      {section.title}
-                    </h2>
-                  )}
-                {section.id === "work" && (
-                  <WorkExperience
-                    className="mt-10 md:mt-14"
-                    experiences={workExperiences}
-                  />
-                )}
-                {section.id === "github" && (
-                  <div className="w-full min-w-0">
-                    <GithubCalendar
-                      username="karnikkanojia"
-                      colorSchema="blue"
-                      shape="rounded"
+                <BlogsBento posts={mediumPosts} />
+              </BlogFooterTransition>
+            ) : (
+              <section
+                key={section.id}
+                id={section.id}
+                data-deferred-section="true"
+                className={`relative z-10 flex scroll-mt-12 px-5 md:px-8 ${
+                  section.id === "work"
+                    ? "min-h-screen items-center py-12 md:py-16"
+                    : section.id === "github"
+                      ? "min-h-0 items-start py-6 md:py-8"
+                      : section.id === "projects"
+                        ? "min-h-0 items-start py-8 md:py-6"
+                        : "min-h-[70vh] items-end bg-white py-12 text-black md:py-16"
+                } bg-white text-black`}
+              >
+                <div
+                  className={
+                    section.id === "work"
+                      ? "mx-auto w-full max-w-3xl text-left"
+                      : section.id === "github" || section.id === "projects"
+                        ? "mx-auto w-full max-w-6xl"
+                        : "w-full max-w-3xl"
+                  }
+                >
+                  <h2 className="sr-only">{section.title}</h2>
+                  {section.id !== "github" &&
+                    section.id !== "work" &&
+                    section.id !== "projects" && (
+                      <p className="mb-4 text-base tracking-wide text-black/55">
+                        {section.eyebrow}
+                      </p>
+                    )}
+                  {section.id !== "github" &&
+                    section.id !== "work" &&
+                    section.id !== "projects" && (
+                      <h2 className="max-w-4xl text-4xl leading-[1.02] font-medium tracking-tight text-balance md:text-5xl">
+                        {section.title}
+                      </h2>
+                    )}
+                  {section.id === "work" && (
+                    <WorkExperience
+                      className="mt-10 md:mt-14"
+                      experiences={workExperiences}
                     />
-                  </div>
-                )}
-                {section.id === "projects" && <ProjectsBento />}
-                {section.id === "blogs" && <BlogsBento posts={mediumPosts} />}
-              </div>
-            </section>
-          ))}
+                  )}
+                  {section.id === "github" && (
+                    <div className="w-full min-w-0">
+                      <GithubCalendar
+                        username="karnikkanojia"
+                        colorSchema="blue"
+                        shape="rounded"
+                      />
+                    </div>
+                  )}
+                  {section.id === "projects" && <ProjectsBento />}
+                </div>
+              </section>
+            )
+          )}
         </main>
       </IntroTransition>
     </PullToRefresh>

@@ -13,6 +13,7 @@ import Image from "next/image"
 import { useEffect, useLayoutEffect, useRef, useState } from "react"
 
 import { CursorImageTrail } from "@/components/ui/cursor-image-trail"
+import { haptics } from "@/lib/haptics"
 
 const stats = ["2", "BLR → NYU"] as const
 
@@ -138,7 +139,10 @@ export function AboutSection() {
       }
     })
 
-    const stopReveal = observeMaskedReveal(copy, split.words)
+    const stopReveal = observeMaskedReveal(copy, split.words, {
+      enterDuration: 460,
+      enterStagger: 14,
+    })
 
     return () => {
       stopReveal()
@@ -181,6 +185,7 @@ export function AboutSection() {
   }, [activeIndex])
 
   function changeStatement(direction: 1 | -1) {
+    haptics.light()
     setActiveIndex(
       (current) => (current + direction + stats.length) % stats.length
     )
@@ -225,12 +230,12 @@ export function AboutSection() {
           </div>
 
           <div className="mt-3 flex items-center justify-between">
-            <div className="flex items-center gap-2">
+            <div className="-my-2 flex items-center gap-1">
               <button
                 type="button"
                 onClick={() => changeStatement(-1)}
                 aria-label="Previous about statement"
-                className="grid size-5 place-items-center text-black hover:text-black/55"
+                className="about-statement-control grid size-9 place-items-center text-black active:scale-[0.94]"
               >
                 <ArrowLeft aria-hidden="true" size={17} strokeWidth={2.25} />
               </button>
@@ -238,12 +243,12 @@ export function AboutSection() {
                 type="button"
                 onClick={() => changeStatement(1)}
                 aria-label="Next about statement"
-                className="grid size-5 place-items-center text-black hover:text-black/55"
+                className="about-statement-control grid size-9 place-items-center text-black active:scale-[0.94]"
               >
                 <ArrowRight aria-hidden="true" size={17} strokeWidth={2.25} />
               </button>
             </div>
-            <p className="font-navbar text-xs tracking-[0.08em] text-black/55">
+            <p className="font-navbar text-xs tracking-[0.08em] text-black/60">
               {String(activeIndex + 1).padStart(2, "0")}.
               {String(stats.length).padStart(2, "0")}
             </p>

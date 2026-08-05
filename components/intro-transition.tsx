@@ -188,7 +188,7 @@ export function IntroTransition({ children }: IntroTransitionProps) {
     <>
       <div
         ref={contentRef}
-        className="relative z-10 flow-root min-h-screen w-full bg-white"
+        className="relative z-10 flow-root min-h-screen w-full rounded-b-[0.625rem] bg-white"
       >
         {children}
       </div>

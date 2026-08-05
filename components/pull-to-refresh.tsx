@@ -2,6 +2,8 @@
 
 import { useCallback, useEffect, type ReactNode, useRef, useState } from "react"
 
+import { haptics } from "@/lib/haptics"
+
 const TRIGGER_DISTANCE = 96
 const MAX_DISTANCE = 140
 const DAMPING_DISTANCE = 110
@@ -31,6 +33,7 @@ export function PullToRefresh({
 
   const updateStatus = useCallback((nextStatus: RefreshStatus) => {
     if (statusRef.current === nextStatus) return
+    if (nextStatus === "ready") haptics.light()
     statusRef.current = nextStatus
     setStatus(nextStatus)
   }, [])
@@ -144,6 +147,7 @@ export function PullToRefresh({
       if (statusRef.current === "loading") return
 
       if (pullDistanceRef.current >= TRIGGER_DISTANCE) {
+        haptics.medium()
         updateStatus("loading")
         setSurfacePosition(TRIGGER_DISTANCE, true)
         try {
@@ -161,14 +165,33 @@ export function PullToRefresh({
       settleClosed()
     }
 
+    const cancelInterruptedGesture = () => {
+      if (
+        statusRef.current === "idle" ||
+        statusRef.current === "loading"
+      ) {
+        return
+      }
+
+      mouseGestureActive = false
+      startRef.current = null
+      settleClosed()
+    }
+
     const onTouchStart = (event: TouchEvent) => {
-      if (event.touches.length !== 1) return
+      if (event.touches.length !== 1) {
+        cancelInterruptedGesture()
+        return
+      }
       const touch = event.touches[0]
       startGesture(touch.clientX, touch.clientY)
     }
 
     const onTouchMove = (event: TouchEvent) => {
-      if (event.touches.length !== 1) return
+      if (event.touches.length !== 1) {
+        cancelInterruptedGesture()
+        return
+      }
       const touch = event.touches[0]
       moveGesture(touch.clientX, touch.clientY, () => event.preventDefault())
     }
@@ -177,9 +200,10 @@ export function PullToRefresh({
       if (event.touches.length === 0) finishGesture()
     }
 
-    const onTouchCancel = () => {
-      startRef.current = null
-      if (statusRef.current !== "loading") settleClosed()
+    const onTouchCancel = () => cancelInterruptedGesture()
+
+    const onVisibilityChange = () => {
+      if (document.visibilityState !== "visible") cancelInterruptedGesture()
     }
 
     const onMouseDown = (event: MouseEvent) => {
@@ -205,6 +229,10 @@ export function PullToRefresh({
     document.addEventListener("mousedown", onMouseDown)
     document.addEventListener("mousemove", onMouseMove)
     document.addEventListener("mouseup", onMouseUp)
+    document.addEventListener("visibilitychange", onVisibilityChange)
+    window.addEventListener("blur", cancelInterruptedGesture)
+    window.addEventListener("pagehide", cancelInterruptedGesture)
+    window.addEventListener("pageshow", cancelInterruptedGesture)
 
     return () => {
       document.removeEventListener("touchstart", onTouchStart)
@@ -214,6 +242,10 @@ export function PullToRefresh({
       document.removeEventListener("mousedown", onMouseDown)
       document.removeEventListener("mousemove", onMouseMove)
       document.removeEventListener("mouseup", onMouseUp)
+      document.removeEventListener("visibilitychange", onVisibilityChange)
+      window.removeEventListener("blur", cancelInterruptedGesture)
+      window.removeEventListener("pagehide", cancelInterruptedGesture)
+      window.removeEventListener("pageshow", cancelInterruptedGesture)
       clearSettleTimeout()
       const navbar = document.querySelector<HTMLElement>("[data-site-navbar]")
       if (navbar) {
@@ -228,10 +260,10 @@ export function PullToRefresh({
   }, [disabled, setSurfacePosition, settleClosed, updateStatus])
 
   return (
-    <div className="relative isolate z-10">
+    <div className="relative isolate z-10 overflow-x-clip bg-white">
       <div
         data-pull-refresh-underlay
-        className={`pointer-events-none fixed inset-x-0 top-0 z-0 h-40 overflow-hidden bg-[#090909] text-white md:hidden ${
+        className={`pointer-events-none absolute inset-x-0 top-0 z-0 h-40 overflow-hidden bg-white text-[#1d1d1f] [backface-visibility:hidden] [clip-path:inset(0)] [contain:paint] md:hidden ${
           status === "idle" ? "invisible opacity-0" : "visible opacity-100"
         }`}
         role="status"
@@ -247,20 +279,48 @@ export function PullToRefresh({
         <div className="absolute inset-0 bg-[linear-gradient(90deg,transparent_49.75%,rgba(255,255,255,0.08)_50%,transparent_50.25%),linear-gradient(rgba(255,255,255,0.04)_1px,transparent_1px)] bg-size-[100%_100%,100%_16px]" />
         <div
           ref={orbitRef}
-          className={`absolute -top-16 left-1/2 h-44 w-44 -translate-x-1/2 rounded-full border border-white/25 will-change-transform ${
+          className={`absolute -top-16 left-1/2 h-44 w-44 -translate-x-1/2 ${
             status === "loading" ? "pull-refresh-orbit" : ""
           }`}
           aria-hidden="true"
         >
-          <div className="absolute inset-5 rounded-full border border-white/12" />
-          <div className="absolute inset-1/2 h-2 w-2 -translate-x-1/2 -translate-y-1/2 rounded-full bg-white" />
-          <div className="absolute top-1/2 -right-1 h-2 w-2 -translate-y-1/2 rounded-full bg-white" />
+          <svg
+            className="h-full w-full"
+            viewBox="0 0 176 176"
+            fill="none"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <circle
+              cx="88"
+              cy="88"
+              r="87.25"
+              stroke="#1d1d1f"
+              strokeOpacity="0.2"
+              strokeWidth="1.5"
+            />
+            <circle
+              cx="88"
+              cy="88"
+              r="67.25"
+              stroke="#1d1d1f"
+              strokeOpacity="0.1"
+              strokeWidth="1.5"
+            />
+            <circle cx="88" cy="88" r="4" fill="#1d1d1f" />
+            <circle cx="172" cy="88" r="4" fill="#0071e3" />
+          </svg>
         </div>
         <div className="absolute inset-x-0 top-2.5 flex items-center justify-between px-5 font-navbar text-xs leading-none tracking-[0.17em] uppercase">
-          <span className="text-white/48">Pull down</span>
-          <span className="text-white/48">Refresh</span>
+          <span className="text-[#1d1d1f]/48">Pull down</span>
+          <span className="text-[#1d1d1f]/48">Refresh</span>
         </div>
-        <div className="absolute inset-x-0 top-[4.35rem] text-center font-navbar text-xs leading-none tracking-[0.2em] uppercase">
+        <div
+          className={`absolute inset-x-0 top-[4.35rem] text-center font-navbar text-xs leading-none tracking-[0.2em] uppercase ${
+            status === "ready" || status === "loading"
+              ? "text-[#0071e3]"
+              : "text-[#1d1d1f]"
+          }`}
+        >
           {status === "loading"
             ? "Refreshing"
             : status === "ready"

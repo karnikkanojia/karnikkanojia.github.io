@@ -6,6 +6,7 @@ import { createLayout } from "animejs"
 import { useEffect, useRef, useState } from "react"
 
 import { CursorFollowLabel } from "@/components/ui/cursor-follow-label"
+import { haptics } from "@/lib/haptics"
 import type { MediumPost } from "@/lib/medium"
 import { projects } from "@/lib/projects"
 import { cn } from "@/lib/utils"
@@ -79,7 +80,7 @@ function BentoCard({ item }: { item: BentoItem }) {
                 ))}
               </div>
             ) : (
-              <p className="bento-card-meta font-navbar text-xs tracking-[0.08em] text-black/48 uppercase transition-colors duration-180">
+              <p className="bento-card-meta font-navbar text-xs tracking-[0.08em] text-black/58 uppercase transition-colors duration-180">
                 {item.meta}
               </p>
             )}
@@ -133,6 +134,8 @@ function BentoSection({
     const nextLayout = layout === "overview" ? "alternate" : "overview"
     const autoLayout = layoutRef.current
 
+    haptics.medium()
+
     if (!autoLayout) {
       setLayout(nextLayout)
       return
@@ -159,7 +162,7 @@ function BentoSection({
         <button
           type="button"
           onClick={toggleLayout}
-          className="group hidden items-center gap-2 border-b border-black/25 pb-1 font-navbar text-xs tracking-[0.06em] uppercase transition-colors duration-180 hover:border-black active:scale-[0.98] md:inline-flex"
+          className="bento-layout-control group -my-2 hidden items-center gap-2 border-b border-black/25 py-2 font-navbar text-xs tracking-[0.06em] uppercase transition-colors duration-180 active:scale-[0.98] md:inline-flex"
           aria-pressed={layout === "alternate"}
         >
           <PanelsTopLeft aria-hidden="true" className="size-3.5" />
@@ -174,12 +177,12 @@ function BentoSection({
             href={viewMoreHref}
             target={viewMoreHref.startsWith("http") ? "_blank" : undefined}
             rel={viewMoreHref.startsWith("http") ? "noreferrer" : undefined}
-            className="group inline-flex items-center gap-2 border-b border-black/25 pb-1 font-navbar text-xs tracking-[0.06em] uppercase transition-colors duration-180 hover:border-black active:scale-[0.98]"
+            className="bento-view-more group -my-2 inline-flex items-center gap-2 border-b border-black/25 py-2 font-navbar text-xs tracking-[0.06em] uppercase transition-colors duration-180 active:scale-[0.98]"
           >
             {viewMoreLabel}
             <ArrowUpRight
               aria-hidden="true"
-              className="size-3.5 transition-transform duration-200 ease-[cubic-bezier(0.23,1,0.32,1)] group-hover:translate-x-0.5 group-hover:-translate-y-0.5"
+              className="bento-view-more-arrow size-3.5 transition-transform duration-200 ease-[cubic-bezier(0.23,1,0.32,1)]"
             />
           </a>
         </CursorFollowLabel>

@@ -36,6 +36,8 @@ export function BlendCursor() {
       data-blend-cursor
       data-visible="false"
       viewBox="0 0 24 24"
+      width="24"
+      height="24"
     >
       <circle cx="12" cy="12" r="7" fill="currentColor" />
     </svg>

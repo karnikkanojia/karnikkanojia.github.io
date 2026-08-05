@@ -1,18 +1,20 @@
 "use client"
 
-import { useCallback, useEffect, useRef, type ComponentProps } from "react"
+import {
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+  type ComponentProps,
+} from "react"
 import { animate, createTimeline, cubicBezier, remove } from "animejs"
 import { differenceInMonths, parse } from "date-fns"
 import Image from "next/image"
 import ReactMarkdown from "react-markdown"
 
 import { cn } from "@/lib/utils"
+import { haptics } from "@/lib/haptics"
 import { CursorFollowLabel } from "@/components/ui/cursor-follow-label"
-import {
-  Collapsible,
-  CollapsibleContent,
-  CollapsibleTrigger,
-} from "@/components/ui/collapsible"
 import type { ChevronsUpDownIconHandle } from "@/components/chevrons-up-down-icon"
 import { ChevronsUpDownIcon } from "@/components/chevrons-up-down-icon"
 import { ArrowUpRightIcon, CodeXmlIcon } from "lucide-react"
@@ -222,6 +224,14 @@ export type ExperienceItemProps = {
 }
 
 export function ExperienceItem({ experience }: ExperienceItemProps) {
+  const currentEmployerIndicator = experience.isCurrentEmployer ? (
+    <span className="relative flex shrink-0 items-center justify-center">
+      <span className="absolute inline-flex size-3 animate-ping rounded-full bg-sky-500 opacity-50" />
+      <span className="relative inline-flex size-2 rounded-full bg-sky-500" />
+      <span className="sr-only">Current employer</span>
+    </span>
+  ) : null
+
   return (
     <div data-work-experience-company className="space-y-4 py-4">
       <div className="not-prose flex items-center gap-3">
@@ -240,44 +250,42 @@ export function ExperienceItem({ experience }: ExperienceItemProps) {
           )}
         </div>
 
-        <h3 className="text-xl leading-snug font-medium">
+        <h3 className="min-w-0 flex-1 text-xl leading-snug font-medium">
           {experience.companyWebsite ? (
             <CursorFollowLabel
               as="span"
-              className="inline-flex"
+              className="block w-full"
               icon={<ArrowUpRightIcon />}
               labelClassName="[&_svg]:!size-3.5 [&_svg]:stroke-[1.75]"
               label={`Visit ${experience.companyName}`}
             >
               <a
-                className="inline-flex items-center gap-1 link"
+                className="flex w-full items-center justify-between gap-4 py-1 link active:opacity-60"
                 href={experience.companyWebsite}
                 target="_blank"
                 rel="noopener noreferrer"
               >
-                {experience.companyName}
+                <span className="inline-flex min-w-0 items-center gap-2">
+                  <span className="truncate">{experience.companyName}</span>
+                  {currentEmployerIndicator}
+                </span>
                 <Image
                   src="/noun-up-right-648092.svg"
                   alt=""
                   width={12}
                   height={12}
-                  className="size-3 opacity-70"
+                  className="size-3 shrink-0 opacity-70"
                   aria-hidden
                 />
               </a>
             </CursorFollowLabel>
           ) : (
-            experience.companyName
+            <span className="inline-flex items-center gap-2">
+              {experience.companyName}
+              {currentEmployerIndicator}
+            </span>
           )}
         </h3>
-
-        {experience.isCurrentEmployer && (
-          <span className="relative flex items-center justify-center">
-            <span className="absolute inline-flex size-3 animate-ping rounded-full bg-sky-500 opacity-50" />
-            <span className="relative inline-flex size-2 rounded-full bg-sky-500" />
-            <span className="sr-only">Current employer</span>
-          </span>
-        )}
       </div>
 
       <div className="space-y-4 text-left">
@@ -297,6 +305,7 @@ export function ExperiencePositionItem({
   position,
 }: ExperiencePositionItemProps) {
   const chevronsUpDownIconRef = useRef<ChevronsUpDownIconHandle>(null)
+  const [isOpen, setIsOpen] = useState(position.isExpanded ?? false)
 
   const handleOpenChange = useCallback((open: boolean) => {
     const controls = chevronsUpDownIconRef.current
@@ -314,15 +323,23 @@ export function ExperiencePositionItem({
   const duration = formatDuration(start, end)
   const skills = position.skills ?? []
   const hasSkills = skills.length > 0
+  const contentId = `work-experience-${position.id}-details`
+
+  const toggleOpen = () => {
+    if (!position.description) return
+
+    const nextOpen = !isOpen
+    haptics.light()
+    setIsOpen(nextOpen)
+    handleOpenChange(nextOpen)
+  }
 
   return (
-    <Collapsible
-      defaultOpen={position.isExpanded}
-      onOpenChange={handleOpenChange}
-      disabled={!position.description}
-      asChild
+    <div
+      data-work-experience-position
+      data-state={isOpen ? "open" : "closed"}
+      className="relative"
     >
-      <div data-work-experience-position className="relative">
         <span
           aria-hidden
           className={cn(
@@ -336,75 +353,92 @@ export function ExperiencePositionItem({
             style={{ transform: "scaleY(0)" }}
           />
         </span>
-        <h4 className="not-prose relative z-1 mb-1 text-base font-medium text-balance text-foreground">
-          <CollapsibleTrigger
-            className={cn(
-              "group/experience-position flex w-full items-start gap-3 text-left select-none",
-              "relative before:absolute before:-top-1 before:-right-1 before:-bottom-1.5 before:left-7 before:rounded-lg hover:before:bg-muted/30",
-              "data-disabled:before:content-none"
-            )}
-          >
-            <div
-              className={cn(
-                "flex size-6 shrink-0 items-center justify-center rounded-lg",
-                "bg-muted text-muted-foreground",
-                "[&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4"
-              )}
+        <div className="relative isolate">
+          <h4 className="peer/experience-position-summary not-prose relative z-1 mb-1 text-base font-medium text-balance text-foreground">
+            <button
+              type="button"
+              aria-controls={contentId}
+              aria-expanded={isOpen}
+              data-state={isOpen ? "open" : "closed"}
+              disabled={!position.description}
+              className="experience-position-trigger group/experience-position flex w-full items-start gap-3 text-left select-none active:scale-[0.99]"
+              onClick={toggleOpen}
             >
-              {position.icon ?? <CodeXmlIcon />}
-            </div>
-
-            <span className="flex-1">{position.title}</span>
-
-            <div className="shrink-0 text-muted-foreground group-disabled/experience-position:hidden [&_svg]:h-lh [&_svg]:w-4">
-              <ChevronsUpDownIcon
-                ref={chevronsUpDownIconRef}
-                duration={0.15}
-                initialOpen={position.isExpanded}
-              />
-            </div>
-          </CollapsibleTrigger>
-        </h4>
-
-        <dl className="relative z-1 flex items-center gap-2 pl-9 font-navbar text-xs tracking-wide text-muted-foreground uppercase">
-          {position.employmentType && (
-            <>
-              <div>
-                <dt className="sr-only">Employment Type</dt>
-                <dd>{position.employmentType}</dd>
+              <div
+                className={cn(
+                  "flex size-6 shrink-0 items-center justify-center rounded-lg",
+                  "bg-muted text-muted-foreground",
+                  "[&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4"
+                )}
+              >
+                {position.icon ?? <CodeXmlIcon />}
               </div>
 
-              <span aria-hidden>-</span>
-            </>
-          )}
+              <span className="flex-1">{position.title}</span>
 
-          <div>
-            <dt className="sr-only">Employment Period</dt>
-            <dd className="flex items-center gap-0.5 tabular-nums">
-              <span>{start}</span>
-              <span>.</span>
-              <span>{isOngoing ? "Present" : end}</span>
-            </dd>
-          </div>
-
-          {duration && (
-            <>
-              <span aria-hidden>-</span>
-              <div>
-                <dt className="sr-only">Duration</dt>
-                <dd className="tabular-nums">{duration}</dd>
+              <div className="shrink-0 text-muted-foreground group-disabled/experience-position:hidden [&_svg]:h-lh [&_svg]:w-4">
+                <ChevronsUpDownIcon
+                  ref={chevronsUpDownIconRef}
+                  duration={0.15}
+                  initialOpen={position.isExpanded}
+                />
               </div>
-            </>
-          )}
-        </dl>
+            </button>
+          </h4>
 
-        <CollapsibleContent className="relative z-1 overflow-hidden">
+          {position.description && (
+            <span
+              data-experience-position-highlight
+              aria-hidden
+              className="pointer-events-none absolute -top-1 -right-2 -bottom-2 left-6 z-0 rounded-lg bg-transparent peer-hover/experience-position-summary:bg-[#f1f1f1] peer-focus-within/experience-position-summary:bg-[#f1f1f1]/60"
+            />
+          )}
+
+          <dl className="relative z-1 flex items-center gap-2 pl-9 font-navbar text-xs tracking-wide text-muted-foreground uppercase">
+            {position.employmentType && (
+              <>
+                <div>
+                  <dt className="sr-only">Employment Type</dt>
+                  <dd>{position.employmentType}</dd>
+                </div>
+
+                <span aria-hidden>-</span>
+              </>
+            )}
+
+            <div>
+              <dt className="sr-only">Employment Period</dt>
+              <dd className="flex items-center gap-0.5 tabular-nums">
+                <span>{start}</span>
+                <span>.</span>
+                <span>{isOngoing ? "Present" : end}</span>
+              </dd>
+            </div>
+
+            {duration && (
+              <>
+                <span aria-hidden>-</span>
+                <div>
+                  <dt className="sr-only">Duration</dt>
+                  <dd className="tabular-nums">{duration}</dd>
+                </div>
+              </>
+            )}
+          </dl>
+        </div>
+
+        <div
+          id={contentId}
+          data-state={isOpen ? "open" : "closed"}
+          hidden={!isOpen}
+          className="relative z-1 overflow-hidden"
+        >
           {position.description && (
             <Prose className="pt-2 pl-9 prose-p:my-1.5 prose-p:leading-[1.4] prose-ul:my-1.5 prose-li:my-1 prose-li:leading-[1.4]">
               <ReactMarkdown>{position.description}</ReactMarkdown>
             </Prose>
           )}
-        </CollapsibleContent>
+        </div>
 
         {hasSkills && (
           <ul className="not-prose relative z-1 flex flex-wrap gap-1.5 pt-3 pl-9">
@@ -425,8 +459,7 @@ export function ExperiencePositionItem({
             ))}
           </ul>
         )}
-      </div>
-    </Collapsible>
+    </div>
   )
 }
 
