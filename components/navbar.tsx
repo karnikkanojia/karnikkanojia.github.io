@@ -15,6 +15,8 @@ import {
   useState,
 } from "react"
 
+import { haptics } from "@/lib/haptics"
+
 const RESUME_URL =
   "https://drive.google.com/file/d/1BZi0plL9zUQAPkJ0Qz4lJjMWQUvh4_v5/view?usp=sharing"
 
@@ -194,6 +196,7 @@ function getRouteRoot(pathname: string): RouteRoot | undefined {
 
 export function Navbar() {
   const logoRef = useRef<HTMLSpanElement>(null)
+  const navbarMaterialRef = useRef<HTMLSpanElement>(null)
   const linksRef = useRef<HTMLUListElement>(null)
   const contactRef = useRef<HTMLDivElement>(null)
   const contactButtonRef = useRef<HTMLAnchorElement>(null)
@@ -223,6 +226,7 @@ export function Navbar() {
     isVisible: isNavbarVisible,
     isScrolled: isNavbarScrolled,
   } = useNavbarScrollState()
+  const shouldShowNavbarMaterial = isNavbarScrolled
 
   useEffect(() => {
     const markIntroComplete = () => setIsIntroComplete(true)
@@ -367,13 +371,25 @@ export function Navbar() {
 
   useLayoutEffect(() => {
     const logo = logoRef.current
+    const navbarMaterial = navbarMaterialRef.current
     const links = linksRef.current
     const contact = contactRef.current
     const contactButton = contactButtonRef.current
     const contactDots = contactDotsRef.current
-    if (!logo || !links || !contact || !contactButton || !contactDots) return
+    if (
+      !logo ||
+      !navbarMaterial ||
+      !links ||
+      !contact ||
+      !contactButton ||
+      !contactDots
+    )
+      return
 
     if (window.location.pathname !== "/") {
+      navbarMaterial.style.visibility = "visible"
+      navbarMaterial.style.transform = "none"
+      navbarMaterial.style.clipPath = "none"
       logo.style.visibility = "visible"
       logo.style.opacity = "1"
       logo.style.transform = "none"
@@ -423,6 +439,10 @@ export function Navbar() {
     contact.style.transform = `translate(${contactStartX}px, ${contactStartY}px)`
     contact.style.opacity = "0"
     contact.style.visibility = "visible"
+    navbarMaterial.style.transformOrigin = "left center"
+    navbarMaterial.style.transform = "scaleX(0.92) scaleY(0.96)"
+    navbarMaterial.style.clipPath = "inset(0 100% 0 0)"
+    navbarMaterial.style.visibility = "hidden"
     contactButton.style.clipPath = "inset(0 0 0 100% round 999px)"
     Array.from(contactDots.children).forEach((cell) => {
       const element = cell as HTMLElement
@@ -444,11 +464,20 @@ export function Navbar() {
 
     const revealNavbar = () => {
       const logo = logoRef.current
+      const navbarMaterial = navbarMaterialRef.current
       const links = linksRef.current
       const contact = contactRef.current
       const contactButton = contactButtonRef.current
       const contactDots = contactDotsRef.current
-      if (!logo || !links || !contact || !contactButton || !contactDots) return
+      if (
+        !logo ||
+        !navbarMaterial ||
+        !links ||
+        !contact ||
+        !contactButton ||
+        !contactDots
+      )
+        return
 
       const logoTranslation = getTranslation(logo)
       const contactTranslation = getTranslation(contact)
@@ -526,6 +555,28 @@ export function Navbar() {
       })
 
       timeline
+        .add(
+          navbarMaterial,
+          {
+            clipPath: [
+              "inset(0 100% 0 0)",
+              "inset(0 0% 0 0)",
+            ],
+            scaleX: [0.92, 1],
+            scaleY: [0.96, 1],
+            duration: 760,
+            ease: cubicBezier(0.77, 0, 0.175, 1),
+            onBegin: () => {
+              navbarMaterial.style.visibility = "visible"
+            },
+            onComplete: () => {
+              navbarMaterial.style.removeProperty("clip-path")
+              navbarMaterial.style.removeProperty("transform")
+              navbarMaterial.style.removeProperty("visibility")
+            },
+          },
+          900
+        )
         .add(
           contactButton,
           {
@@ -623,7 +674,7 @@ export function Navbar() {
           <Link
             href="/"
             aria-label="Home"
-            className="flex shrink-0 items-center"
+            className="flex shrink-0 items-center active:scale-[0.97]"
           >
             <span
               ref={logoRef}
@@ -710,15 +761,27 @@ export function Navbar() {
           )}
         </div>
         <div
-          className={`flex items-center gap-2 rounded-[7px] border transition-[background-color,border-color,padding,transform] duration-200 ease-[cubic-bezier(0.23,1,0.32,1)] ${
-            isNavbarScrolled
-              ? "-translate-x-1 border-white/70 bg-[#f1f1f1]/78 px-3 py-2 backdrop-blur-md md:px-4 md:py-3"
-              : "translate-x-0 border-transparent bg-transparent px-0 py-0"
+          data-navbar-cluster
+          data-scrolled={shouldShowNavbarMaterial}
+          className={`relative isolate flex items-center gap-2 rounded-[7px] transition-[padding,transform] duration-200 ease-[cubic-bezier(0.23,1,0.32,1)] ${
+            shouldShowNavbarMaterial
+              ? "-translate-x-1 px-3 py-2 md:px-4 md:py-3"
+              : "translate-x-0 px-0 py-0"
           }`}
         >
+          <span
+            ref={navbarMaterialRef}
+            data-navbar-material
+            aria-hidden="true"
+            className={`pointer-events-none absolute inset-0 -z-1 rounded-[7px] border transition-[background-color,border-color,backdrop-filter] duration-200 ease-[cubic-bezier(0.23,1,0.32,1)] ${
+              shouldShowNavbarMaterial
+                ? "border-white/70 bg-[#f1f1f1]/78 backdrop-blur-md backdrop-saturate-150"
+                : "border-transparent bg-transparent"
+            }`}
+          />
           <ul
             ref={linksRef}
-            className="group/nav-links hidden items-center gap-3 md:flex"
+            className="group/nav-links relative z-1 hidden items-center gap-3 md:flex"
           >
             {DESKTOP_LINKS.map((link) => (
               <li key={link.label}>
@@ -728,15 +791,19 @@ export function Navbar() {
           </ul>
           <div
             ref={contactRef}
-            className="inline-flex items-center gap-2.5"
+            className="relative z-1 inline-flex items-center gap-2.5"
             style={{ visibility: "hidden", opacity: 0 }}
           >
             <Link
               ref={contactButtonRef}
               href="/#contact"
               className="group hidden md:inline-flex"
-              onPointerEnter={() => animateContactRadius(0)}
-              onPointerLeave={() => animateContactRadius(14)}
+              onPointerEnter={(event) => {
+                if (event.pointerType === "mouse") animateContactRadius(0)
+              }}
+              onPointerLeave={(event) => {
+                if (event.pointerType === "mouse") animateContactRadius(14)
+              }}
             >
               <span
                 ref={contactShapeRef}
@@ -760,11 +827,16 @@ export function Navbar() {
               }
               aria-controls={isMobileViewport ? "mobile-navigation" : undefined}
               aria-expanded={isMobileViewport ? isMobileMenuOpen : undefined}
-              className="relative isolate inline-flex size-6.5 shrink-0 transform-gpu border-0 bg-transparent p-0"
-              onPointerEnter={() => animateContactDotsScale(1.25)}
-              onPointerLeave={() => animateContactDotsScale(1)}
+              className="relative isolate inline-flex size-6.5 shrink-0 transform-gpu border-0 bg-transparent p-0 after:absolute after:-inset-2 active:scale-[0.97]"
+              onPointerEnter={(event) => {
+                if (event.pointerType === "mouse") animateContactDotsScale(1.25)
+              }}
+              onPointerLeave={(event) => {
+                if (event.pointerType === "mouse") animateContactDotsScale(1)
+              }}
               onClick={() => {
                 if (isMobileViewport) {
+                  haptics.light()
                   if (isMobileMenuOpen) closeMobileMenu()
                   else openMobileMenu()
                 } else {
@@ -816,7 +888,7 @@ export function Navbar() {
         id="mobile-navigation"
         aria-label="Navigation menu"
         data-open={isMobileMenuOpen && !isFooterActive}
-        className="fixed inset-0 m-0 h-full max-h-none w-full max-w-none border-0 bg-[#f1f1f1] p-0 font-navbar md:hidden backdrop:bg-transparent"
+        className="fixed inset-0 m-0 h-full max-h-none w-full max-w-none border-0 bg-[#f1f1f1] p-0 font-navbar backdrop:bg-transparent md:hidden"
         onCancel={(event) => {
           event.preventDefault()
           closeMobileMenu()
@@ -834,8 +906,11 @@ export function Navbar() {
         <button
           type="button"
           aria-label="Close navigation menu"
-          className="absolute top-4 right-5 grid size-8 place-items-center rounded-full md:hidden"
-          onClick={closeMobileMenu}
+          className="absolute top-4 right-5 grid size-8 place-items-center rounded-full after:absolute after:-inset-1.5 active:scale-[0.94] md:hidden"
+          onClick={() => {
+            haptics.light()
+            closeMobileMenu()
+          }}
         >
           <svg aria-hidden="true" viewBox="0 0 24 24" className="size-6">
             <path
@@ -856,10 +931,11 @@ export function Navbar() {
                     href={link.href}
                     target={link.external ? "_blank" : undefined}
                     rel={link.external ? "noopener noreferrer" : undefined}
-                    className="mobile-menu-link group flex items-center justify-between border-b border-black/10 px-0 py-5 text-lg leading-none font-light text-black transition-[background-color,color,padding] duration-200 ease-[cubic-bezier(0.23,1,0.32,1)] hover:border-[#1c1c1c] hover:bg-[#1c1c1c] hover:px-3 hover:text-white"
-                    onPointerEnter={(event) =>
-                      animateMobileMenuArrow(event.currentTarget)
-                    }
+                    className="mobile-menu-link group flex items-center justify-between border-b border-black/10 px-0 py-5 text-lg leading-none font-light text-black transition-[background-color,color,padding] duration-200 ease-[cubic-bezier(0.23,1,0.32,1)] active:scale-[0.99]"
+                    onPointerEnter={(event) => {
+                      if (event.pointerType === "mouse")
+                        animateMobileMenuArrow(event.currentTarget)
+                    }}
                     onFocus={(event) =>
                       animateMobileMenuArrow(event.currentTarget)
                     }

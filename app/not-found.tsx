@@ -23,7 +23,7 @@ export default function NotFound() {
           </h1>
           <Link
             href="/"
-            className="mt-5 inline-flex text-base underline decoration-black/35 underline-offset-4 transition-[text-decoration-color] duration-180 hover:decoration-black"
+            className="not-found-home mt-5 inline-flex border-b border-transparent py-2 text-base underline decoration-black/35 underline-offset-4 transition-[text-decoration-color] duration-180 active:opacity-60"
           >
             Return home
           </Link>

@@ -34,12 +34,6 @@ interface GithubCalendarProps {
   colorSchema?: "green" | "blue" | "purple" | "orange" | "gray"
 }
 
-const DATE_FORMATTER = new Intl.DateTimeFormat("en", {
-  day: "numeric",
-  month: "short",
-  year: "numeric",
-})
-
 const EMPTY_WEEKS: ContributionDay[][] = []
 
 // Color schemas for custom styling
@@ -119,8 +113,6 @@ type ContributionGridProps = {
   colorSchema: keyof typeof colorSchemas
   glowIntensity: number
   gridRef: React.RefObject<HTMLDivElement | null>
-  onDayHover: (date: string, contributionCount: number) => void
-  onLeave: () => void
   shape: GithubCalendarProps["shape"]
   variant: GithubCalendarProps["variant"]
   weeks: ContributionDay[][]
@@ -130,43 +122,18 @@ const ContributionGrid = React.memo(function ContributionGrid({
   colorSchema,
   glowIntensity,
   gridRef,
-  onDayHover,
-  onLeave,
   shape = "rounded",
   variant,
   weeks,
 }: ContributionGridProps) {
   const shapeClass = getShapeClass(shape)
   const isMinimal = variant === "minimal"
-  const lastHoveredDateRef = React.useRef<string | null>(null)
-
-  const handlePointerMove = (event: React.PointerEvent<HTMLDivElement>) => {
-    const target = event.target
-    if (!(target instanceof HTMLElement)) return
-
-    const cell = target.closest<HTMLElement>("[data-contribution-day]")
-    if (!cell || !event.currentTarget.contains(cell)) return
-
-    const date = cell.dataset.contributionDate
-    const contributionCount = Number(cell.dataset.contributionCount)
-    if (date && date !== lastHoveredDateRef.current) {
-      lastHoveredDateRef.current = date
-      onDayHover(date, contributionCount)
-    }
-  }
-
-  const handlePointerLeave = () => {
-    lastHoveredDateRef.current = null
-    onLeave()
-  }
 
   return (
     <div
       ref={gridRef}
       aria-hidden="true"
       className="grid w-full auto-cols-fr grid-flow-col gap-px sm:gap-0.75"
-      onPointerLeave={handlePointerLeave}
-      onPointerMove={handlePointerMove}
     >
       {weeks.map((week, weekIndex) => (
         <div
@@ -180,9 +147,6 @@ const ContributionGrid = React.memo(function ContributionGrid({
             return (
               <div
                 key={day.date}
-                data-contribution-day
-                data-contribution-count={day.contributionCount}
-                data-contribution-date={day.date}
                 className={cn(
                   "github-contribution-day aspect-square w-full [box-shadow:inset_0_0_0_1px_rgb(0_0_0/0.08)] transition-transform duration-100 ease-[cubic-bezier(0.23,1,0.32,1)]",
                   getLevelClass(day.contributionLevel, colorSchema),
@@ -229,10 +193,6 @@ export function GithubCalendar({
   const [data, setData] = React.useState<GithubContributionData | null>(null)
   const [loading, setLoading] = React.useState(true)
   const [error, setError] = React.useState<string | null>(null)
-  const [hoveredDay, setHoveredDay] = React.useState<{
-    date: string
-    contributionCount: number
-  } | null>(null)
   const gridRef = React.useRef<HTMLDivElement>(null)
   const summaryId = React.useId()
   const weeks = data?.contributions ?? EMPTY_WEEKS
@@ -241,24 +201,6 @@ export function GithubCalendar({
     () => contributionDays.filter((day) => day.contributionCount > 0),
     [contributionDays]
   )
-  const hoveredLabel = hoveredDay
-    ? `${hoveredDay.contributionCount} ${
-        hoveredDay.contributionCount === 1 ? "contribution" : "contributions"
-      } . ${DATE_FORMATTER.format(new Date(`${hoveredDay.date}T00:00:00`))}`
-    : ""
-  const handleDayHover = React.useCallback(
-    (date: string, contributionCount: number) => {
-      setHoveredDay((current) =>
-        current?.date === date &&
-        current.contributionCount === contributionCount
-          ? current
-          : { date, contributionCount }
-      )
-    },
-    []
-  )
-  const handleGridLeave = React.useCallback(() => setHoveredDay(null), [])
-
   React.useEffect(() => {
     const controller = new AbortController()
 
@@ -344,7 +286,7 @@ export function GithubCalendar({
             labelClassName="[&_svg]:!size-3.5 [&_svg]:stroke-[1.75]"
           >
             <a
-              className="inline-flex items-center gap-2 link"
+              className="inline-flex items-center gap-2 py-1 link active:scale-[0.97]"
               href={`https://github.com/${username}`}
               target="_blank"
               rel="noopener noreferrer"
@@ -381,31 +323,21 @@ export function GithubCalendar({
 
       <figure
         aria-labelledby={summaryId}
-        className="my-5 border border-black/12 bg-[#e8e8e3] p-2 sm:p-3 md:my-6"
+        className="my-5 border border-black/12 bg-[#e8e8e3] p-2 [contain:paint] sm:p-3 md:my-6"
       >
         <figcaption id={summaryId} className="sr-only">
           GitHub contribution calendar for {username}:{" "}
           {data?.totalContributions} contributions across {weeks.length} weeks,
           with {activeDays} active days.
         </figcaption>
-        <CursorFollowLabel
-          className="w-full"
-          followStrength={1}
-          label={hoveredLabel}
-          labelClassName="w-[250px] justify-center whitespace-nowrap"
-          showLabel={hoveredDay !== null}
-        >
-          <ContributionGrid
-            colorSchema={colorSchema}
-            glowIntensity={glowIntensity}
-            gridRef={gridRef}
-            onDayHover={handleDayHover}
-            onLeave={handleGridLeave}
-            shape={shape}
-            variant={variant}
-            weeks={weeks}
-          />
-        </CursorFollowLabel>
+        <ContributionGrid
+          colorSchema={colorSchema}
+          glowIntensity={glowIntensity}
+          gridRef={gridRef}
+          shape={shape}
+          variant={variant}
+          weeks={weeks}
+        />
         <table className="sr-only">
           <caption>Active GitHub contribution days for {username}</caption>
           <thead>
@@ -425,7 +357,7 @@ export function GithubCalendar({
         </table>
       </figure>
 
-      <div className="flex flex-col gap-3 font-navbar text-xs leading-none font-light tracking-[0.12em] text-black/45 uppercase sm:flex-row sm:items-center sm:justify-between">
+      <div className="flex flex-col gap-3 font-navbar text-xs leading-none font-light tracking-[0.12em] text-black/58 uppercase sm:flex-row sm:items-center sm:justify-between">
         <span>
           {weeks.length} weeks . {activeDays} active days
         </span>

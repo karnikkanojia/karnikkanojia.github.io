@@ -428,9 +428,13 @@ export function HeroSurface({
       <button
         type="button"
         data-hero-surface="true"
-        aria-label="Animated gradient"
+        aria-label={
+          gradientAnimating
+            ? "Pause animated gradient"
+            : "Play animated gradient"
+        }
         aria-pressed={gradientAnimating}
-        className="relative block h-full w-full cursor-pointer overflow-hidden rounded-[0.625rem] border-0 bg-white p-0 text-left focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-black"
+        className="relative block h-full w-full cursor-pointer overflow-hidden rounded-[0.625rem] border-0 bg-white p-0 text-left focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-black active:brightness-[0.98]"
         onClick={() => setGradientAnimating((isAnimating) => !isAnimating)}
       >
         <div data-intro-gradient className="absolute inset-0 overflow-hidden">

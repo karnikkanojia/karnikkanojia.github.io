@@ -229,14 +229,14 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
             </p>
             <Link
               href={`/projects/${nextProject.slug}`}
-              className="group mt-6 flex items-end justify-between gap-5 border-b border-black/20 pb-5 outline-2 outline-offset-4 outline-transparent transition-[transform,border-color] duration-200 ease-[cubic-bezier(0.23,1,0.32,1)] hover:border-black focus-visible:border-black focus-visible:outline-black active:scale-[0.99]"
+              className="project-next-link group mt-6 flex items-end justify-between gap-5 border-b border-black/20 pb-5 outline-2 outline-offset-4 outline-transparent transition-[transform,border-color] duration-200 ease-[cubic-bezier(0.23,1,0.32,1)] focus-visible:border-black focus-visible:outline-black active:scale-[0.99]"
             >
               <span className="text-2xl leading-[1] font-medium tracking-[-0.03em] text-balance md:text-4xl">
                 {nextProject.title}
               </span>
               <ArrowUpRight
                 aria-hidden="true"
-                className="mb-1 size-7 shrink-0 stroke-[1.3] transition-transform duration-200 ease-[cubic-bezier(0.23,1,0.32,1)] group-hover:translate-x-1 group-hover:-translate-y-1 md:size-10"
+                className="project-next-arrow mb-1 size-7 shrink-0 stroke-[1.3] transition-transform duration-200 ease-[cubic-bezier(0.23,1,0.32,1)] md:size-10"
               />
             </Link>
           </div>
