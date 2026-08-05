@@ -74,6 +74,16 @@ function useNavbarScrollState() {
     let footerAnchor: HTMLElement | null = null
     let heroEndY = 0
     let frameId: number | undefined
+    let touchStart: { x: number; y: number } | undefined
+    let touchMoved = false
+    let directionalInputUntil = 0
+    const mobileViewport = window.matchMedia("(max-width: 767px)")
+
+    const resetScrollDirection = () => {
+      previousScrollY = window.scrollY
+      directionStartY = previousScrollY
+      previousDirection = 0
+    }
 
     const measureHero = () => {
       const hero = document.querySelector<HTMLElement>(
@@ -88,7 +98,17 @@ function useNavbarScrollState() {
     const update = () => {
       frameId = undefined
       const currentScrollY = window.scrollY
-      const direction = Math.sign(currentScrollY - previousScrollY)
+      const canTrackDirection =
+        !mobileViewport.matches || performance.now() < directionalInputUntil
+      const direction = canTrackDirection
+        ? Math.sign(currentScrollY - previousScrollY)
+        : 0
+
+      if (!canTrackDirection) {
+        previousScrollY = currentScrollY
+        directionStartY = currentScrollY
+        previousDirection = 0
+      }
 
       if (direction !== 0 && direction !== previousDirection) {
         directionStartY = previousScrollY
@@ -126,19 +146,77 @@ function useNavbarScrollState() {
       if (frameId === undefined) frameId = requestAnimationFrame(update)
     }
     const onResize = () => {
+      // Mobile Safari resizes its visual viewport when browser chrome changes.
+      // That can also adjust scrollY by a few pixels without a user scroll and
+      // must not be interpreted as an upward gesture that reveals the navbar.
+      resetScrollDirection()
       measureHero()
       requestUpdate()
+    }
+    const onPointerDown = (event: PointerEvent) => {
+      if (event.pointerType !== "touch") return
+      touchStart = { x: event.clientX, y: event.clientY }
+      touchMoved = false
+      directionalInputUntil = 0
+      resetScrollDirection()
+    }
+    const onPointerMove = (event: PointerEvent) => {
+      if (event.pointerType !== "touch" || !touchStart) return
+
+      if (!touchMoved) {
+        const distance = Math.hypot(
+          event.clientX - touchStart.x,
+          event.clientY - touchStart.y
+        )
+        if (distance < 10) return
+        touchMoved = true
+      }
+
+      directionalInputUntil = performance.now() + 1200
+    }
+    const onPointerUp = (event: PointerEvent) => {
+      if (event.pointerType !== "touch" || !touchStart) return
+      touchStart = undefined
+
+      if (touchMoved) {
+        directionalInputUntil = performance.now() + 1200
+      } else {
+        directionalInputUntil = 0
+        resetScrollDirection()
+      }
+      touchMoved = false
+    }
+    const onPointerCancel = () => {
+      touchStart = undefined
+      touchMoved = false
+      directionalInputUntil = 0
+      resetScrollDirection()
+    }
+    const onWheel = () => {
+      directionalInputUntil = performance.now() + 1200
     }
 
     measureHero()
     update()
     window.addEventListener("scroll", requestUpdate, { passive: true })
     window.addEventListener("resize", onResize)
+    window.visualViewport?.addEventListener("resize", onResize)
+    window.addEventListener("pointerdown", onPointerDown, { passive: true })
+    window.addEventListener("pointermove", onPointerMove, { passive: true })
+    window.addEventListener("pointerup", onPointerUp, { passive: true })
+    window.addEventListener("pointercancel", onPointerCancel, { passive: true })
+    window.addEventListener("wheel", onWheel, { passive: true })
 
     return () => {
       if (frameId !== undefined) cancelAnimationFrame(frameId)
       window.removeEventListener("scroll", requestUpdate)
       window.removeEventListener("resize", onResize)
+      window.visualViewport?.removeEventListener("resize", onResize)
+      window.removeEventListener("pointerdown", onPointerDown)
+      window.removeEventListener("pointermove", onPointerMove)
+      window.removeEventListener("pointerup", onPointerUp)
+      window.removeEventListener("pointercancel", onPointerCancel)
+      window.removeEventListener("wheel", onWheel)
     }
   }, [])
 
@@ -558,10 +636,7 @@ export function Navbar() {
         .add(
           navbarMaterial,
           {
-            clipPath: [
-              "inset(0 100% 0 0)",
-              "inset(0 0% 0 0)",
-            ],
+            clipPath: ["inset(0 100% 0 0)", "inset(0 0% 0 0)"],
             scaleX: [0.92, 1],
             scaleY: [0.96, 1],
             duration: 760,
@@ -664,7 +739,7 @@ export function Navbar() {
           isFooterActive ||
           (!isNavbarVisible && !isMobileMenuOpen)
         }
-        className={`fixed top-0 right-0 left-0 z-[102] flex h-14 items-center justify-between bg-transparent px-5 font-navbar text-black transition-transform duration-220 ease-[cubic-bezier(0.23,1,0.32,1)] md:h-[4.125rem] md:px-6 ${
+        className={`fixed top-0 right-0 left-0 z-[102] flex h-14 transform-gpu items-center justify-between bg-transparent px-5 font-navbar text-black transition-transform duration-220 ease-[cubic-bezier(0.23,1,0.32,1)] will-change-transform md:h-[4.125rem] md:px-6 ${
           !isFooterActive && (isNavbarVisible || isMobileMenuOpen)
             ? "translate-y-0"
             : "-translate-y-[calc(100%+0.5rem)]"
@@ -884,7 +959,7 @@ export function Navbar() {
         id="mobile-navigation"
         aria-label="Navigation menu"
         data-open={isMobileMenuOpen && !isFooterActive}
-        className="fixed inset-0 m-0 h-full max-h-none w-full max-w-none border-0 bg-[#f1f1f1] p-0 font-navbar md:hidden backdrop:bg-transparent"
+        className="fixed inset-0 m-0 h-full max-h-none w-full max-w-none border-0 bg-[#f1f1f1] p-0 font-navbar backdrop:bg-transparent md:hidden"
         onCancel={(event) => {
           event.preventDefault()
           closeMobileMenu()
