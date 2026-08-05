@@ -902,9 +902,13 @@ export function Navbar() {
               }
               aria-controls={isMobileViewport ? "mobile-navigation" : undefined}
               aria-expanded={isMobileViewport ? isMobileMenuOpen : undefined}
-              className="relative isolate inline-flex size-6.5 shrink-0 transform-gpu border-0 bg-transparent p-0"
-              onPointerEnter={() => animateContactDotsScale(1.25)}
-              onPointerLeave={() => animateContactDotsScale(1)}
+              className="relative isolate inline-flex size-6.5 shrink-0 transform-gpu border-0 bg-transparent p-0 after:absolute after:-inset-2 active:scale-[0.97]"
+              onPointerEnter={(event) => {
+                if (event.pointerType === "mouse") animateContactDotsScale(1.25)
+              }}
+              onPointerLeave={(event) => {
+                if (event.pointerType === "mouse") animateContactDotsScale(1)
+              }}
               onClick={() => {
                 if (isMobileViewport) {
                   haptics.light()
