@@ -1,14 +1,12 @@
 "use client"
 
 import * as React from "react"
-import { animate, cubicBezier } from "animejs"
 import { ArrowUpRightIcon } from "lucide-react"
 import Image from "next/image"
 import { CursorFollowLabel } from "@/components/ui/cursor-follow-label"
 import { cn } from "@/lib/utils"
 
 interface ContributionDay {
-  color: string
   contributionCount: number
   contributionLevel:
     | "NONE"
@@ -148,7 +146,7 @@ const ContributionGrid = React.memo(function ContributionGrid({
               <div
                 key={day.date}
                 className={cn(
-                  "github-contribution-day aspect-square w-full [box-shadow:inset_0_0_0_1px_rgb(0_0_0/0.08)] transition-transform duration-100 ease-[cubic-bezier(0.23,1,0.32,1)]",
+                  "github-contribution-day aspect-square w-full",
                   getLevelClass(day.contributionLevel, colorSchema),
                   isGlowing && "z-10",
                   shapeClass,
@@ -207,6 +205,7 @@ export function GithubCalendar({
     const fetchData = async () => {
       try {
         setLoading(true)
+        setError(null)
         const response = await fetch(
           `/api/github-contributions/${encodeURIComponent(username)}`,
           { signal: controller.signal }
@@ -232,14 +231,22 @@ export function GithubCalendar({
   }, [username])
 
   React.useEffect(() => {
-    if (!data || !gridRef.current) return
+    const grid = gridRef.current
+    if (!data || !grid) return
 
-    animate(gridRef.current, {
-      opacity: [0, 1],
-      translateY: [4, 0],
-      duration: 420,
-      ease: cubicBezier(0.23, 1, 0.32, 1),
-    })
+    const reveal = grid.animate(
+      [
+        { opacity: 0, transform: "translateY(4px)" },
+        { opacity: 1, transform: "translateY(0)" },
+      ],
+      {
+        duration: 420,
+        easing: "cubic-bezier(0.23, 1, 0.32, 1)",
+        fill: "both",
+      }
+    )
+
+    return () => reveal.cancel()
   }, [data])
 
   if (error) {
@@ -323,7 +330,7 @@ export function GithubCalendar({
 
       <figure
         aria-labelledby={summaryId}
-        className="my-5 border border-black/12 bg-[#e8e8e3] p-2 [contain:paint] sm:p-3 md:my-6"
+        className="my-5 border border-black/12 bg-[#e8e8e3] p-2 [contain:layout_paint_style] sm:p-3 md:my-6"
       >
         <figcaption id={summaryId} className="sr-only">
           GitHub contribution calendar for {username}:{" "}

@@ -13,7 +13,6 @@ type ContributionLevel = (typeof contributionLevels)[number]
 const ONE_DAY = 60 * 60 * 24
 
 interface ContributionDay {
-  color: string
   contributionCount: number
   contributionLevel: ContributionLevel
   date: string
@@ -26,7 +25,10 @@ export async function GET(
   const { username } = await params
 
   if (!/^[a-z\d](?:[a-z\d-]{0,37}[a-z\d])?$/i.test(username)) {
-    return NextResponse.json({ error: "Invalid GitHub username" }, { status: 400 })
+    return NextResponse.json(
+      { error: "Invalid GitHub username" },
+      { status: 400 }
+    )
   }
 
   try {
@@ -53,10 +55,11 @@ export async function GET(
         /<td\b(?=[^>]*\bdata-date="([^"]+)")(?=[^>]*\bdata-level="(\d+)")[^>]*>[\s\S]*?<\/td>\s*<tool-tip\b[^>]*>([\s\S]*?)<\/tool-tip>/g
       ),
     ].map(([, date, level, tooltip]): ContributionDay => {
-      const count = Number(tooltip.match(/([\d,]+) contributions?/)?.[1]?.replaceAll(",", "") ?? 0)
+      const count = Number(
+        tooltip.match(/([\d,]+) contributions?/)?.[1]?.replaceAll(",", "") ?? 0
+      )
 
       return {
-        color: "",
         contributionCount: count,
         contributionLevel:
           contributionLevels[Math.max(0, Math.min(4, Number(level)))],
@@ -79,8 +82,14 @@ export async function GET(
     return NextResponse.json(
       {
         contributions: [...weeks.entries()]
-          .sort(([firstWeek], [secondWeek]) => firstWeek.localeCompare(secondWeek))
-          .map(([, week]) => week.sort((firstDay, secondDay) => firstDay.date.localeCompare(secondDay.date))),
+          .sort(([firstWeek], [secondWeek]) =>
+            firstWeek.localeCompare(secondWeek)
+          )
+          .map(([, week]) =>
+            week.sort((firstDay, secondDay) =>
+              firstDay.date.localeCompare(secondDay.date)
+            )
+          ),
         totalContributions: days.reduce(
           (total, day) => total + day.contributionCount,
           0

@@ -413,12 +413,6 @@ button *,
     color: rgb(0 0 0 / 0.8);
   }
 
-  .github-contribution-day:hover {
-    z-index: 10;
-    transform: scale(1.32);
-    outline: 1px solid rgb(255 255 255 / 0.9);
-  }
-
   .bento-card:hover .bento-card-image img {
     transform: scale(1.035);
   }
