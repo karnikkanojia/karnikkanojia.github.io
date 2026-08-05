@@ -254,60 +254,70 @@ export function AboutSection() {
             </p>
           </div>
 
-          <div className="mt-3 lg:mt-4">
-            <div aria-live="polite">
-              {activeIndex === 0 ? (
-                <p className="text-2xl leading-none font-medium tracking-[-0.07em] md:text-4xl">
-                  {stats[0]}
-                </p>
-              ) : (
-                <div
-                  role="img"
-                  aria-label="Boarding pass for flight AI101 from Bengaluru at 23:10 to New York at 09:40 the following day, gate 12A, seat 21F"
-                  className="flex w-full max-w-60 overflow-hidden rounded-md border border-black/20"
-                >
-                  <div className="min-w-0 flex-1 px-3 py-2">
-                    <div className="flex items-center justify-between font-navbar text-xs leading-none tracking-[0.1em] text-black/50 uppercase">
-                      <span className="inline-flex items-center gap-1">
-                        <span
-                          aria-hidden="true"
-                          className="block size-3 shrink-0 bg-contain bg-center bg-no-repeat"
-                          style={{
-                            backgroundImage:
-                              'url("https://www.google.com/s2/favicons?domain=airindia.com&sz=64")',
-                          }}
-                        />
-                        <span>AI101</span>
-                      </span>
-                      <span>23.10 - 09.40</span>
-                    </div>
-                    <div className="mt-2 grid grid-cols-[auto_1fr_auto] items-center gap-2">
-                      <span className="text-xl leading-none font-medium tracking-[-0.04em]">
-                        BLR
-                      </span>
-                      <span className="flex min-w-0 items-center gap-1 text-black/45">
-                        <span className="h-px flex-1 border-t border-dashed border-black/30" />
-                        <Plane aria-hidden="true" size={10} strokeWidth={1.8} />
-                        <span className="h-px flex-1 border-t border-dashed border-black/30" />
-                      </span>
-                      <span className="text-xl leading-none font-medium tracking-[-0.04em]">
-                        NYC
-                      </span>
-                    </div>
-                  </div>
-                </div>
-              )}
-            </div>
-            {activeIndex === 0 ? (
+          <div className="mt-3 grid lg:mt-4" aria-live="polite">
+            <div
+              aria-hidden={activeIndex !== 0}
+              className={`col-start-1 row-start-1 transition-opacity duration-300 ease-[cubic-bezier(0.23,1,0.32,1)] ${
+                activeIndex === 0
+                  ? "visible opacity-100"
+                  : "invisible opacity-0"
+              }`}
+            >
+              <p className="text-2xl leading-none font-medium tracking-[-0.07em] md:text-4xl">
+                {stats[0]}
+              </p>
               <p className="mt-2.5 max-w-52 text-base leading-[1.32] text-black/55">
                 Years building dependable systems across healthcare and applied
                 research.
               </p>
-            ) : (
+            </div>
+            <div
+              aria-hidden={activeIndex !== 1}
+              className={`col-start-1 row-start-1 transition-opacity duration-300 ease-[cubic-bezier(0.23,1,0.32,1)] ${
+                activeIndex === 1
+                  ? "visible opacity-100"
+                  : "invisible opacity-0"
+              }`}
+            >
+              <div
+                role="img"
+                aria-label="Boarding pass for flight AI101 from Bengaluru at 23:10 to New York at 09:40 the following day, gate 12A, seat 21F"
+                className="flex w-full max-w-60 overflow-hidden rounded-md border border-black/20"
+              >
+                <div className="min-w-0 flex-1 px-3 py-2">
+                  <div className="flex items-center justify-between font-navbar text-xs leading-none tracking-[0.1em] text-black/50 uppercase">
+                    <span className="inline-flex items-center gap-1">
+                      <span
+                        aria-hidden="true"
+                        className="block size-3 shrink-0 bg-contain bg-center bg-no-repeat"
+                        style={{
+                          backgroundImage:
+                            'url("https://www.google.com/s2/favicons?domain=airindia.com&sz=64")',
+                        }}
+                      />
+                      <span>AI101</span>
+                    </span>
+                    <span>23.10 - 09.40</span>
+                  </div>
+                  <div className="mt-2 grid grid-cols-[auto_1fr_auto] items-center gap-2">
+                    <span className="text-xl leading-none font-medium tracking-[-0.04em]">
+                      BLR
+                    </span>
+                    <span className="flex min-w-0 items-center gap-1 text-black/45">
+                      <span className="h-px flex-1 border-t border-dashed border-black/30" />
+                      <Plane aria-hidden="true" size={10} strokeWidth={1.8} />
+                      <span className="h-px flex-1 border-t border-dashed border-black/30" />
+                    </span>
+                    <span className="text-xl leading-none font-medium tracking-[-0.04em]">
+                      NYC
+                    </span>
+                  </div>
+                </div>
+              </div>
               <p className="mt-2.5 max-w-52 text-base leading-[1.32] text-black/55">
                 New York bound for NYU&rsquo;s MS in Data Science.
               </p>
-            )}
+            </div>
           </div>
         </aside>
 

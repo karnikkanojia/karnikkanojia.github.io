@@ -62,6 +62,11 @@ body {
   min-height: 100vh;
 }
 
+html[data-site-footer-active],
+html[data-site-footer-active] body {
+  background: #080808;
+}
+
 @media (max-width: 767px) {
   html[data-site-intro-complete],
   html[data-site-intro-complete] body {
