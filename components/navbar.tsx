@@ -636,7 +636,10 @@ export function Navbar() {
         .add(
           navbarMaterial,
           {
-            clipPath: ["inset(0 100% 0 0)", "inset(0 0% 0 0)"],
+            clipPath: [
+              "inset(0 100% 0 0)",
+              "inset(0 0% 0 0)",
+            ],
             scaleX: [0.92, 1],
             scaleY: [0.96, 1],
             duration: 760,
