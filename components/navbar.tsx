@@ -827,13 +827,9 @@ export function Navbar() {
               }
               aria-controls={isMobileViewport ? "mobile-navigation" : undefined}
               aria-expanded={isMobileViewport ? isMobileMenuOpen : undefined}
-              className="relative isolate inline-flex size-6.5 shrink-0 transform-gpu border-0 bg-transparent p-0 after:absolute after:-inset-2 active:scale-[0.97]"
-              onPointerEnter={(event) => {
-                if (event.pointerType === "mouse") animateContactDotsScale(1.25)
-              }}
-              onPointerLeave={(event) => {
-                if (event.pointerType === "mouse") animateContactDotsScale(1)
-              }}
+              className="relative isolate inline-flex size-6.5 shrink-0 transform-gpu border-0 bg-transparent p-0"
+              onPointerEnter={() => animateContactDotsScale(1.25)}
+              onPointerLeave={() => animateContactDotsScale(1)}
               onClick={() => {
                 if (isMobileViewport) {
                   haptics.light()
@@ -888,7 +884,7 @@ export function Navbar() {
         id="mobile-navigation"
         aria-label="Navigation menu"
         data-open={isMobileMenuOpen && !isFooterActive}
-        className="fixed inset-0 m-0 h-full max-h-none w-full max-w-none border-0 bg-[#f1f1f1] p-0 font-navbar backdrop:bg-transparent md:hidden"
+        className="fixed inset-0 m-0 h-full max-h-none w-full max-w-none border-0 bg-[#f1f1f1] p-0 font-navbar md:hidden backdrop:bg-transparent"
         onCancel={(event) => {
           event.preventDefault()
           closeMobileMenu()

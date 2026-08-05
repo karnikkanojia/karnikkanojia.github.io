@@ -276,7 +276,7 @@ export function PullToRefresh({
               : "Pull to refresh site"
         }
       >
-        <div className="absolute inset-0 bg-[linear-gradient(90deg,transparent_49.75%,rgba(29,29,31,0.09)_50%,transparent_50.25%),linear-gradient(rgba(29,29,31,0.055)_1px,transparent_1px)] bg-size-[100%_100%,100%_16px]" />
+        <div className="absolute inset-0 bg-[linear-gradient(90deg,transparent_49.75%,rgba(255,255,255,0.08)_50%,transparent_50.25%),linear-gradient(rgba(255,255,255,0.04)_1px,transparent_1px)] bg-size-[100%_100%,100%_16px]" />
         <div
           ref={orbitRef}
           className={`absolute -top-16 left-1/2 h-44 w-44 -translate-x-1/2 ${
