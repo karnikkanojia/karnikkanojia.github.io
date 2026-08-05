@@ -111,10 +111,15 @@ export function BlogFooterTransition({ children }: BlogFooterTransitionProps) {
       coralFrame.style.transform = "translate3d(0, 0, 0)"
       const coralHeight = Math.min(coralOffset, amberOffset)
       const amberHeight = Math.max(0, amberOffset - coralHeight)
-      const coralTop = `${sectionBounds.bottom}px`
-      const amberTop = `${sectionBounds.bottom + coralHeight}px`
+      // Keep the transition in document space. Mobile Safari can composite fixed
+      // colored layers underneath its translucent bottom toolbar, tinting the
+      // browser chrome even when the layer is only a few pixels tall onscreen.
+      const sectionBottom = window.scrollY + sectionBounds.bottom
+      const sectionLeft = window.scrollX + sectionBounds.left
+      const coralTop = `${sectionBottom}px`
+      const amberTop = `${sectionBottom + coralHeight}px`
       const frameWidth = `${sectionBounds.width}px`
-      const frameLeft = `${sectionBounds.left}px`
+      const frameLeft = `${sectionLeft}px`
 
       for (const frame of [amberFrame, coralFrame]) {
         frame.style.left = frameLeft
@@ -168,12 +173,12 @@ export function BlogFooterTransition({ children }: BlogFooterTransitionProps) {
             <div
               ref={amberFrameRef}
               aria-hidden="true"
-              className="pointer-events-none fixed z-20 bg-[#fff68a]"
+              className="pointer-events-none absolute z-20 bg-[#fff68a]"
             />
             <div
               ref={coralFrameRef}
               aria-hidden="true"
-              className="pointer-events-none fixed z-21 bg-[#ff886b]"
+              className="pointer-events-none absolute z-21 bg-[#ff886b]"
             />
           </>,
           document.body

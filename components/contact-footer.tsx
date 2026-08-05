@@ -43,6 +43,9 @@ const dateFormatter = new Intl.DateTimeFormat("en-IN", {
   year: "numeric",
 })
 
+const PAGE_THEME_COLOR = "#ffffff"
+const FOOTER_THEME_COLOR = "#080808"
+
 export function ContactFooter() {
   const [now, setNow] = useState<Date | null>(null)
   const [isInteractive, setIsInteractive] = useState(false)
@@ -69,6 +72,41 @@ export function ContactFooter() {
     observer.observe(shell)
     return () => observer.disconnect()
   }, [])
+
+  useEffect(() => {
+    const root = document.documentElement
+    const body = document.body
+    const themeColor = document.querySelector<HTMLMetaElement>(
+      'meta[name="theme-color"]'
+    )
+    const activeThemeColor = isInteractive
+      ? FOOTER_THEME_COLOR
+      : PAGE_THEME_COLOR
+
+    root.style.backgroundColor = activeThemeColor
+    body.style.backgroundColor = activeThemeColor
+    themeColor?.setAttribute("content", activeThemeColor)
+
+    if (isInteractive) {
+      root.dataset.siteFooterActive = "true"
+    } else {
+      delete root.dataset.siteFooterActive
+    }
+  }, [isInteractive])
+
+  useEffect(
+    () => () => {
+      const root = document.documentElement
+
+      delete root.dataset.siteFooterActive
+      root.style.removeProperty("background-color")
+      document.body.style.removeProperty("background-color")
+      document
+        .querySelector<HTMLMetaElement>('meta[name="theme-color"]')
+        ?.setAttribute("content", PAGE_THEME_COLOR)
+    },
+    []
+  )
 
   useLayoutEffect(() => {
     const shell = shellRef.current
