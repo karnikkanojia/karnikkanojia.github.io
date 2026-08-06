@@ -1,7 +1,5 @@
 import { markdownForPath } from "@/lib/markdown"
 
-export const runtime = "edge"
-
 function responseFor(request: Request, includeBody: boolean) {
   const pathname = new URL(request.url).searchParams.get("path")
   const markdown = pathname ? markdownForPath(pathname) : null
