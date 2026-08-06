@@ -234,7 +234,7 @@ export function ExperienceItem({ experience }: ExperienceItemProps) {
 
   return (
     <div data-work-experience-company className="space-y-4 py-4">
-      <div className="not-prose flex items-center gap-3">
+      <div className="not-prose flex w-full min-w-0 items-center gap-3 text-left">
         <div className="flex size-6 shrink-0 items-center justify-center">
           {experience.companyLogo ? (
             <Image
@@ -250,23 +250,25 @@ export function ExperienceItem({ experience }: ExperienceItemProps) {
           )}
         </div>
 
-        <h3 className="min-w-0 flex-1 text-xl leading-snug font-medium">
+        <h3 className="min-w-0 flex-1 text-left text-xl leading-snug font-medium">
           {experience.companyWebsite ? (
             <CursorFollowLabel
               as="span"
-              className="block w-full"
+              className="block w-full min-w-0 text-left"
               icon={<ArrowUpRightIcon />}
               labelClassName="[&_svg]:!size-3.5 [&_svg]:stroke-[1.75]"
               label={`Visit ${experience.companyName}`}
             >
               <a
-                className="flex w-full items-center justify-between gap-4 py-1 link active:opacity-60"
+                className="flex w-full min-w-0 items-center justify-between gap-3 py-1 text-left link active:opacity-60"
                 href={experience.companyWebsite}
                 target="_blank"
                 rel="noopener noreferrer"
               >
-                <span className="inline-flex min-w-0 items-center gap-2">
-                  <span className="truncate">{experience.companyName}</span>
+                <span className="flex min-w-0 flex-1 items-center gap-2 text-left">
+                  <span className="min-w-0 truncate">
+                    {experience.companyName}
+                  </span>
                   {currentEmployerIndicator}
                 </span>
                 <Image
@@ -274,13 +276,13 @@ export function ExperienceItem({ experience }: ExperienceItemProps) {
                   alt=""
                   width={12}
                   height={12}
-                  className="size-3 shrink-0 opacity-70"
+                  className="block size-3 shrink-0 opacity-70"
                   aria-hidden
                 />
               </a>
             </CursorFollowLabel>
           ) : (
-            <span className="inline-flex items-center gap-2">
+            <span className="inline-flex items-center gap-2 text-left">
               {experience.companyName}
               {currentEmployerIndicator}
             </span>

@@ -5,7 +5,14 @@ import { AnimatedGradient } from "@/components/ui/animated-gradient"
 import { CursorFollowLabel } from "@/components/ui/cursor-follow-label"
 import { Pause, Play, Sparkles } from "lucide-react"
 import Image from "next/image"
-import { type ReactNode, type Ref, useEffect, useRef, useState } from "react"
+import {
+  type ReactNode,
+  type Ref,
+  useEffect,
+  useLayoutEffect,
+  useRef,
+  useState,
+} from "react"
 
 const GRADIENT_CONFIG = {
   preset: "custom",
@@ -27,6 +34,16 @@ const GRADIENT_CONFIG = {
 const GRADIENT_NOISE = { opacity: 0.14, scale: 0.8 } as const
 const GRADIENT_INITIAL_TIME = 18
 const GRADIENT_RADIUS = "0.625rem"
+const MOBILE_QUERY = "(max-width: 767px)"
+const MOBILE_GRADIENT_REVEAL_DURATION_MS = 940
+const MOBILE_GRADIENT_REVEAL_EASING = "cubic-bezier(0.77, 0, 0.175, 1)"
+const MOBILE_GRADIENT_HIDDEN_CLIP =
+  "inset(calc(100% + 1px) -1px -1px -1px)"
+const MOBILE_GRADIENT_VISIBLE_CLIP = "inset(-1px)"
+const WORD_ENTRY_STAGGER_MS = 45
+const DESKTOP_WORD_ENTRY_DURATION_MS = 520
+const MOBILE_WORD_ENTRY_DELAY_MS = 160
+const WORD_ENTRY_HIDDEN_TRANSFORM = "translateY(calc(100% + 0.8em))"
 const DESKTOP_QUERY = "(min-width: 768px)"
 const DESKTOP_ENTRY_START_SCALE = 0.04
 const DESKTOP_ENTRY_SCALE = 0.4
@@ -45,14 +62,19 @@ export function Hero() {
   const sectionRef = useRef<HTMLElement>(null)
   const windowRef = useRef<HTMLDivElement>(null)
   const copyRef = useRef<HTMLDivElement>(null)
+  const mobileCopyRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
     const section = sectionRef.current
     const heroWindow = windowRef.current
     const heroCopy = copyRef.current
-    if (!section || !heroWindow || !heroCopy) return
-    const maskWords = Array.from(
+    const mobileHeroCopy = mobileCopyRef.current
+    if (!section || !heroWindow || !heroCopy || !mobileHeroCopy) return
+    const desktopMaskWords = Array.from(
       heroCopy.querySelectorAll<HTMLElement>("[data-hero-mask-word]")
+    )
+    const mobileMaskWords = Array.from(
+      mobileHeroCopy.querySelectorAll<HTMLElement>("[data-hero-mask-word]")
     )
     const backplates = Array.from(
       section.querySelectorAll<HTMLElement>("[data-hero-backplate]")
@@ -68,6 +90,7 @@ export function Hero() {
     let wordsStarted = false
     let entryAnimations: Animation[] = []
     let wordAnimations: Animation[] = []
+    let mobileWordEntryTimeout: number | undefined
     let frameId: number | undefined
     let sectionTop = 0
     let scrollDistance = 1
@@ -169,7 +192,7 @@ export function Hero() {
         heroWindow.style.removeProperty("will-change")
         heroCopy.style.removeProperty("opacity")
         heroCopy.style.removeProperty("will-change")
-        maskWords.forEach((word) => {
+        desktopMaskWords.forEach((word) => {
           word.style.removeProperty("transform")
           word.style.removeProperty("will-change")
         })
@@ -231,15 +254,29 @@ export function Hero() {
       requestRender()
     }
     const startWordEntry = () => {
-      if (wordsStarted || !entryStarted || !desktop.matches) return
+      if (wordsStarted || !entryStarted) return
       wordsStarted = true
+      const activeMaskWords = desktop.matches
+        ? desktopMaskWords
+        : mobileMaskWords
+      const wordEntryDuration = desktop.matches
+        ? DESKTOP_WORD_ENTRY_DURATION_MS
+        : Math.max(
+            0,
+            MOBILE_GRADIENT_REVEAL_DURATION_MS -
+              MOBILE_WORD_ENTRY_DELAY_MS -
+              (activeMaskWords.length - 1) * WORD_ENTRY_STAGGER_MS
+          )
 
-      wordAnimations = maskWords.map((word, index) =>
+      wordAnimations = activeMaskWords.map((word, index) =>
         word.animate(
-          [{ transform: "translateY(110%)" }, { transform: "translateY(0)" }],
+          [
+            { transform: WORD_ENTRY_HIDDEN_TRANSFORM },
+            { transform: "translateY(0)" },
+          ],
           {
-            delay: index * 45,
-            duration: 520,
+            delay: index * WORD_ENTRY_STAGGER_MS,
+            duration: wordEntryDuration,
             easing: "cubic-bezier(0.23, 1, 0.32, 1)",
             fill: "both",
           }
@@ -248,7 +285,7 @@ export function Hero() {
 
       Promise.all(wordAnimations.map((animation) => animation.finished)).then(
         () => {
-          maskWords.forEach((word) => {
+          activeMaskWords.forEach((word) => {
             word.style.transform = "translateY(0)"
             word.style.willChange = "auto"
           })
@@ -261,6 +298,15 @@ export function Hero() {
     const startEntry = () => {
       if (entryStarted) return
       entryStarted = true
+      const activeMaskWords = desktop.matches
+        ? desktopMaskWords
+        : mobileMaskWords
+
+      activeMaskWords.forEach((word) => {
+        word.style.transform = WORD_ENTRY_HIDDEN_TRANSFORM
+        word.style.willChange = "transform"
+      })
+      if (navbarSettled && desktop.matches) startWordEntry()
 
       if (!desktop.matches) {
         entryComplete = true
@@ -281,12 +327,6 @@ export function Hero() {
       backplateScales.fill(DESKTOP_ENTRY_START_SCALE)
       backplateTargetScale = DESKTOP_ENTRY_START_SCALE
       backplateTargetY = entryTranslateY
-      maskWords.forEach((word) => {
-        word.style.transform = "translateY(110%)"
-        word.style.willChange = "transform"
-      })
-      if (navbarSettled) startWordEntry()
-
       const frameAnimation = heroWindow.animate(
         [
           {
@@ -346,7 +386,15 @@ export function Hero() {
     }
     const onNavbarSettled = () => {
       navbarSettled = true
-      startWordEntry()
+      if (desktop.matches) startWordEntry()
+    }
+    const onMobileGradientReveal = () => {
+      if (desktop.matches) return
+
+      mobileWordEntryTimeout = window.setTimeout(
+        startWordEntry,
+        MOBILE_WORD_ENTRY_DELAY_MS
+      )
     }
 
     measure()
@@ -354,11 +402,18 @@ export function Hero() {
     window.addEventListener("resize", onResize)
     window.addEventListener("site-loader:complete", onIntroComplete)
     window.addEventListener("site-loader:navbar-settled", onNavbarSettled)
+    window.addEventListener(
+      "site-loader:hero-gradient-reveal",
+      onMobileGradientReveal
+    )
     desktop.addEventListener("change", requestRender)
     if (introComplete) startEntry()
 
     return () => {
       if (frameId !== undefined) cancelAnimationFrame(frameId)
+      if (mobileWordEntryTimeout !== undefined) {
+        window.clearTimeout(mobileWordEntryTimeout)
+      }
       cancelBackplateAnimation()
       entryAnimations.forEach((animation) => animation.cancel())
       wordAnimations.forEach((animation) => animation.cancel())
@@ -366,6 +421,10 @@ export function Hero() {
       window.removeEventListener("resize", onResize)
       window.removeEventListener("site-loader:complete", onIntroComplete)
       window.removeEventListener("site-loader:navbar-settled", onNavbarSettled)
+      window.removeEventListener(
+        "site-loader:hero-gradient-reveal",
+        onMobileGradientReveal
+      )
       desktop.removeEventListener("change", requestRender)
     }
   }, [])
@@ -396,7 +455,10 @@ export function Hero() {
           ref={copyRef}
           className="pointer-events-none absolute inset-x-0 bottom-0 z-10 hidden px-12 pb-5 text-black md:block"
         />
-        <HeroCopy className="flex flex-1 items-end px-5 pb-5 text-black md:hidden" />
+        <HeroCopy
+          ref={mobileCopyRef}
+          className="flex flex-1 items-end px-5 pb-5 text-black md:hidden"
+        />
       </div>
     </section>
   )
@@ -412,6 +474,58 @@ export function HeroSurface({
   resizeGradientWhilePaused = true,
 }: HeroSurfaceProps) {
   const [gradientAnimating, setGradientAnimating] = useState(animateGradient)
+  const gradientMaskRef = useRef<HTMLDivElement>(null)
+
+  useLayoutEffect(() => {
+    const gradientMask = gradientMaskRef.current
+    if (!gradientMask) return
+
+    if (
+      !window.matchMedia(MOBILE_QUERY).matches ||
+      document.documentElement.dataset.siteIntroComplete === "true"
+    ) {
+      gradientMask.style.clipPath = "inset(0 0 0 0)"
+      return
+    }
+
+    gradientMask.style.clipPath = MOBILE_GRADIENT_HIDDEN_CLIP
+    gradientMask.style.willChange = "clip-path"
+
+    const revealGradient = () => {
+      if (!window.matchMedia(MOBILE_QUERY).matches) return
+
+      const revealAnimation = gradientMask.animate(
+        [
+          { clipPath: MOBILE_GRADIENT_HIDDEN_CLIP },
+          { clipPath: MOBILE_GRADIENT_VISIBLE_CLIP },
+        ],
+        {
+          duration: MOBILE_GRADIENT_REVEAL_DURATION_MS,
+          easing: MOBILE_GRADIENT_REVEAL_EASING,
+          fill: "both",
+        }
+      )
+
+      void revealAnimation.finished.then(
+        () => {
+          gradientMask.style.clipPath = MOBILE_GRADIENT_VISIBLE_CLIP
+          gradientMask.style.willChange = "auto"
+          revealAnimation.cancel()
+        },
+        () => undefined
+      )
+    }
+
+    window.addEventListener("site-loader:hero-gradient-reveal", revealGradient, {
+      once: true,
+    })
+
+    return () =>
+      window.removeEventListener(
+        "site-loader:hero-gradient-reveal",
+        revealGradient
+      )
+  }, [])
 
   return (
     <CursorFollowLabel
@@ -437,7 +551,11 @@ export function HeroSurface({
         className="relative block h-full w-full cursor-pointer overflow-hidden rounded-[0.625rem] border-0 bg-white p-0 text-left focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-black active:brightness-[0.98]"
         onClick={() => setGradientAnimating((isAnimating) => !isAnimating)}
       >
-        <div data-intro-gradient className="absolute inset-0 overflow-hidden">
+        <div
+          ref={gradientMaskRef}
+          data-intro-gradient
+          className="absolute inset-0 overflow-hidden"
+        >
           <AnimatedGradient
             animate={gradientAnimating}
             config={GRADIENT_CONFIG}
