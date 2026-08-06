@@ -5,7 +5,6 @@ export type Project = {
   tags: string[]
   image: string
   imageAlt: string
-  homeClassName: string
   homeImageSizes: string
   label: string
   summary: string
@@ -24,7 +23,6 @@ export const projects: Project[] = [
     tags: ["Observability", "Platform"],
     image: "/images/bento/ops-command-center.svg",
     imageAlt: "Abstract command center dashboard with service health charts",
-    homeClassName: "md:col-span-7",
     homeImageSizes:
       "(min-width: 1200px) 650px, (min-width: 768px) 58vw, calc(100vw - 40px)",
     label: "Reliability engineering . Oracle Financial Services",
@@ -48,7 +46,6 @@ export const projects: Project[] = [
     tags: ["Computer Vision", "Research"],
     image: "/images/bento/vision-lab.svg",
     imageAlt: "Abstract medical imaging model interface",
-    homeClassName: "md:col-span-5",
     homeImageSizes:
       "(min-width: 1200px) 460px, (min-width: 768px) 42vw, calc(100vw - 40px)",
     label: "Open-source research . Mi4People",
@@ -72,7 +69,6 @@ export const projects: Project[] = [
     tags: ["CDC", "Automation"],
     image: "/images/bento/changeflow.svg",
     imageAlt: "Abstract data synchronization flow",
-    homeClassName: "md:col-span-5",
     homeImageSizes:
       "(min-width: 1200px) 460px, (min-width: 768px) 42vw, calc(100vw - 40px)",
     label: "Data reliability . Oracle Financial Services",
@@ -96,7 +92,6 @@ export const projects: Project[] = [
     tags: ["SRE", "Systems Design"],
     image: "/images/bento/infrastructure-atlas.svg",
     imageAlt: "Abstract infrastructure dependency map",
-    homeClassName: "md:col-span-7",
     homeImageSizes:
       "(min-width: 1200px) 650px, (min-width: 768px) 58vw, calc(100vw - 40px)",
     label: "Systems design . Reliability practice",

@@ -3,7 +3,10 @@ import { IntroTransition } from "@/components/intro-transition"
 import { PullToRefresh } from "@/components/pull-to-refresh"
 import { GithubCalendar } from "@/components/ui/github-calendar"
 import { AboutSection } from "@/components/about-section"
-import { BlogsBento, ProjectsBento } from "@/components/bento-sections"
+import {
+  BlogsShowcase,
+  ProjectsShowcase,
+} from "@/components/editorial-showcase"
 import { BlogFooterTransition } from "@/components/blog-footer-transition"
 import { getMediumPosts } from "@/lib/medium"
 
@@ -140,7 +143,7 @@ export default async function Home() {
           <Hero />
           <section
             id="about"
-            className="relative z-20 scroll-mt-12 bg-white px-2 py-2 md:mt-[-100vh] md:px-3 md:py-3"
+            className="relative z-20 scroll-mt-12 bg-white md:mt-[-100vh]"
           >
             <AboutSection />
           </section>
@@ -148,7 +151,7 @@ export default async function Home() {
             section.id === "blogs" ? (
               <BlogFooterTransition key={section.id}>
                 <h2 className="sr-only">{section.title}</h2>
-                <BlogsBento posts={mediumPosts} />
+                <BlogsShowcase posts={mediumPosts} />
               </BlogFooterTransition>
             ) : (
               <section
@@ -204,7 +207,7 @@ export default async function Home() {
                       />
                     </div>
                   )}
-                  {section.id === "projects" && <ProjectsBento />}
+                  {section.id === "projects" && <ProjectsShowcase />}
                 </div>
               </section>
             )
