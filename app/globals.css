@@ -360,8 +360,7 @@ button *,
     color: rgb(0 0 0 / 0.55);
   }
 
-  .bento-layout-control:hover,
-  .bento-view-more:hover,
+  .editorial-view-more:hover,
   .project-next-link:hover {
     border-color: rgb(0 0 0 / 1);
   }
@@ -370,7 +369,7 @@ button *,
     text-decoration-color: currentColor;
   }
 
-  .bento-view-more:hover .bento-view-more-arrow {
+  .editorial-view-more:hover .editorial-view-more-arrow {
     transform: translate(2px, -2px);
   }
 
@@ -418,28 +417,6 @@ button *,
     color: rgb(0 0 0 / 0.8);
   }
 
-  .bento-card:hover .bento-card-image img {
-    transform: scale(1.035);
-  }
-
-  .bento-card:hover .bento-card-arrow {
-    opacity: 1;
-    transform: translate(2px, -2px) scale(1);
-  }
-
-  .bento-card:hover {
-    border-color: #0a0a0a;
-  }
-
-  .bento-card:hover .bento-card-title {
-    color: rgb(0 0 0 / 0.96);
-  }
-
-  .bento-card:hover .bento-card-meta,
-  .bento-card:hover .bento-card-description {
-    color: rgb(0 0 0 / 0.62);
-  }
-
   .project-list-item:hover {
     background: rgb(0 0 0 / 0.025);
   }
@@ -469,44 +446,99 @@ button *,
   transform: translate(4px, -4px);
 }
 
-.bento-card:focus-visible {
-  border-color: #0a0a0a;
-}
-
 @media (min-width: 768px) {
-  .bento-layout[data-layout="alternate"] > li[data-alternate-span="4"] {
-    grid-column: span 4 / span 4;
+  .editorial-grid {
+    display: grid;
+    grid-template-columns: repeat(12, minmax(0, 1fr));
+    align-items: start;
+    column-gap: clamp(0.9rem, 1.35vw, 1.25rem);
+    row-gap: clamp(3.5rem, 6vw, 5.5rem);
   }
 
-  .bento-layout[data-layout="alternate"] > li[data-alternate-span="5"] {
-    grid-column: span 5 / span 5;
+  .editorial-grid-item {
+    grid-column: span 6;
   }
 
-  .bento-layout[data-layout="alternate"] > li[data-alternate-span="7"] {
-    grid-column: span 7 / span 7;
+  .editorial-grid-item[data-editorial-position="1"] {
+    grid-column: span 6;
   }
 
-  .bento-layout[data-layout="alternate"] > li[data-alternate-span="8"] {
-    grid-column: span 8 / span 8;
+  .editorial-grid-item[data-editorial-position="2"] {
+    grid-column: span 3;
   }
 
-  .bento-layout[data-layout="alternate"] > li[data-alternate-span="12"] {
-    grid-column: span 12 / span 12;
+  .editorial-grid-item[data-editorial-position="3"] {
+    grid-column: span 3;
+  }
+
+  .editorial-grid-item[data-editorial-position="4"] {
+    grid-column: span 6;
+  }
+
+  .editorial-grid-item[data-editorial-position="4"] .editorial-card-image {
+    aspect-ratio: 2 / 1;
   }
 }
 
-.bento-card:focus-visible .bento-card-arrow {
+.editorial-card-pill {
+  opacity: 0;
+  transform: translate3d(0, 0.75rem, 0);
+  transition:
+    opacity 260ms cubic-bezier(0.23, 1, 0.32, 1),
+    transform 260ms cubic-bezier(0.23, 1, 0.32, 1);
+  transition-delay: 0ms;
+  will-change: opacity, transform;
+}
+
+.editorial-card-image::after {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  background: rgb(255 255 255 / 0.2);
+  content: "";
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 180ms cubic-bezier(0.23, 1, 0.32, 1);
+}
+
+.editorial-card:active .editorial-card-image::after,
+.editorial-card[data-click-animating="true"] .editorial-card-image::after {
   opacity: 1;
-  transform: translate(2px, -2px) scale(1);
+  transition-duration: 80ms;
 }
 
-.bento-card:focus-visible .bento-card-title {
-  color: rgb(0 0 0 / 0.96);
+.editorial-card:active .editorial-card-title,
+.editorial-card[data-click-animating="true"] .editorial-card-title {
+  text-decoration-line: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 4px;
 }
 
-.bento-card:focus-visible .bento-card-meta,
-.bento-card:focus-visible .bento-card-description {
-  color: rgb(0 0 0 / 0.62);
+@media (hover: hover) and (pointer: fine) {
+  .editorial-card:hover .editorial-card-pill {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+    transition-delay: var(--editorial-pill-delay);
+  }
+}
+
+.editorial-card:focus-visible .editorial-card-pill {
+  opacity: 1;
+  transform: translate3d(0, 0, 0);
+  transition-delay: var(--editorial-pill-delay);
+}
+
+@media (max-width: 767px) {
+  .editorial-grid {
+    display: grid;
+    gap: 3rem;
+  }
+
+  .editorial-card-pill {
+    opacity: 1;
+    transform: none;
+    transition: none;
+  }
 }
 
 .project-list-item:focus-visible {

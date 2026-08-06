@@ -540,6 +540,10 @@ export function Navbar() {
       window.dispatchEvent(new Event("site-loader:navbar-settled"))
     }
 
+    const revealMobileHeroGradient = () => {
+      window.dispatchEvent(new Event("site-loader:hero-gradient-reveal"))
+    }
+
     const revealNavbar = () => {
       const logo = logoRef.current
       const navbarMaterial = navbarMaterialRef.current
@@ -592,6 +596,7 @@ export function Navbar() {
             scale: [1.45, 1],
             duration: 940,
             ease: "inOutQuart",
+            onBegin: revealMobileHeroGradient,
           },
           260
         )
