@@ -182,8 +182,10 @@ export function AnimatedGradient({
   const shouldAnimateRef = useRef(shouldAnimate)
   const requestedAnimationRef = useRef(shouldAnimate)
   const isNearViewportRef = useRef(true)
+  const hasRenderedRef = useRef(false)
 
   const [hasWebGLError, setHasWebGLError] = useState(false)
+  const [hasRendered, setHasRendered] = useState(false)
 
   const syncAnimationLoop = useCallback(() => {
     const canAnimate =
@@ -267,6 +269,9 @@ export function AnimatedGradient({
     const canvas = canvasRef.current
     const container = containerRef.current
     if (!canvas || !container) return
+
+    hasRenderedRef.current = false
+    setHasRendered(false)
 
     const showWebglError = () => {
       queueMicrotask(() => setHasWebGLError(true))
@@ -401,6 +406,10 @@ export function AnimatedGradient({
 
         gl.uniform1f(uniforms.u_time, elapsed * speed + params.offset * 0.01)
         gl.drawArrays(gl.TRIANGLES, 0, 6)
+        if (!hasRenderedRef.current) {
+          hasRenderedRef.current = true
+          setHasRendered(true)
+        }
         if (shouldAnimateRef.current) {
           frameIdRef.current = requestAnimationFrame(renderFrame)
         }
@@ -462,13 +471,7 @@ export function AnimatedGradient({
       <div
         ref={containerRef}
         className={cn("absolute inset-0 overflow-hidden", className)}
-        style={
-          {
-            borderRadius: radius,
-            ...style,
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          } as any
-        }
+        style={{ backgroundColor: "#fff", borderRadius: radius, ...style }}
       >
         <canvas
           ref={canvasRef}
@@ -476,9 +479,10 @@ export function AnimatedGradient({
             display: "block",
             width: "100%",
             height: "100%",
+            opacity: hasRendered ? 1 : 0,
           }}
         />
-        {noise && noise.opacity > 0 && (
+        {hasRendered && noise && noise.opacity > 0 && (
           <div
             style={{
               position: "absolute",

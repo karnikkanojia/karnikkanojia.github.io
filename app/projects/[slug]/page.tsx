@@ -94,7 +94,7 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
                   {project.title}
                 </h1>
               </div>
-              <p className="max-w-[42ch] text-base leading-[1.5] text-black/62 md:col-span-4 md:justify-self-end md:pb-1">
+              <p className="max-w-[42ch] text-base leading-normal text-black/62 md:col-span-4 md:justify-self-end md:pb-1">
                 {project.summary}
               </p>
             </div>
@@ -102,7 +102,7 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
         </header>
 
         <div className="px-2 md:px-3">
-          <div className="relative mx-auto h-[55svh] max-h-[32rem] min-h-80 max-w-[94rem] overflow-hidden rounded-[1rem] bg-[#e8e8e4] md:aspect-[16/8.5] md:h-auto md:max-h-[82svh] md:min-h-0">
+          <div className="relative mx-auto h-[55svh] max-h-128 min-h-80 max-w-376 overflow-hidden rounded-[1rem] bg-[#e8e8e4] md:aspect-16/8.5 md:h-auto md:max-h-[82svh] md:min-h-0">
             <Image
               src={project.image}
               alt={project.imageAlt}
@@ -149,7 +149,7 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
                 </p>
                 <h2
                   id="challenge-title"
-                  className="mt-4 text-xl leading-[1.02] font-medium tracking-[-0.025em] md:text-2xl"
+                  className="mt-4 text-xl leading-[1.02] font-medium tracking-tight md:text-2xl"
                 >
                   The challenge
                 </h2>
@@ -167,7 +167,7 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
                 </p>
                 <h2
                   id="contribution-title"
-                  className="mt-4 text-xl leading-[1.02] font-medium tracking-[-0.025em] md:text-2xl"
+                  className="mt-4 text-xl leading-[1.02] font-medium tracking-tight md:text-2xl"
                 >
                   What I built
                 </h2>
@@ -175,7 +175,7 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
                   {project.contribution.map((item, index) => (
                     <li
                       key={item}
-                      className="grid grid-cols-[2.5rem_1fr] gap-3 py-5 text-base leading-[1.5] text-black/68 md:grid-cols-[3.5rem_1fr] md:py-6"
+                      className="grid grid-cols-[2.5rem_1fr] gap-3 py-5 text-base leading-normal text-black/68 md:grid-cols-[3.5rem_1fr] md:py-6"
                     >
                       <span
                         aria-hidden="true"
@@ -198,7 +198,7 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
                 </p>
                 <h2
                   id="impact-title"
-                  className="mt-4 text-xl leading-[1.02] font-medium tracking-[-0.025em] md:text-2xl"
+                  className="mt-4 text-xl leading-[1.02] font-medium tracking-tight md:text-2xl"
                 >
                   Measurable impact
                 </h2>
@@ -208,7 +208,7 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
                       key={outcome}
                       className="flex min-h-36 items-end rounded-xl bg-[#f4f4f1] p-5 md:min-h-44 md:p-6"
                     >
-                      <p className="max-w-[15ch] text-2xl leading-[1] font-medium tracking-[-0.025em]">
+                      <p className="max-w-[15ch] text-2xl leading-none font-medium tracking-tight">
                         {outcome}
                       </p>
                     </div>
@@ -231,7 +231,7 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
               href={`/projects/${nextProject.slug}`}
               className="project-next-link group mt-6 flex items-end justify-between gap-5 border-b border-black/20 pb-5 outline-2 outline-offset-4 outline-transparent transition-[transform,border-color] duration-200 ease-[cubic-bezier(0.23,1,0.32,1)] focus-visible:border-black focus-visible:outline-black active:scale-[0.99]"
             >
-              <span className="text-2xl leading-[1] font-medium tracking-[-0.03em] text-balance md:text-4xl">
+              <span className="text-2xl font-medium tracking-[-0.03em] text-balance md:text-4xl">
                 {nextProject.title}
               </span>
               <ArrowUpRight

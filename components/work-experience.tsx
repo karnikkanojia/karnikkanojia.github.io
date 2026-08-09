@@ -8,12 +8,12 @@ import {
   type ComponentProps,
 } from "react"
 import { animate, createTimeline, cubicBezier, remove } from "animejs"
-import { differenceInMonths, parse } from "date-fns"
 import Image from "next/image"
 import ReactMarkdown from "react-markdown"
 
 import { cn } from "@/lib/utils"
 import { haptics } from "@/lib/haptics"
+import { formatDuration } from "@/lib/format-duration"
 import { CursorFollowLabel } from "@/components/ui/cursor-follow-label"
 import type { ChevronsUpDownIconHandle } from "@/components/chevrons-up-down-icon"
 import { ChevronsUpDownIcon } from "@/components/chevrons-up-down-icon"
@@ -342,125 +342,125 @@ export function ExperiencePositionItem({
       data-state={isOpen ? "open" : "closed"}
       className="relative"
     >
+      <span
+        aria-hidden
+        className={cn(
+          "pointer-events-none absolute top-3 left-3 z-0 w-px overflow-hidden bg-black/15",
+          hasSkills ? "bottom-2.5" : "bottom-0"
+        )}
+      >
         <span
-          aria-hidden
-          className={cn(
-            "pointer-events-none absolute top-3 left-3 z-0 w-px overflow-hidden bg-black/15",
-            hasSkills ? "bottom-2.5" : "bottom-0"
-          )}
-        >
-          <span
-            data-work-experience-trail-progress
-            className="absolute inset-0 origin-top bg-black"
-            style={{ transform: "scaleY(0)" }}
-          />
-        </span>
-        <div className="relative isolate">
-          <h4 className="peer/experience-position-summary not-prose relative z-1 mb-1 text-base font-medium text-balance text-foreground">
-            <button
-              type="button"
-              aria-controls={contentId}
-              aria-expanded={isOpen}
-              data-state={isOpen ? "open" : "closed"}
-              disabled={!position.description}
-              className="experience-position-trigger group/experience-position flex w-full items-start gap-3 text-left select-none active:scale-[0.99]"
-              onClick={toggleOpen}
+          data-work-experience-trail-progress
+          className="absolute inset-0 origin-top bg-black"
+          style={{ transform: "scaleY(0)" }}
+        />
+      </span>
+      <div className="relative isolate">
+        <h4 className="peer/experience-position-summary not-prose relative z-1 mb-1 text-base font-medium text-balance text-foreground">
+          <button
+            type="button"
+            aria-controls={contentId}
+            aria-expanded={isOpen}
+            data-state={isOpen ? "open" : "closed"}
+            disabled={!position.description}
+            className="experience-position-trigger group/experience-position flex w-full items-start gap-3 text-left select-none active:scale-[0.99]"
+            onClick={toggleOpen}
+          >
+            <div
+              className={cn(
+                "flex size-6 shrink-0 items-center justify-center rounded-lg",
+                "bg-muted text-muted-foreground",
+                "[&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4"
+              )}
             >
-              <div
-                className={cn(
-                  "flex size-6 shrink-0 items-center justify-center rounded-lg",
-                  "bg-muted text-muted-foreground",
-                  "[&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4"
-                )}
-              >
-                {position.icon ?? <CodeXmlIcon />}
-              </div>
-
-              <span className="flex-1">{position.title}</span>
-
-              <div className="shrink-0 text-muted-foreground group-disabled/experience-position:hidden [&_svg]:h-lh [&_svg]:w-4">
-                <ChevronsUpDownIcon
-                  ref={chevronsUpDownIconRef}
-                  duration={0.15}
-                  initialOpen={position.isExpanded}
-                />
-              </div>
-            </button>
-          </h4>
-
-          {position.description && (
-            <span
-              data-experience-position-highlight
-              aria-hidden
-              className="pointer-events-none absolute -top-1 -right-2 -bottom-2 left-6 z-0 rounded-lg bg-transparent peer-hover/experience-position-summary:bg-[#f1f1f1] peer-focus-within/experience-position-summary:bg-[#f1f1f1]/60"
-            />
-          )}
-
-          <dl className="relative z-1 flex items-center gap-2 pl-9 font-navbar text-xs tracking-wide text-muted-foreground uppercase">
-            {position.employmentType && (
-              <>
-                <div>
-                  <dt className="sr-only">Employment Type</dt>
-                  <dd>{position.employmentType}</dd>
-                </div>
-
-                <span aria-hidden>-</span>
-              </>
-            )}
-
-            <div>
-              <dt className="sr-only">Employment Period</dt>
-              <dd className="flex items-center gap-0.5 tabular-nums">
-                <span>{start}</span>
-                <span>.</span>
-                <span>{isOngoing ? "Present" : end}</span>
-              </dd>
+              {position.icon ?? <CodeXmlIcon />}
             </div>
 
-            {duration && (
-              <>
-                <span aria-hidden>-</span>
-                <div>
-                  <dt className="sr-only">Duration</dt>
-                  <dd className="tabular-nums">{duration}</dd>
-                </div>
-              </>
-            )}
-          </dl>
-        </div>
+            <span className="flex-1">{position.title}</span>
 
-        <div
-          id={contentId}
-          data-state={isOpen ? "open" : "closed"}
-          hidden={!isOpen}
-          className="relative z-1 overflow-hidden"
-        >
-          {position.description && (
-            <Prose className="pt-2 pl-9 prose-p:my-1.5 prose-p:leading-[1.4] prose-ul:my-1.5 prose-li:my-1 prose-li:leading-[1.4]">
-              <ReactMarkdown>{position.description}</ReactMarkdown>
-            </Prose>
-          )}
-        </div>
-
-        {hasSkills && (
-          <ul className="not-prose relative z-1 flex flex-wrap gap-1.5 pt-3 pl-9">
-            <span
-              aria-hidden
-              className="pointer-events-none absolute bottom-2.5 left-3 h-px w-5 overflow-hidden bg-black/15"
-            >
-              <span
-                data-work-experience-skill-trail-progress
-                className="absolute inset-0 origin-left bg-black"
-                style={{ transform: "scaleX(0)" }}
+            <div className="shrink-0 text-muted-foreground group-disabled/experience-position:hidden [&_svg]:h-lh [&_svg]:w-4">
+              <ChevronsUpDownIcon
+                ref={chevronsUpDownIconRef}
+                duration={0.15}
+                initialOpen={position.isExpanded}
               />
-            </span>
-            {skills.map((skill, index) => (
-              <li key={index} className="flex">
-                <Skill>{skill}</Skill>
-              </li>
-            ))}
-          </ul>
+            </div>
+          </button>
+        </h4>
+
+        {position.description && (
+          <span
+            data-experience-position-highlight
+            aria-hidden
+            className="pointer-events-none absolute -top-1 -right-2 -bottom-2 left-6 z-0 rounded-lg bg-transparent peer-focus-within/experience-position-summary:bg-[#f1f1f1]/60 peer-hover/experience-position-summary:bg-[#f1f1f1]"
+          />
         )}
+
+        <dl className="relative z-1 flex items-center gap-2 pl-9 font-navbar text-xs tracking-wide text-muted-foreground uppercase">
+          {position.employmentType && (
+            <>
+              <div>
+                <dt className="sr-only">Employment Type</dt>
+                <dd>{position.employmentType}</dd>
+              </div>
+
+              <span aria-hidden>-</span>
+            </>
+          )}
+
+          <div>
+            <dt className="sr-only">Employment Period</dt>
+            <dd className="flex items-center gap-0.5 tabular-nums">
+              <span>{start}</span>
+              <span>.</span>
+              <span>{isOngoing ? "Present" : end}</span>
+            </dd>
+          </div>
+
+          {duration && (
+            <>
+              <span aria-hidden>-</span>
+              <div>
+                <dt className="sr-only">Duration</dt>
+                <dd className="tabular-nums">{duration}</dd>
+              </div>
+            </>
+          )}
+        </dl>
+      </div>
+
+      <div
+        id={contentId}
+        data-state={isOpen ? "open" : "closed"}
+        hidden={!isOpen}
+        className="relative z-1 overflow-hidden"
+      >
+        {position.description && (
+          <Prose className="pt-2 pl-9 prose-p:my-1.5 prose-p:leading-[1.4] prose-ul:my-1.5 prose-li:my-1 prose-li:leading-[1.4]">
+            <ReactMarkdown>{position.description}</ReactMarkdown>
+          </Prose>
+        )}
+      </div>
+
+      {hasSkills && (
+        <ul className="not-prose relative z-1 flex flex-wrap gap-1.5 pt-3 pl-9">
+          <span
+            aria-hidden
+            className="pointer-events-none absolute bottom-2.5 left-3 h-px w-5 overflow-hidden bg-black/15"
+          >
+            <span
+              data-work-experience-skill-trail-progress
+              className="absolute inset-0 origin-left bg-black"
+              style={{ transform: "scaleX(0)" }}
+            />
+          </span>
+          {skills.map((skill, index) => (
+            <li key={index} className="flex">
+              <Skill>{skill}</Skill>
+            </li>
+          ))}
+        </ul>
+      )}
     </div>
   )
 }
@@ -486,50 +486,5 @@ function Skill({ className, ...props }: ComponentProps<"span">) {
       )}
       {...props}
     />
-  )
-}
-
-function formatDuration(start: string, end?: string): string {
-  const startHasMonth = start.includes(".")
-  const endHasMonth = end ? end.includes(".") : true
-
-  // Both year-only: granularity is years, no month arithmetic needed.
-  if (!startHasMonth && end && !endHasMonth) {
-    const years = parseInt(end, 10) - parseInt(start, 10)
-    if (years <= 0) {
-      return ""
-    }
-    return `${years}y`
-  }
-
-  const startDate = parsePeriodDate(start, "first")
-  const endDate = end ? parsePeriodDate(end, "last") : new Date()
-
-  // +1 to count both the start and end months inclusively.
-  const totalMonths = differenceInMonths(endDate, startDate) + 1
-  if (totalMonths <= 0) {
-    return ""
-  }
-
-  if (totalMonths < 12) {
-    return `${totalMonths}m`
-  }
-
-  const years = Math.floor(totalMonths / 12)
-  const months = totalMonths % 12
-  if (months === 0) {
-    return `${years}y`
-  }
-  return `${years}y ${months}m`
-}
-
-function parsePeriodDate(str: string, fallbackMonth: "first" | "last"): Date {
-  if (str.includes(".")) {
-    return parse(str, "MM.yyyy", new Date())
-  }
-  return parse(
-    `${fallbackMonth === "last" ? "12" : "01"}.${str}`,
-    "MM.yyyy",
-    new Date()
   )
 }

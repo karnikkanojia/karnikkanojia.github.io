@@ -12,7 +12,6 @@ import {
 import Image from "next/image"
 import { useEffect, useLayoutEffect, useRef, useState } from "react"
 
-import { CursorImageTrail } from "@/components/ui/cursor-image-trail"
 import { haptics } from "@/lib/haptics"
 
 const stats = ["2", "BLR → NYU"] as const
@@ -27,20 +26,6 @@ const aboutActionVerbs = new Set([
   "clinicians",
   "patients",
 ])
-
-const trailImages = [
-  "/images/cursor-trail/mouse1.webp",
-  "/images/cursor-trail/mouse2.webp",
-  "/images/cursor-trail/mouse3.webp",
-  "/images/cursor-trail/mouse4.webp",
-  "/images/cursor-trail/mouse6.webp",
-  "/images/cursor-trail/mouse7.webp",
-  "/images/cursor-trail/mouse8.webp",
-  "/images/cursor-trail/mouse9.webp",
-  "/images/cursor-trail/mouse11.webp",
-  "/images/cursor-trail/mouse12.webp",
-]
-const CURSOR_TRAIL_ENABLED = false
 
 type MaskedRevealOptions = {
   enterDuration?: number
@@ -192,14 +177,7 @@ export function AboutSection() {
   }
 
   return (
-    <CursorImageTrail
-      items={trailImages}
-      itemSize={112}
-      trailLength={CURSOR_TRAIL_ENABLED ? 6 : 0}
-      spawnDistance={72}
-      rotationRange={12}
-      className="bg-white px-8 pt-24 pb-10 text-black md:px-10 md:pt-32 md:pb-12 lg:px-12"
-    >
+    <section className="bg-white px-8 pt-24 pb-10 text-black md:px-10 md:pt-32 md:pb-12 lg:px-12">
       <div className="grid gap-14 lg:grid-cols-[minmax(17rem,31%)_minmax(0,1fr)] lg:gap-0">
         <aside className="flex flex-col lg:pr-12">
           <div aria-hidden="true" className="flex h-px w-full gap-1">
@@ -360,6 +338,6 @@ export function AboutSection() {
           </div>
         </div>
       </div>
-    </CursorImageTrail>
+    </section>
   )
 }
