@@ -1,7 +1,7 @@
 "use client"
 
 import { animate, remove } from "animejs"
-import { Cursor } from "@/components/motion-primitives/cursor"
+import { Cursor } from "@/components/ui/cursor"
 import { cn } from "@/lib/utils"
 import {
   createContext,
