@@ -6,7 +6,7 @@ import { Agentation } from "agentation"
 import { ReactLenis } from "lenis/react"
 
 import { ContactFooter } from "@/components/contact-footer"
-import { BlendCursor } from "@/components/blend-cursor"
+import { CursorProvider } from "@/components/cursor-provider"
 import { Navbar } from "@/components/navbar"
 import { cn } from "@/lib/utils"
 import { SITE_DESCRIPTION, SITE_NAME, SITE_URL } from "@/lib/site"
@@ -151,26 +151,27 @@ export default function RootLayout({
         />
       </head>
       <body id="custom-cursor-root">
-        <BlendCursor />
-        <noscript>
-          <style>{`
-            html, body { overflow: auto !important; overscroll-behavior: auto !important; }
-            [data-site-intro] { display: none !important; }
-          `}</style>
-        </noscript>
-        <script
-          type="application/ld+json"
-          dangerouslySetInnerHTML={{ __html: JSON.stringify(personJsonLd) }}
-        />
-        <Script id="initial-scroll-position" strategy="beforeInteractive">
-          {`try { if (window.sessionStorage.getItem("portfolio:skip-intro-once") === "true") { window.sessionStorage.removeItem("portfolio:skip-intro-once"); document.documentElement.dataset.siteSkipIntro = "true"; document.documentElement.dataset.siteIntroComplete = "true"; document.documentElement.dataset.siteNavbarReady = "true"; } } catch {} if (window.location.pathname !== "/") { document.documentElement.dataset.siteIntroComplete = "true"; document.documentElement.dataset.siteNavbarReady = "true"; } if (!window.location.hash) { window.history.scrollRestoration = "manual"; const resetInitialScroll = () => { if (window.matchMedia("(max-width: 767px)").matches && !window.location.hash) window.scrollTo(0, 0); }; window.scrollTo(0, 0); window.requestAnimationFrame(resetInitialScroll); window.addEventListener("pageshow", resetInitialScroll); }`}
-        </Script>
-        <ReactLenis root options={{ anchors: true, autoRaf: true, lerp: 0.1 }}>
-          <Navbar />
-          {children}
-          <ContactFooter />
-        </ReactLenis>
-        {process.env.NODE_ENV === "development" && <Agentation />}
+        <CursorProvider>
+          <noscript>
+            <style>{`
+              html, body { overflow: auto !important; overscroll-behavior: auto !important; }
+              [data-site-intro] { display: none !important; }
+            `}</style>
+          </noscript>
+          <script
+            type="application/ld+json"
+            dangerouslySetInnerHTML={{ __html: JSON.stringify(personJsonLd) }}
+          />
+          <Script id="initial-scroll-position" strategy="beforeInteractive">
+            {`try { if (window.sessionStorage.getItem("portfolio:skip-intro-once") === "true") { window.sessionStorage.removeItem("portfolio:skip-intro-once"); document.documentElement.dataset.siteSkipIntro = "true"; document.documentElement.dataset.siteIntroComplete = "true"; document.documentElement.dataset.siteNavbarReady = "true"; } } catch {} if (window.location.pathname !== "/") { document.documentElement.dataset.siteIntroComplete = "true"; document.documentElement.dataset.siteNavbarReady = "true"; } if (!window.location.hash) { window.history.scrollRestoration = "manual"; const resetInitialScroll = () => { if (window.matchMedia("(max-width: 767px)").matches && !window.location.hash) window.scrollTo(0, 0); }; window.scrollTo(0, 0); window.requestAnimationFrame(resetInitialScroll); window.addEventListener("pageshow", resetInitialScroll); }`}
+          </Script>
+          <ReactLenis root options={{ anchors: true, autoRaf: true, lerp: 0.1 }}>
+            <Navbar />
+            {children}
+            <ContactFooter />
+          </ReactLenis>
+          {process.env.NODE_ENV === "development" && <Agentation />}
+        </CursorProvider>
       </body>
     </html>
   )
