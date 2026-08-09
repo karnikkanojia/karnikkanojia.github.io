@@ -47,3 +47,4 @@ assets/
 !.dev.vars.example
 
 !.env.example
+graphify-out/
