@@ -296,7 +296,10 @@ export function Navbar() {
     )
       return
 
-    if (window.location.pathname !== "/") {
+    if (
+      window.location.pathname !== "/" ||
+      document.documentElement.dataset.siteSkipIntro === "true"
+    ) {
       navbarMaterial.style.visibility = "visible"
       navbarMaterial.style.transform = "none"
       navbarMaterial.style.clipPath = "none"
@@ -524,6 +527,11 @@ export function Navbar() {
           },
           1450
         )
+    }
+
+    if (document.documentElement.dataset.siteSkipIntro === "true") {
+      markNavbarSettled()
+      return
     }
 
     if (document.documentElement.dataset.siteNavbarReady === "true") {

@@ -70,6 +70,9 @@ export function IntroTransition({ children }: IntroTransitionProps) {
     }
 
     document.documentElement.dataset.siteIntroComplete = "true"
+    try {
+      window.sessionStorage.setItem("portfolio:intro-complete", "true")
+    } catch {}
     revealNavbar()
     window.dispatchEvent(new Event("site-loader:complete"))
 
@@ -119,12 +122,17 @@ export function IntroTransition({ children }: IntroTransitionProps) {
   }, [finishIntro])
 
   useLayoutEffect(() => {
-    if (document.documentElement.dataset.siteSkipIntro !== "true") return
+    const html = document.documentElement
+    const shouldSkipIntro =
+      html.dataset.siteSkipIntro === "true" ||
+      html.dataset.siteIntroComplete === "true"
+    if (!shouldSkipIntro) return
 
     skipIntroRef.current = true
     finishingRef.current = true
     removedRef.current = true
     navbarRevealedRef.current = true
+    html.dataset.siteSkipIntro = "true"
     requestAnimationFrame(() => {
       setIntroVisible(false)
       window.dispatchEvent(new Event("site-loader:complete"))

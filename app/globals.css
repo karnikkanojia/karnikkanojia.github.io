@@ -80,6 +80,7 @@ html:not([data-site-intro-complete]) body {
   overscroll-behavior: none;
 }
 
+html:not([data-site-intro-active]) [data-site-intro],
 html[data-site-skip-intro] [data-site-intro] {
   display: none;
 }

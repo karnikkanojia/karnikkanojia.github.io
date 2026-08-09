@@ -83,6 +83,7 @@ export function Hero() {
     const desktop = window.matchMedia(DESKTOP_QUERY)
     let introComplete =
       document.documentElement.dataset.siteIntroComplete === "true"
+    const skipEntry = document.documentElement.dataset.siteSkipIntro === "true"
     let navbarSettled =
       document.documentElement.dataset.siteNavbarSettled === "true"
     let entryComplete = false
@@ -301,6 +302,16 @@ export function Hero() {
       const activeMaskWords = desktop.matches
         ? desktopMaskWords
         : mobileMaskWords
+
+      if (skipEntry) {
+        activeMaskWords.forEach((word) => {
+          word.style.transform = "translateY(0)"
+          word.style.willChange = "auto"
+        })
+        entryComplete = true
+        render()
+        return
+      }
 
       activeMaskWords.forEach((word) => {
         word.style.transform = WORD_ENTRY_HIDDEN_TRANSFORM
