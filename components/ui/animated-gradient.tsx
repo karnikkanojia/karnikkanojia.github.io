@@ -471,7 +471,7 @@ export function AnimatedGradient({
       <div
         ref={containerRef}
         className={cn("absolute inset-0 overflow-hidden", className)}
-        style={{ borderRadius: radius, ...style }}
+        style={{ backgroundColor: "#fff", borderRadius: radius, ...style }}
       >
         <canvas
           ref={canvasRef}
