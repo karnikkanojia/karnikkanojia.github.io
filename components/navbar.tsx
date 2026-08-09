@@ -15,6 +15,7 @@ import {
   useState,
 } from "react"
 
+import { useNavbarScrollState } from "@/hooks/use-navbar-scroll-state"
 import { haptics } from "@/lib/haptics"
 
 const RESUME_URL =
@@ -52,175 +53,6 @@ function getTranslation(element: HTMLElement) {
     x: matrix?.m41 ?? 0,
     y: matrix?.m42 ?? 0,
   }
-}
-
-type NavbarScrollState = {
-  isFooterActive: boolean
-  isVisible: boolean
-  isScrolled: boolean
-}
-
-function useNavbarScrollState() {
-  const [state, setState] = useState<NavbarScrollState>({
-    isFooterActive: false,
-    isVisible: true,
-    isScrolled: false,
-  })
-
-  useEffect(() => {
-    let previousScrollY = window.scrollY
-    let directionStartY = previousScrollY
-    let previousDirection = 0
-    let footerAnchor: HTMLElement | null = null
-    let heroEndY = 0
-    let frameId: number | undefined
-    let touchStart: { x: number; y: number } | undefined
-    let touchMoved = false
-    let directionalInputUntil = 0
-    const mobileViewport = window.matchMedia("(max-width: 767px)")
-
-    const resetScrollDirection = () => {
-      previousScrollY = window.scrollY
-      directionStartY = previousScrollY
-      previousDirection = 0
-    }
-
-    const measureHero = () => {
-      const hero = document.querySelector<HTMLElement>(
-        "[data-hero-scroll-section]"
-      )
-      heroEndY = hero
-        ? hero.getBoundingClientRect().bottom + window.scrollY
-        : window.innerHeight + 80
-      footerAnchor = document.querySelector<HTMLElement>("#contact")
-    }
-
-    const update = () => {
-      frameId = undefined
-      const currentScrollY = window.scrollY
-      const canTrackDirection =
-        !mobileViewport.matches || performance.now() < directionalInputUntil
-      const direction = canTrackDirection
-        ? Math.sign(currentScrollY - previousScrollY)
-        : 0
-
-      if (!canTrackDirection) {
-        previousScrollY = currentScrollY
-        directionStartY = currentScrollY
-        previousDirection = 0
-      }
-
-      if (direction !== 0 && direction !== previousDirection) {
-        directionStartY = previousScrollY
-        previousDirection = direction
-      }
-
-      const directionalDistance = currentScrollY - directionStartY
-      previousScrollY = currentScrollY
-      const isHeroActive = currentScrollY + window.innerHeight <= heroEndY + 1
-      const isFooterActive = footerAnchor
-        ? footerAnchor.getBoundingClientRect().top <= window.innerHeight
-        : false
-
-      setState((current) => {
-        const isVisible = isFooterActive
-          ? false
-          : isHeroActive
-            ? true
-            : directionalDistance < -8
-              ? true
-              : directionalDistance > 8
-                ? false
-                : current.isVisible
-        const isScrolled = currentScrollY > 24
-
-        return current.isVisible === isVisible &&
-          current.isFooterActive === isFooterActive &&
-          current.isScrolled === isScrolled
-          ? current
-          : { isFooterActive, isVisible, isScrolled }
-      })
-    }
-
-    const requestUpdate = () => {
-      if (frameId === undefined) frameId = requestAnimationFrame(update)
-    }
-    const onResize = () => {
-      // Mobile Safari resizes its visual viewport when browser chrome changes.
-      // That can also adjust scrollY by a few pixels without a user scroll and
-      // must not be interpreted as an upward gesture that reveals the navbar.
-      resetScrollDirection()
-      measureHero()
-      requestUpdate()
-    }
-    const onPointerDown = (event: PointerEvent) => {
-      if (event.pointerType !== "touch") return
-      touchStart = { x: event.clientX, y: event.clientY }
-      touchMoved = false
-      directionalInputUntil = 0
-      resetScrollDirection()
-    }
-    const onPointerMove = (event: PointerEvent) => {
-      if (event.pointerType !== "touch" || !touchStart) return
-
-      if (!touchMoved) {
-        const distance = Math.hypot(
-          event.clientX - touchStart.x,
-          event.clientY - touchStart.y
-        )
-        if (distance < 10) return
-        touchMoved = true
-      }
-
-      directionalInputUntil = performance.now() + 1200
-    }
-    const onPointerUp = (event: PointerEvent) => {
-      if (event.pointerType !== "touch" || !touchStart) return
-      touchStart = undefined
-
-      if (touchMoved) {
-        directionalInputUntil = performance.now() + 1200
-      } else {
-        directionalInputUntil = 0
-        resetScrollDirection()
-      }
-      touchMoved = false
-    }
-    const onPointerCancel = () => {
-      touchStart = undefined
-      touchMoved = false
-      directionalInputUntil = 0
-      resetScrollDirection()
-    }
-    const onWheel = () => {
-      directionalInputUntil = performance.now() + 1200
-    }
-
-    measureHero()
-    update()
-    window.addEventListener("scroll", requestUpdate, { passive: true })
-    window.addEventListener("resize", onResize)
-    window.visualViewport?.addEventListener("resize", onResize)
-    window.addEventListener("pointerdown", onPointerDown, { passive: true })
-    window.addEventListener("pointermove", onPointerMove, { passive: true })
-    window.addEventListener("pointerup", onPointerUp, { passive: true })
-    window.addEventListener("pointercancel", onPointerCancel, { passive: true })
-    window.addEventListener("wheel", onWheel, { passive: true })
-
-    return () => {
-      if (frameId !== undefined) cancelAnimationFrame(frameId)
-      window.removeEventListener("scroll", requestUpdate)
-      window.removeEventListener("resize", onResize)
-      window.visualViewport?.removeEventListener("resize", onResize)
-      window.removeEventListener("pointerdown", onPointerDown)
-      window.removeEventListener("pointermove", onPointerMove)
-      window.removeEventListener("pointerup", onPointerUp)
-      window.removeEventListener("pointercancel", onPointerCancel)
-      window.removeEventListener("wheel", onWheel)
-    }
-  }, [])
-
-  return state
 }
 
 function NavLink({ href, label, external }: NavbarLinkItem) {
@@ -641,10 +473,7 @@ export function Navbar() {
         .add(
           navbarMaterial,
           {
-            clipPath: [
-              "inset(0 100% 0 0)",
-              "inset(0 0% 0 0)",
-            ],
+            clipPath: ["inset(0 100% 0 0)", "inset(0 0% 0 0)"],
             scaleX: [0.92, 1],
             scaleY: [0.96, 1],
             duration: 760,

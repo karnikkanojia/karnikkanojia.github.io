@@ -462,13 +462,7 @@ export function AnimatedGradient({
       <div
         ref={containerRef}
         className={cn("absolute inset-0 overflow-hidden", className)}
-        style={
-          {
-            borderRadius: radius,
-            ...style,
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          } as any
-        }
+        style={{ borderRadius: radius, ...style }}
       >
         <canvas
           ref={canvasRef}
