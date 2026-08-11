@@ -105,6 +105,13 @@ function EditorialCard({
               "editorial-card-image relative overflow-hidden rounded-[0.9rem] bg-[#eeeeeb]",
               isLead ? "aspect-[4/3]" : "aspect-square"
             )}
+            style={
+              item.href.startsWith("/projects/")
+                ? {
+                    viewTransitionName: `project-image-${item.href.split("/").at(-1)}`,
+                  }
+                : undefined
+            }
           >
             {item.image && (
               <Image

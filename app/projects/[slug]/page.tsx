@@ -1,9 +1,9 @@
 import type { Metadata } from "next"
 import Image from "next/image"
-import Link from "next/link"
 import { notFound } from "next/navigation"
 import { ArrowUpRight } from "lucide-react"
 
+import { CrossDocumentLink } from "@/components/cross-document-link"
 import { getNextProject, getProject, projects } from "@/lib/projects"
 import { SITE_NAME, SITE_URL } from "@/lib/site"
 
@@ -102,7 +102,10 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
         </header>
 
         <div className="px-2 md:px-3">
-          <div className="relative mx-auto h-[55svh] max-h-128 min-h-80 max-w-376 overflow-hidden rounded-[1rem] bg-[#e8e8e4] md:aspect-16/8.5 md:h-auto md:max-h-[82svh] md:min-h-0">
+          <div
+            className="relative mx-auto h-[55svh] max-h-128 min-h-80 max-w-376 overflow-hidden rounded-[1rem] bg-[#e8e8e4] md:aspect-16/8.5 md:h-auto md:max-h-[82svh] md:min-h-0"
+            style={{ viewTransitionName: `project-image-${project.slug}` }}
+          >
             <Image
               src={project.image}
               alt={project.imageAlt}
@@ -227,7 +230,7 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
             <p className="font-navbar text-xs tracking-[0.09em] text-black/60 uppercase">
               Next project
             </p>
-            <Link
+            <CrossDocumentLink
               href={`/projects/${nextProject.slug}`}
               className="project-next-link group mt-6 flex items-end justify-between gap-5 border-b border-black/20 pb-5 outline-2 outline-offset-4 outline-transparent transition-[transform,border-color] duration-200 ease-[cubic-bezier(0.23,1,0.32,1)] focus-visible:border-black focus-visible:outline-black active:scale-[0.99]"
             >
@@ -238,7 +241,7 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
                 aria-hidden="true"
                 className="project-next-arrow mb-1 size-7 shrink-0 stroke-[1.3] transition-transform duration-200 ease-[cubic-bezier(0.23,1,0.32,1)] md:size-10"
               />
-            </Link>
+            </CrossDocumentLink>
           </div>
         </nav>
       </article>
