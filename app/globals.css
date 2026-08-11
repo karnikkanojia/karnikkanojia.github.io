@@ -6,6 +6,66 @@
 
 @plugin "@tailwindcss/typography";
 
+@view-transition {
+  navigation: auto;
+}
+
+[data-site-navbar] {
+  view-transition-name: site-navbar;
+}
+
+::view-transition-group(root) {
+  overflow: clip;
+  animation-duration: 320ms;
+  animation-timing-function: cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+::view-transition-old(root) {
+  z-index: 1;
+  transform-origin: center top;
+  animation: view-transition-page-out 220ms cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+::view-transition-new(root) {
+  z-index: 2;
+  transform-origin: center top;
+  animation: view-transition-page-in 320ms cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+::view-transition-group(site-navbar) {
+  z-index: 2147483647;
+}
+
+::view-transition-old(site-navbar),
+::view-transition-new(site-navbar) {
+  animation-duration: 160ms;
+  animation-timing-function: cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+@keyframes view-transition-page-out {
+  to {
+    transform: translate3d(0, -16px, 0) scale(0.985);
+  }
+}
+
+@keyframes view-transition-page-in {
+  from {
+    transform: translate3d(0, 28px, 0) scale(0.965);
+  }
+
+  to {
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  ::view-transition-group(*),
+  ::view-transition-old(*),
+  ::view-transition-new(*) {
+    animation-duration: 1ms !important;
+  }
+}
+
 @custom-variant dark (&:is(.dark *));
 
 @keyframes about-stat-progress {
@@ -87,6 +147,28 @@ html[data-site-skip-intro] [data-site-intro] {
 
 html:not([data-site-navbar-ready]) [data-site-navbar] {
   visibility: hidden;
+}
+
+html[data-site-navbar-ready] [data-navbar-contact] {
+  visibility: visible !important;
+  opacity: 1 !important;
+  transform: none !important;
+}
+
+html[data-site-navbar-ready] [data-navbar-contact-dots] > span:nth-child(1) {
+  transform: translate(-4.75px, -4.75px);
+}
+
+html[data-site-navbar-ready] [data-navbar-contact-dots] > span:nth-child(2) {
+  transform: translate(4.75px, -4.75px);
+}
+
+html[data-site-navbar-ready] [data-navbar-contact-dots] > span:nth-child(3) {
+  transform: translate(-4.75px, 4.75px);
+}
+
+html[data-site-navbar-ready] [data-navbar-contact-dots] > span:nth-child(4) {
+  transform: translate(4.75px, 4.75px);
 }
 
 @theme inline {
@@ -600,8 +682,7 @@ button *,
   will-change: transform, opacity;
 }
 
-body:has(.contact-footer:hover)
-  [data-cursor-capsule][data-expanded="false"] {
+body:has(.contact-footer:hover) [data-cursor-capsule][data-expanded="false"] {
   background: #f1f1f1;
 }
 

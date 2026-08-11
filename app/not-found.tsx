@@ -1,5 +1,5 @@
 import Image from "next/image"
-import Link from "next/link"
+import { CrossDocumentLink } from "@/components/cross-document-link"
 
 export default function NotFound() {
   return (
@@ -21,12 +21,12 @@ export default function NotFound() {
           <h1 className="text-5xl leading-[0.88] tracking-[-0.065em] sm:text-7xl">
             Not found
           </h1>
-          <Link
+          <CrossDocumentLink
             href="/"
             className="not-found-home mt-5 inline-flex border-b border-transparent py-2 text-base underline decoration-black/35 underline-offset-4 transition-[text-decoration-color] duration-180 active:opacity-60"
           >
             Return home
-          </Link>
+          </CrossDocumentLink>
         </div>
       </div>
     </main>

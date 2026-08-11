@@ -1,10 +1,12 @@
 import type { Metadata } from "next"
 import Image from "next/image"
-import Link from "next/link"
 
+import { CrossDocumentLink } from "@/components/cross-document-link"
 import { CursorFollowLabel } from "@/components/ui/cursor-follow-label"
 import { projects } from "@/lib/projects"
 import { SITE_NAME } from "@/lib/site"
+import { projectImageTransition } from "@/lib/view-transitions/project-image"
+import { getViewTransitionTargetProps } from "@/lib/view-transitions/registry"
 
 const projectsDescription =
   "Selected systems, research, and reliability projects by Karnik Kanojia."
@@ -56,7 +58,7 @@ export default function ProjectsPage() {
           {projects.map((project, index) => (
             <li key={project.slug}>
               <CursorFollowLabel className="h-full" label="Case study">
-                <Link
+                <CrossDocumentLink
                   href={`/projects/${project.slug}`}
                   aria-label={`View ${project.title} case study`}
                   className="project-list-item group grid gap-x-6 gap-y-5 border-t border-black/12 py-6 outline-2 outline-offset-4 outline-transparent transition-[background-color,transform] duration-180 ease-[cubic-bezier(0.23,1,0.32,1)] focus-visible:outline-black active:scale-[0.995] md:grid-cols-12 md:items-center md:py-8"
@@ -70,7 +72,13 @@ export default function ProjectsPage() {
                     </p>
                   </div>
 
-                  <div className="relative order-2 aspect-[16/10] overflow-hidden rounded-[0.75rem] bg-[#e8e8e4] md:order-none md:col-span-3 md:aspect-[4/3]">
+                  <div
+                    {...getViewTransitionTargetProps(
+                      projectImageTransition,
+                      project.slug
+                    )}
+                    className="relative order-2 aspect-[16/10] overflow-hidden rounded-[0.75rem] bg-[#e8e8e4] md:order-none md:col-span-3 md:aspect-[4/3]"
+                  >
                     <Image
                       src={project.image}
                       alt={project.imageAlt}
@@ -108,7 +116,7 @@ export default function ProjectsPage() {
                       {project.outcomes.join(" . ")}
                     </p>
                   </div>
-                </Link>
+                </CrossDocumentLink>
               </CursorFollowLabel>
             </li>
           ))}

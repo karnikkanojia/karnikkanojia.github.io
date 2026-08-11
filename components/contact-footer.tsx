@@ -3,8 +3,10 @@
 import { useEffect, useLayoutEffect, useRef, useState } from "react"
 import Image from "next/image"
 import { ArrowUp, ArrowUpRight } from "lucide-react"
+import { CrossDocumentLink } from "@/components/cross-document-link"
 import { SpotlightLogo } from "@/components/spotlight-logo"
 import { CursorFollowLabel } from "@/components/ui/cursor-follow-label"
+import { setSiteFooterActive } from "@/lib/site-footer-state"
 
 const navigation = [
   { label: "About", href: "/#about" },
@@ -87,18 +89,14 @@ export function ContactFooter() {
     body.style.backgroundColor = activeThemeColor
     themeColor?.setAttribute("content", activeThemeColor)
 
-    if (isInteractive) {
-      root.dataset.siteFooterActive = "true"
-    } else {
-      delete root.dataset.siteFooterActive
-    }
+    setSiteFooterActive(isInteractive)
   }, [isInteractive])
 
   useEffect(
     () => () => {
       const root = document.documentElement
 
-      delete root.dataset.siteFooterActive
+      setSiteFooterActive(false)
       root.style.removeProperty("background-color")
       document.body.style.removeProperty("background-color")
       document
@@ -204,7 +202,7 @@ export function ContactFooter() {
               <ul>
                 {navigation.map((item) => (
                   <li key={item.href}>
-                    <a
+                    <CrossDocumentLink
                       href={item.href}
                       className="footer-nav-link group inline-flex min-h-14 origin-left items-center text-2xl leading-none font-normal tracking-[-0.04em] active:scale-[0.98] md:min-h-[4.35rem] md:text-4xl"
                     >
@@ -221,7 +219,7 @@ export function ContactFooter() {
                           className="size-3.5 invert md:size-4"
                         />
                       </span>
-                    </a>
+                    </CrossDocumentLink>
                   </li>
                 ))}
               </ul>

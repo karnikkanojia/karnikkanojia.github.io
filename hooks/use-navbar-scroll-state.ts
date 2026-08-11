@@ -2,6 +2,12 @@
 
 import { useEffect, useState } from "react"
 
+import {
+  getSiteFooterActiveState,
+  isSiteFooterActive,
+  SITE_FOOTER_ACTIVE_EVENT,
+} from "@/lib/site-footer-state"
+
 type NavbarScrollState = {
   isFooterActive: boolean
   isVisible: boolean
@@ -23,7 +29,7 @@ export function useNavbarScrollState(): NavbarScrollState {
     let previousScrollY = window.scrollY
     let directionStartY = previousScrollY
     let previousDirection = 0
-    let footerAnchor: HTMLElement | null = null
+    let footerActive = isSiteFooterActive()
     let heroEndY = 0
     let frameId: number | undefined
     let touchStart: { x: number; y: number } | undefined
@@ -44,7 +50,6 @@ export function useNavbarScrollState(): NavbarScrollState {
       heroEndY = hero
         ? hero.getBoundingClientRect().bottom + window.scrollY
         : window.innerHeight + 80
-      footerAnchor = document.querySelector<HTMLElement>("#contact")
     }
 
     const updateState = () => {
@@ -70,9 +75,7 @@ export function useNavbarScrollState(): NavbarScrollState {
       const directionalDistance = currentScrollY - directionStartY
       previousScrollY = currentScrollY
       const isHeroActive = currentScrollY + window.innerHeight <= heroEndY + 1
-      const isFooterActive = footerAnchor
-        ? footerAnchor.getBoundingClientRect().top <= window.innerHeight
-        : false
+      const isFooterActive = footerActive
 
       setState((current) => {
         const isVisible = isFooterActive
@@ -151,6 +154,11 @@ export function useNavbarScrollState(): NavbarScrollState {
       directionalInputUntil = performance.now() + DIRECTIONAL_INPUT_WINDOW_MS
     }
 
+    const handleFooterActiveChange = (event: Event) => {
+      footerActive = getSiteFooterActiveState(event)
+      requestUpdate()
+    }
+
     measurePageAnchors()
     updateState()
     window.addEventListener("scroll", requestUpdate, { passive: true })
@@ -163,6 +171,7 @@ export function useNavbarScrollState(): NavbarScrollState {
       passive: true,
     })
     window.addEventListener("wheel", handleWheel, { passive: true })
+    window.addEventListener(SITE_FOOTER_ACTIVE_EVENT, handleFooterActiveChange)
 
     return () => {
       if (frameId !== undefined) cancelAnimationFrame(frameId)
@@ -174,6 +183,10 @@ export function useNavbarScrollState(): NavbarScrollState {
       window.removeEventListener("pointerup", handlePointerUp)
       window.removeEventListener("pointercancel", handlePointerCancel)
       window.removeEventListener("wheel", handleWheel)
+      window.removeEventListener(
+        SITE_FOOTER_ACTIVE_EVENT,
+        handleFooterActiveChange
+      )
     }
   }, [])
 

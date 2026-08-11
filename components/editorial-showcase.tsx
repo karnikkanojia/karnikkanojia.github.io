@@ -14,6 +14,8 @@ import { haptics } from "@/lib/haptics"
 import type { MediumPost } from "@/lib/medium"
 import { projects } from "@/lib/projects"
 import { cn } from "@/lib/utils"
+import { projectImageTransition } from "@/lib/view-transitions/project-image"
+import { getViewTransitionTargetProps } from "@/lib/view-transitions/registry"
 
 const BLOG_PROFILE_URL = "https://medium.com/@karnikk1406120"
 
@@ -26,6 +28,7 @@ type EditorialItem = {
   href: string
   className?: string
   imageSizes?: string
+  projectSlug?: string
 }
 
 function EditorialCard({
@@ -101,6 +104,12 @@ function EditorialCard({
           className="editorial-card block outline-2 outline-offset-4 outline-transparent focus-visible:outline-black"
         >
           <div
+            {...(item.projectSlug
+              ? getViewTransitionTargetProps(
+                  projectImageTransition,
+                  item.projectSlug
+                )
+              : {})}
             className={cn(
               "editorial-card-image relative overflow-hidden rounded-[0.9rem] bg-[#eeeeeb]",
               isLead ? "aspect-[4/3]" : "aspect-square"
@@ -332,6 +341,7 @@ export function ProjectsShowcase() {
     imageAlt: project.imageAlt,
     href: `/projects/${project.slug}`,
     imageSizes: project.homeImageSizes,
+    projectSlug: project.slug,
   }))
 
   return (

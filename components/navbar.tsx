@@ -5,7 +5,6 @@ import { animate, createTimeline, cubicBezier, stagger } from "animejs"
 import { useLenis } from "lenis/react"
 import { ArrowLeft } from "lucide-react"
 import Image from "next/image"
-import Link from "next/link"
 import { usePathname } from "next/navigation"
 import {
   useCallback,
@@ -17,6 +16,7 @@ import {
 
 import { useNavbarScrollState } from "@/hooks/use-navbar-scroll-state"
 import { haptics } from "@/lib/haptics"
+import { CrossDocumentLink } from "@/components/cross-document-link"
 
 const RESUME_URL =
   "https://drive.google.com/file/d/1BZi0plL9zUQAPkJ0Qz4lJjMWQUvh4_v5/view?usp=sharing"
@@ -58,12 +58,12 @@ function getTranslation(element: HTMLElement) {
 function NavLink({ href, label, external }: NavbarLinkItem) {
   if (!external) {
     return (
-      <Link
+      <CrossDocumentLink
         href={href}
         className="px-2 py-2 text-sm leading-none font-light text-black transition-[opacity,transform] duration-150 ease-out group-hover/nav-links:opacity-35 hover:opacity-100! active:scale-[0.97]"
       >
         {label}
-      </Link>
+      </CrossDocumentLink>
     )
   }
 
@@ -153,15 +153,6 @@ export function Navbar() {
       window.removeEventListener("site-loader:complete", markIntroComplete)
   }, [])
 
-  useEffect(() => {
-    const query = window.matchMedia("(max-width: 767px)")
-    const updateViewport = () => setIsMobileViewport(query.matches)
-
-    updateViewport()
-    query.addEventListener("change", updateViewport)
-    return () => query.removeEventListener("change", updateViewport)
-  }, [])
-
   const finishMobileMenuClose = useCallback((restoreFocus = true) => {
     if (mobileMenuCloseTimeoutRef.current !== undefined) {
       window.clearTimeout(mobileMenuCloseTimeoutRef.current)
@@ -183,6 +174,23 @@ export function Navbar() {
       () => finishMobileMenuClose(),
       520
     )
+  }, [finishMobileMenuClose])
+
+  useEffect(() => {
+    const query = window.matchMedia("(max-width: 767px)")
+    const updateViewport = () => {
+      const isMobile = query.matches
+      setIsMobileViewport(isMobile)
+
+      if (!isMobile) {
+        setIsMobileMenuOpen(false)
+        finishMobileMenuClose(false)
+      }
+    }
+
+    updateViewport()
+    query.addEventListener("change", updateViewport)
+    return () => query.removeEventListener("change", updateViewport)
   }, [finishMobileMenuClose])
 
   const openMobileMenu = () => {
@@ -591,7 +599,7 @@ export function Navbar() {
         }`}
       >
         <div className="flex min-w-0 items-center gap-3">
-          <Link
+          <CrossDocumentLink
             href="/"
             aria-label="Home"
             className="flex shrink-0 items-center active:scale-[0.97]"
@@ -614,7 +622,7 @@ export function Navbar() {
                 priority
               />
             </span>
-          </Link>
+          </CrossDocumentLink>
           {routeRoot && (
             <div className="flex min-w-0 translate-y-px items-center gap-3 font-navbar text-sm leading-none tracking-[0.08em] text-black/58 uppercase">
               <span
@@ -628,7 +636,7 @@ export function Navbar() {
                   className="min-w-0"
                   icon={<ArrowLeft aria-hidden="true" />}
                 >
-                  <Link
+                  <CrossDocumentLink
                     href={routeRoot.href}
                     aria-label={`Go back to ${routeRoot.label.toLowerCase()}`}
                     className="navbar-route-link relative inline-block max-w-[calc(100vw-9.5rem)] outline-2 outline-offset-4 outline-transparent transition-[opacity,transform] duration-150 ease-[cubic-bezier(0.23,1,0.32,1)] focus-visible:outline-black active:scale-[0.97] md:max-w-60"
@@ -667,7 +675,7 @@ export function Navbar() {
                       className="navbar-route-underline pointer-events-none absolute right-0 -bottom-0.75 left-0 h-px origin-left bg-current transition-transform duration-150 ease-[cubic-bezier(0.23,1,0.32,1)]"
                       style={{ scale: isRouteLinkActive ? "1 1" : "0 1" }}
                     />
-                  </Link>
+                  </CrossDocumentLink>
                 </CursorFollowLabel>
               ) : (
                 <span
@@ -711,10 +719,11 @@ export function Navbar() {
           </ul>
           <div
             ref={contactRef}
+            data-navbar-contact
             className="relative z-1 inline-flex items-center gap-2.5"
             style={{ visibility: "hidden", opacity: 0 }}
           >
-            <Link
+            <CrossDocumentLink
               ref={contactButtonRef}
               href="/#contact"
               className="group hidden md:inline-flex"
@@ -734,7 +743,7 @@ export function Navbar() {
                   CONTACT
                 </span>
               </span>
-            </Link>
+            </CrossDocumentLink>
             <button
               ref={mobileMenuButtonRef}
               type="button"
@@ -768,6 +777,7 @@ export function Navbar() {
             >
               <span
                 ref={contactDotsRef}
+                data-navbar-contact-dots
                 aria-hidden="true"
                 className={`pointer-events-none absolute inset-0 overflow-hidden rounded-full transition-opacity duration-150 ease-out contain-[paint] ${
                   isMobileMenuOpen ? "opacity-0" : "opacity-100"

@@ -22,6 +22,11 @@ interface GithubContributionData {
   totalContributions: number
 }
 
+type GithubCalendarState =
+  | { status: "loading" }
+  | { status: "success"; data: GithubContributionData }
+  | { status: "error"; message: string }
+
 interface GithubCalendarProps {
   username: string
   variant?: "default" | "city-lights" | "minimal"
@@ -188,11 +193,12 @@ export function GithubCalendar({
   showTotal = true,
   colorSchema = "green",
 }: GithubCalendarProps) {
-  const [data, setData] = React.useState<GithubContributionData | null>(null)
-  const [loading, setLoading] = React.useState(true)
-  const [error, setError] = React.useState<string | null>(null)
+  const [requestState, setRequestState] = React.useState<GithubCalendarState>({
+    status: "loading",
+  })
   const gridRef = React.useRef<HTMLDivElement>(null)
   const summaryId = React.useId()
+  const data = requestState.status === "success" ? requestState.data : null
   const weeks = data?.contributions ?? EMPTY_WEEKS
   const contributionDays = React.useMemo(() => weeks.flat(), [weeks])
   const activeContributionDays = React.useMemo(
@@ -204,8 +210,7 @@ export function GithubCalendar({
 
     const fetchData = async () => {
       try {
-        setLoading(true)
-        setError(null)
+        setRequestState({ status: "loading" })
         const response = await fetch(
           `/api/github-contributions/${encodeURIComponent(username)}`,
           { signal: controller.signal }
@@ -213,13 +218,14 @@ export function GithubCalendar({
         if (!response.ok) {
           throw new Error("Failed to fetch GitHub data")
         }
-        const jsonData = await response.json()
-        setData(jsonData)
+        const jsonData = (await response.json()) as GithubContributionData
+        setRequestState({ status: "success", data: jsonData })
       } catch (err) {
         if (err instanceof DOMException && err.name === "AbortError") return
-        setError(err instanceof Error ? err.message : "An error occurred")
-      } finally {
-        if (!controller.signal.aborted) setLoading(false)
+        setRequestState({
+          status: "error",
+          message: err instanceof Error ? err.message : "An error occurred",
+        })
       }
     }
 
@@ -249,7 +255,7 @@ export function GithubCalendar({
     return () => reveal.cancel()
   }, [data])
 
-  if (error) {
+  if (requestState.status === "error") {
     return (
       <p
         role="status"
@@ -258,12 +264,12 @@ export function GithubCalendar({
           className
         )}
       >
-        Error: {error}
+        Error: {requestState.message}
       </p>
     )
   }
 
-  if (loading) {
+  if (requestState.status === "loading") {
     return (
       <div className={className}>
         <p className="sr-only">Loading GitHub contribution data</p>
