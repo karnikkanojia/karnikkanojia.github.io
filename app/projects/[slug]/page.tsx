@@ -6,6 +6,8 @@ import { ArrowUpRight } from "lucide-react"
 import { CrossDocumentLink } from "@/components/cross-document-link"
 import { getNextProject, getProject, projects } from "@/lib/projects"
 import { SITE_NAME, SITE_URL } from "@/lib/site"
+import { projectImageTransition } from "@/lib/view-transitions/project-image"
+import { getViewTransitionTargetProps } from "@/lib/view-transitions/registry"
 
 type ProjectPageProps = {
   params: Promise<{ slug: string }>
@@ -103,7 +105,10 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
 
         <div className="px-2 md:px-3">
           <div
-            data-project-transition-image={project.slug}
+            {...getViewTransitionTargetProps(
+              projectImageTransition,
+              project.slug
+            )}
             className="relative mx-auto h-[55svh] max-h-128 min-h-80 max-w-376 overflow-hidden rounded-[1rem] bg-[#e8e8e4] md:aspect-16/8.5 md:h-auto md:max-h-[82svh] md:min-h-0"
           >
             <Image

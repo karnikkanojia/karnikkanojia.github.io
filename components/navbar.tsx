@@ -582,7 +582,6 @@ export function Navbar() {
       <nav
         data-site-navbar
         aria-label="Primary"
-        style={{ viewTransitionName: "site-navbar" }}
         inert={
           !isIntroComplete ||
           isFooterActive ||

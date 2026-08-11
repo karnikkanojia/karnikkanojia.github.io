@@ -5,6 +5,8 @@ import { CrossDocumentLink } from "@/components/cross-document-link"
 import { CursorFollowLabel } from "@/components/ui/cursor-follow-label"
 import { projects } from "@/lib/projects"
 import { SITE_NAME } from "@/lib/site"
+import { projectImageTransition } from "@/lib/view-transitions/project-image"
+import { getViewTransitionTargetProps } from "@/lib/view-transitions/registry"
 
 const projectsDescription =
   "Selected systems, research, and reliability projects by Karnik Kanojia."
@@ -71,7 +73,10 @@ export default function ProjectsPage() {
                   </div>
 
                   <div
-                    data-project-transition-image={project.slug}
+                    {...getViewTransitionTargetProps(
+                      projectImageTransition,
+                      project.slug
+                    )}
                     className="relative order-2 aspect-[16/10] overflow-hidden rounded-[0.75rem] bg-[#e8e8e4] md:order-none md:col-span-3 md:aspect-[4/3]"
                   >
                     <Image

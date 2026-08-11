@@ -10,24 +10,8 @@
   navigation: auto;
 }
 
-html[data-project-transition-images~="ops-command-center"]
-  [data-project-transition-image="ops-command-center"] {
-  view-transition-name: project-image-ops-command-center;
-}
-
-html[data-project-transition-images~="vision-lab"]
-  [data-project-transition-image="vision-lab"] {
-  view-transition-name: project-image-vision-lab;
-}
-
-html[data-project-transition-images~="changeflow"]
-  [data-project-transition-image="changeflow"] {
-  view-transition-name: project-image-changeflow;
-}
-
-html[data-project-transition-images~="infrastructure-atlas"]
-  [data-project-transition-image="infrastructure-atlas"] {
-  view-transition-name: project-image-infrastructure-atlas;
+[data-site-navbar] {
+  view-transition-name: site-navbar;
 }
 
 ::view-transition-group(root) {
@@ -56,30 +40,6 @@ html[data-project-transition-images~="infrastructure-atlas"]
 ::view-transition-new(site-navbar) {
   animation-duration: 160ms;
   animation-timing-function: cubic-bezier(0.22, 1, 0.36, 1);
-}
-
-::view-transition-group(project-image-ops-command-center),
-::view-transition-group(project-image-vision-lab),
-::view-transition-group(project-image-changeflow),
-::view-transition-group(project-image-infrastructure-atlas) {
-  z-index: 1;
-  animation-duration: 520ms;
-  animation-timing-function: cubic-bezier(0.22, 1, 0.36, 1);
-}
-
-::view-transition-old(project-image-ops-command-center),
-::view-transition-old(project-image-vision-lab),
-::view-transition-old(project-image-changeflow),
-::view-transition-old(project-image-infrastructure-atlas),
-::view-transition-new(project-image-ops-command-center),
-::view-transition-new(project-image-vision-lab),
-::view-transition-new(project-image-changeflow),
-::view-transition-new(project-image-infrastructure-atlas) {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  overflow: hidden;
-  mix-blend-mode: normal;
 }
 
 @keyframes view-transition-page-out {
