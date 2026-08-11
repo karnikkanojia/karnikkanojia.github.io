@@ -103,8 +103,8 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
 
         <div className="px-2 md:px-3">
           <div
+            data-project-transition-image={project.slug}
             className="relative mx-auto h-[55svh] max-h-128 min-h-80 max-w-376 overflow-hidden rounded-[1rem] bg-[#e8e8e4] md:aspect-16/8.5 md:h-auto md:max-h-[82svh] md:min-h-0"
-            style={{ viewTransitionName: `project-image-${project.slug}` }}
           >
             <Image
               src={project.image}

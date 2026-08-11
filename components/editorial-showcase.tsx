@@ -101,17 +101,15 @@ function EditorialCard({
           className="editorial-card block outline-2 outline-offset-4 outline-transparent focus-visible:outline-black"
         >
           <div
+            data-project-transition-image={
+              item.href.startsWith("/projects/")
+                ? item.href.split("/").at(-1)
+                : undefined
+            }
             className={cn(
               "editorial-card-image relative overflow-hidden rounded-[0.9rem] bg-[#eeeeeb]",
               isLead ? "aspect-[4/3]" : "aspect-square"
             )}
-            style={
-              item.href.startsWith("/projects/")
-                ? {
-                    viewTransitionName: `project-image-${item.href.split("/").at(-1)}`,
-                  }
-                : undefined
-            }
           >
             {item.image && (
               <Image

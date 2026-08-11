@@ -131,6 +131,144 @@ const personJsonLd = {
   ],
 }
 
+const viewTransitionLifecycleScript = String.raw`
+  (() => {
+    const navigationContextKey = "portfolio:view-transition-navigation"
+
+    const getPath = (url) => {
+      if (!url) return ""
+
+      try {
+        return new URL(url, window.location.href).pathname
+      } catch {
+        return ""
+      }
+    }
+
+    const getProjectSlug = (url) =>
+      getPath(url).match(/^\/projects\/([^/]+)\/?$/)?.[1] ?? null
+
+    const getProjectImages = () =>
+      Array.from(document.querySelectorAll("[data-project-transition-image]"))
+
+    const saveNavigationContext = (sourceUrl, destinationUrl) => {
+      try {
+        window.sessionStorage.setItem(
+          navigationContextKey,
+          JSON.stringify({ sourceUrl, destinationUrl })
+        )
+      } catch {}
+    }
+
+    const readNavigationContext = () => {
+      try {
+        const value = window.sessionStorage.getItem(navigationContextKey)
+        window.sessionStorage.removeItem(navigationContextKey)
+        if (!value) return null
+
+        const context = JSON.parse(value)
+        return getPath(context.destinationUrl) === window.location.pathname
+          ? context
+          : null
+      } catch {
+        return null
+      }
+    }
+
+    const watchViewTransition = (event) => {
+      const transition = event.viewTransition
+      if (!transition) return
+
+      transition.ready.catch((error) => {
+        if (error?.name !== "AbortError") console.error(error)
+      })
+    }
+
+    const nameProjectImages = (event, images) => {
+      const transition = event.viewTransition
+      if (!transition || images.length === 0) return
+
+      document.documentElement.dataset.projectTransitionImages = images
+        .map((image) => image.dataset.projectTransitionImage)
+        .filter(Boolean)
+        .join(" ")
+
+      const cleanup = () => {
+        delete document.documentElement.dataset.projectTransitionImages
+      }
+
+      transition.finished.then(cleanup, cleanup)
+    }
+
+    const nameProjectImage = (event, slug) => {
+      if (!slug) return
+
+      nameProjectImages(
+        event,
+        getProjectImages().filter(
+          (image) => image.dataset.projectTransitionImage === slug
+        )
+      )
+    }
+
+    window.addEventListener("pageswap", (event) => {
+      watchViewTransition(event)
+
+      const activation = event.activation
+      if (!activation) return
+
+      const sourceUrl = activation.from?.url ?? window.location.href
+      const destinationUrl = activation.entry?.url
+      const sourcePath = getPath(sourceUrl)
+      const destinationPath = getPath(destinationUrl)
+
+      saveNavigationContext(sourceUrl, destinationUrl)
+
+      if (sourcePath === "/" && destinationPath === "/projects") {
+        nameProjectImages(event, getProjectImages())
+        return
+      }
+
+      const destinationSlug = getProjectSlug(destinationUrl)
+      const sourceSlug = getProjectSlug(sourceUrl)
+      const slug =
+        destinationSlug ??
+        (destinationPath === "/" || destinationPath === "/projects"
+          ? sourceSlug
+          : null)
+
+      nameProjectImage(event, slug)
+    })
+
+    window.addEventListener("pagereveal", (event) => {
+      watchViewTransition(event)
+
+      // PageRevealEvent has no activation property. The incoming document's
+      // activation data lives on the Navigation API instead.
+      const activation = window.navigation?.activation
+      const navigationContext = readNavigationContext()
+      const sourceUrl = activation?.from?.url ?? navigationContext?.sourceUrl
+      const sourcePath = getPath(sourceUrl)
+
+      if (sourcePath === "/" && window.location.pathname === "/projects") {
+        nameProjectImages(event, getProjectImages())
+        return
+      }
+
+      const currentSlug = getProjectSlug(window.location.href)
+      const sourceSlug = getProjectSlug(sourceUrl)
+      const slug =
+        currentSlug ??
+        (window.location.pathname === "/" ||
+        window.location.pathname === "/projects"
+          ? sourceSlug
+          : null)
+
+      nameProjectImage(event, slug)
+    })
+  })()
+`
+
 export default function RootLayout({
   children,
 }: {
@@ -143,6 +281,10 @@ export default function RootLayout({
       className={cn("font-sans", khTeka.variable, messinaSansMono.variable)}
     >
       <head>
+        <script
+          id="view-transition-lifecycle"
+          dangerouslySetInnerHTML={{ __html: viewTransitionLifecycleScript }}
+        />
         <style>{`
           html:not([data-site-intro-active]) [data-site-intro],
           html[data-site-skip-intro] [data-site-intro] {
@@ -171,10 +313,10 @@ export default function RootLayout({
           <Script id="initial-scroll-position" strategy="beforeInteractive">
             {`try { const hasSeenIntro = window.sessionStorage.getItem("portfolio:intro-complete") === "true"; const skipIntroOnce = window.sessionStorage.getItem("portfolio:skip-intro-once") === "true"; if (skipIntroOnce) window.sessionStorage.removeItem("portfolio:skip-intro-once"); if (hasSeenIntro || skipIntroOnce) { document.documentElement.dataset.siteSkipIntro = "true"; document.documentElement.dataset.siteIntroComplete = "true"; document.documentElement.dataset.siteNavbarReady = "true"; } } catch {} if (window.location.pathname !== "/") { document.documentElement.dataset.siteIntroComplete = "true"; document.documentElement.dataset.siteNavbarReady = "true"; } else if (document.documentElement.dataset.siteSkipIntro !== "true") { document.documentElement.dataset.siteIntroActive = "true"; } if (!window.location.hash) { window.history.scrollRestoration = "manual"; const resetInitialScroll = () => { if (window.matchMedia("(max-width: 767px)").matches && !window.location.hash) window.scrollTo(0, 0); }; window.scrollTo(0, 0); window.requestAnimationFrame(resetInitialScroll); window.addEventListener("pageshow", resetInitialScroll); }`}
           </Script>
-          <Script id="view-transition-abort-handler" strategy="beforeInteractive">
-            {`const handleViewTransition = (event) => { const transition = event.viewTransition; if (!transition) return; transition.ready.catch((error) => { if (error?.name !== "AbortError") console.error(error); }); }; window.addEventListener("pageswap", handleViewTransition); window.addEventListener("pagereveal", handleViewTransition);`}
-          </Script>
-          <ReactLenis root options={{ anchors: true, autoRaf: true, lerp: 0.1 }}>
+          <ReactLenis
+            root
+            options={{ anchors: true, autoRaf: true, lerp: 0.1 }}
+          >
             <Navbar />
             {children}
             <ContactFooter />

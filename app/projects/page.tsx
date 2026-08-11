@@ -71,10 +71,8 @@ export default function ProjectsPage() {
                   </div>
 
                   <div
+                    data-project-transition-image={project.slug}
                     className="relative order-2 aspect-[16/10] overflow-hidden rounded-[0.75rem] bg-[#e8e8e4] md:order-none md:col-span-3 md:aspect-[4/3]"
-                    style={{
-                      viewTransitionName: `project-image-${project.slug}`,
-                    }}
                   >
                     <Image
                       src={project.image}
