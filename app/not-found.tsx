@@ -14,9 +14,7 @@ export default function NotFound() {
         className="pointer-events-none absolute top-1/2 left-1/2 h-auto w-[72vw] max-w-[24rem] -translate-x-1/2 -translate-y-1/2 object-contain"
       />
 
-      <div className="relative z-10 flex min-h-svh flex-col justify-between p-5 sm:p-8">
-        <p className="font-navbar text-xs font-medium tracking-[0.16em]">404</p>
-
+      <div className="relative z-10 flex min-h-svh flex-col justify-end p-5 sm:p-8">
         <div className="max-w-xs pb-2 sm:pb-4">
           <h1 className="text-5xl leading-[0.88] tracking-[-0.065em] sm:text-7xl">
             Not found
