@@ -19,7 +19,7 @@ import { haptics } from "@/lib/haptics"
 import { CrossDocumentLink } from "@/components/cross-document-link"
 
 const RESUME_URL =
-  "https://drive.google.com/file/d/1mbK0IatXZaDcfpyYMa93BJ45uOUQDa6M/view?usp=share_link"
+  "https://drive.google.com/file/d/1cwcHD7x4AiZsyYGFKWaLJ-EC7Pm8vESq/view?usp=sharing"
 
 type NavbarLinkItem = {
   label: string
